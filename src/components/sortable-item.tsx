@@ -7,6 +7,7 @@ import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
 export const SortableItem = ({
   item,
   index,
+  isCopied,
   onCopy,
   onDelete,
   onToggleFavorite,
@@ -14,12 +15,13 @@ export const SortableItem = ({
 }: {
   item: ClipboardItemType;
   index: number;
+  isCopied: boolean;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
   onSplitEnv?: (id: number) => void;
 }) => {
-  const { ref, isDragging } = useSortable({
+  const { ref, handleRef, isDragging } = useSortable({
     id: item.id,
     index,
   });
@@ -40,6 +42,8 @@ export const SortableItem = ({
     >
       <ClipboardItem
         item={item}
+        isCopied={isCopied}
+        dragHandleRef={handleRef}
         onCopy={onCopy}
         onDelete={onDelete}
         onToggleFavorite={onToggleFavorite}

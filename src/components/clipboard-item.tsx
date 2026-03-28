@@ -7,6 +7,8 @@ import { ClipboardItemActions } from "@/components/clipboard-item-actions";
 
 type ClipboardItemProps = {
   item: ClipboardItemType;
+  isCopied: boolean;
+  dragHandleRef?: (element: Element | null) => void;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite?: (id: number) => void;
@@ -15,14 +17,19 @@ type ClipboardItemProps = {
 
 export const ClipboardItem = ({
   item,
+  isCopied,
+  dragHandleRef,
   onCopy,
   onDelete,
   onSplitEnv,
 }: ClipboardItemProps) => {
   return (
-    <Card className="gap-2 py-3 group">
+    <Card className="gap-2 py-3 group" onDoubleClick={() => onCopy(item)}>
       <CardContent className="flex items-start gap-2 px-1 relative">
-        <div className="flex items-center absolute left-1/2 -top-2 -translate-x-1/2 opacity-0 group-hover:opacity-40 transition-opacity cursor-grab active:cursor-grabbing shrink-0">
+        <div
+          ref={dragHandleRef}
+          className="flex items-center absolute left-1/2 -top-2 -translate-x-1/2 opacity-0 group-hover:opacity-40 transition-opacity cursor-grab active:cursor-grabbing shrink-0"
+        >
           <GripHorizontal className="size-3.5" />
         </div>
 
@@ -32,6 +39,7 @@ export const ClipboardItem = ({
         </div>
 
         <ClipboardItemActions
+          isCopied={isCopied}
           onCopy={() => onCopy(item)}
           onDelete={() => onDelete(item.id)}
           onSplitEnv={onSplitEnv ? () => onSplitEnv(item.id) : undefined}

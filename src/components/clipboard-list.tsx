@@ -6,12 +6,23 @@ import { AnimatePresence } from "motion/react";
 import { EmptyState } from "@/components/clipboard-empty-state";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
+import { ClipboardItem as ClipboardItemType, ClipboardContent } from "@/types/clipboard";
 import { SortableItem } from "./sortable-item";
 import { SearchResultItem } from "./search-result-item";
 
+export const isItemCopied = (item: ClipboardItemType, content: ClipboardContent): boolean => {
+  if (content.type === "text" && item.content_type === "text") {
+    return item.text_content === content.text;
+  }
+  if (content.type === "image" && item.content_type === "image") {
+    return item.image_data === content.base64Data;
+  }
+  return false;
+};
+
 type ClipboardListProps = {
   items: ClipboardItemType[];
+  currentContent: ClipboardContent;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
@@ -24,6 +35,7 @@ type ClipboardListProps = {
 
 export const ClipboardList = ({
   items,
+  currentContent,
   onCopy,
   onDelete,
   onToggleFavorite,
@@ -101,6 +113,7 @@ export const ClipboardList = ({
                 key={item.id}
                 item={item}
                 isActive={index === activeIndex}
+                isCopied={isItemCopied(item, currentContent)}
                 onCopy={onCopy}
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}
@@ -138,6 +151,7 @@ export const ClipboardList = ({
                 key={item.id}
                 item={item}
                 index={index}
+                isCopied={isItemCopied(item, currentContent)}
                 onCopy={onCopy}
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}

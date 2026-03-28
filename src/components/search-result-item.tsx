@@ -7,6 +7,7 @@ import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
 export const SearchResultItem = ({
   item,
   isActive,
+  isCopied,
   onCopy,
   onDelete,
   onToggleFavorite,
@@ -14,6 +15,7 @@ export const SearchResultItem = ({
 }: {
   item: ClipboardItemType;
   isActive: boolean;
+  isCopied: boolean;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
@@ -43,6 +45,7 @@ export const SearchResultItem = ({
     >
       <ClipboardItem
         item={item}
+        isCopied={isCopied}
         onCopy={onCopy}
         onDelete={onDelete}
         onToggleFavorite={onToggleFavorite}

@@ -32,6 +32,7 @@ function App() {
     hasMore,
     loadMore,
     isLoaded,
+    currentContent,
     setCurrentContent,
     addContentToHistory,
     deleteItem,
@@ -147,6 +148,7 @@ function App() {
           ) : (
             <ClipboardList
               items={filteredItems}
+              currentContent={currentContent}
               onCopy={handleCopy}
               onDelete={deleteItem}
               onToggleFavorite={toggleFavorite}
