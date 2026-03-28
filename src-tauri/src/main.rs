@@ -8,9 +8,10 @@ mod window_state;
 
 use clipboard::ClipboardManager;
 use commands::{
-    handle_command, hide_window, is_cosmic_data_control_enabled, is_wayland_session,
-    parse_command_from_args, read_clipboard, read_clipboard_image, reinitialize_clipboard,
-    show_window, show_window_at_cursor, toggle_window, write_clipboard, write_clipboard_image,
+    get_system_theme, handle_command, hide_window, is_cosmic_data_control_enabled,
+    is_wayland_session, parse_command_from_args, read_clipboard, read_clipboard_image,
+    reinitialize_clipboard, show_window, show_window_at_cursor, toggle_window, write_clipboard,
+    write_clipboard_image,
 };
 use tauri::Manager;
 use window_state::set_visible as window_set_visible;
@@ -41,7 +42,8 @@ fn main() {
             write_clipboard_image,
             reinitialize_clipboard,
             is_wayland_session,
-            is_cosmic_data_control_enabled
+            is_cosmic_data_control_enabled,
+            get_system_theme
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

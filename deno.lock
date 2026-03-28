@@ -22,7 +22,9 @@
     "npm:@vitejs/plugin-react@^4.6.0": "4.7.0_vite@7.3.0__picomatch@4.0.3_@babel+core@7.28.5",
     "npm:class-variance-authority@~0.7.1": "0.7.1",
     "npm:clsx@^2.1.1": "2.1.1",
+    "npm:jittered-fractional-indexing@^1.0.1": "1.0.1",
     "npm:lucide-react@0.562": "0.562.0_react@19.2.3",
+    "npm:next-themes@~0.4.6": "0.4.6_react@19.2.3_react-dom@19.2.3__react@19.2.3",
     "npm:react-dom@^19.1.0": "19.2.3_react@19.2.3",
     "npm:react@^19.1.0": "19.2.3",
     "npm:semantic-release@23": "23.1.1_typescript@5.8.3_marked@12.0.2",
@@ -2241,6 +2243,9 @@
     "forwarded@0.2.0": {
       "integrity": "sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow=="
     },
+    "fractional-indexing@3.2.0": {
+      "integrity": "sha512-PcOxmqwYCW7O2ovKRU8OoQQj2yqTfEB/yeTYk4gPid6dN5ODRfU1hXd9tTVZzax/0NkO7AxpHykvZnT1aYp/BQ=="
+    },
     "fresh@2.0.0": {
       "integrity": "sha512-Rx/WycZ60HOaqLKAi6cHRKKI7zxWbJ31MhntmtwMoaTeF7XFH9hhBp8vITaMidfljRQ6eYWCKkaTK+ykVJHP2A=="
     },
@@ -2619,6 +2624,12 @@
       "integrity": "sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==",
       "bin": true
     },
+    "jittered-fractional-indexing@1.0.1": {
+      "integrity": "sha512-OpKFkVr4hU5ivd1ZCjZfHvVpWekraJvcePcMusBmgBmCVQK5JiRCA+4TT1vAUTLqGD9MkhqFwO0l3QspvlZgzw==",
+      "dependencies": [
+        "fractional-indexing"
+      ]
+    },
     "jose@6.2.2": {
       "integrity": "sha512-d7kPDd34KO/YnzaDOlikGpOurfF0ByC2sEV4cANCtdqLlTfBlw2p14O/5d/zv40gJPbIQxfES3nSx1/oYNyuZQ=="
     },
@@ -2954,6 +2965,13 @@
     },
     "nerf-dart@1.0.0": {
       "integrity": "sha512-EZSPZB70jiVsivaBLYDCyntd5eH8NTSMOn3rB+HxwdmKThGELLdYv8qVIMWvZEFy9w8ZZpW9h9OB32l1rGtj7g=="
+    },
+    "next-themes@0.4.6_react@19.2.3_react-dom@19.2.3__react@19.2.3": {
+      "integrity": "sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==",
+      "dependencies": [
+        "react",
+        "react-dom"
+      ]
     },
     "node-domexception@1.0.0": {
       "integrity": "sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==",
@@ -4172,7 +4190,9 @@
         "npm:@vitejs/plugin-react@^4.6.0",
         "npm:class-variance-authority@~0.7.1",
         "npm:clsx@^2.1.1",
+        "npm:jittered-fractional-indexing@^1.0.1",
         "npm:lucide-react@0.562",
+        "npm:next-themes@~0.4.6",
         "npm:react-dom@^19.1.0",
         "npm:react@^19.1.0",
         "npm:semantic-release@23",

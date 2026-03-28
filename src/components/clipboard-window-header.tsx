@@ -1,5 +1,12 @@
 import { CirclePause, CirclePlay, Trash2 } from "lucide-react";
-import { SystemInfo } from "../types/clipboard";
+import { SystemInfo } from "@/types/clipboard";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 type ClipboardHeaderProps = {
   isMonitoring: boolean;
@@ -20,32 +27,45 @@ export const ClipboardHeader = ({
     <header className="flex justify-between items-center p-4">
       <div className="flex items-center gap-2 w-full">
         {systemInfo.isWayland && (
-          <span className="text-xs text-neutral-500 ml-2">
-            Wayland{" "}
-            {systemInfo.isCosmicDataControlEnabled && "• Data Control ✓"}
-          </span>
+          <Badge variant="outline">
+            Wayland
+            {systemInfo.isCosmicDataControlEnabled && " • Data Control ✓"}
+          </Badge>
         )}
 
-        <button
-          onClick={onToggleMonitoring}
-          title={isMonitoring ? "Monitoring active" : "Monitoring paused"}
-          className="cursor-pointer ml-auto"
-        >
-          {isMonitoring ? (
-            <CirclePlay className="size-5 text-neutral-600" />
-          ) : (
-            <CirclePause className="size-5 text-neutral-600" />
-          )}
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={onToggleMonitoring}
+                className="ml-auto"
+              />
+            }
+          >
+            {isMonitoring ? (
+              <CirclePlay className="size-5 text-muted-foreground" />
+            ) : (
+              <CirclePause className="size-5 text-muted-foreground" />
+            )}
+          </TooltipTrigger>
+          <TooltipContent>
+            {isMonitoring ? "Monitoring active" : "Monitoring paused"}
+          </TooltipContent>
+        </Tooltip>
 
         {hasHistory && (
-          <button
-            onClick={onClearAll}
-            className="flex items-center gap-2 cursor-pointer"
-            title="Clear all history"
-          >
-            <Trash2 className="size-5 text-neutral-600" />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button variant="ghost" size="icon-sm" onClick={onClearAll} />
+              }
+            >
+              <Trash2 className="size-5 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>Clear all history</TooltipContent>
+          </Tooltip>
         )}
       </div>
     </header>

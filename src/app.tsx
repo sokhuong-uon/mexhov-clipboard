@@ -1,17 +1,20 @@
-import { useState, useCallback } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import "@/main.css";
+import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useState } from "react";
 
-import { ClipboardHeader } from "@/components/clipboard-window-header";
-import { ClipboardList } from "@/components/clipboard-list";
 import { ErrorBanner } from "@/components/clipboard-error-banner";
+import { ClipboardList } from "@/components/clipboard-list";
+import { ClipboardHeader } from "@/components/clipboard-window-header";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { useClipboard } from "@/hooks/use-clipboard";
+import { useSystemTheme } from "@/hooks/use-system-theme";
 import { useClipboardHistory } from "@/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
-import { ClipboardItem, ClipboardContent } from "@/types/clipboard";
+import { ClipboardContent, ClipboardItem } from "@/types/clipboard";
 
 function App() {
+  useSystemTheme();
   const [isMonitoring, setIsMonitoring] = useState(true);
 
   const { readContent, write, writeImage, reinitialize, error, dismissError } =
@@ -84,31 +87,33 @@ function App() {
   }, [reinitialize, readContent, previousContentRef, setCurrentContent]);
 
   return (
-    <div className="text-white flex flex-col h-full">
-      <ClipboardHeader
-        isMonitoring={isMonitoring}
-        onToggleMonitoring={() => setIsMonitoring(!isMonitoring)}
-        hasHistory={history.length > 0}
-        onClearAll={clearAll}
-        systemInfo={systemInfo}
-      />
-
-      {error && (
-        <ErrorBanner
-          error={error}
-          onRetry={handleRetry}
-          onDismiss={dismissError}
+    <TooltipProvider>
+      <div className="flex flex-col h-full bg-background text-foreground">
+        <ClipboardHeader
+          isMonitoring={isMonitoring}
+          onToggleMonitoring={() => setIsMonitoring(!isMonitoring)}
+          hasHistory={history.length > 0}
+          onClearAll={clearAll}
+          systemInfo={systemInfo}
         />
-      )}
 
-      <div className="flex-1 overflow-y-auto p-4">
-        <ClipboardList
-          items={history}
-          onCopy={handleCopy}
-          onDelete={deleteItem}
-        />
+        {error && (
+          <ErrorBanner
+            error={error}
+            onRetry={handleRetry}
+            onDismiss={dismissError}
+          />
+        )}
+
+        <div className="flex-1 overflow-y-auto">
+          <ClipboardList
+            items={history}
+            onCopy={handleCopy}
+            onDelete={deleteItem}
+          />
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
 
