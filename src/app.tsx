@@ -1,6 +1,7 @@
 import "@/main.css";
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useMemo, useState } from "react";
+import { useDebouncedState } from "@tanstack/react-pacer";
 
 import { ErrorBanner } from "@/components/clipboard-error-banner";
 import { ClipboardList } from "@/components/clipboard-list";
@@ -17,7 +18,8 @@ import { ClipboardContent, ClipboardItem } from "@/types/clipboard";
 function App() {
   useSystemTheme();
   const [isMonitoring, setIsMonitoring] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 150 });
 
   const { historyLimit, setHistoryLimit } = useSettings();
 
@@ -120,8 +122,8 @@ function App() {
           hasHistory={history.length > 0}
           onClearAll={clearAll}
           systemInfo={systemInfo}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          searchQuery={searchInput}
+          onSearchChange={(q) => { setSearchInput(q); setSearchQuery(q); }}
           historyLimit={historyLimit}
           onHistoryLimitChange={setHistoryLimit}
         />

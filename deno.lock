@@ -14,6 +14,7 @@
     "npm:@semantic-release/npm@^11.0.2": "11.0.3_semantic-release@23.1.1__typescript@5.8.3__marked@12.0.2_typescript@5.8.3",
     "npm:@semantic-release/release-notes-generator@^12.1.0": "12.1.0_semantic-release@23.1.1__typescript@5.8.3__marked@12.0.2_typescript@5.8.3",
     "npm:@tailwindcss/vite@^4.1.18": "4.1.18_vite@7.3.0__picomatch@4.0.3",
+    "npm:@tanstack/react-pacer@0.21": "0.21.0_react@19.2.3_react-dom@19.2.3__react@19.2.3",
     "npm:@tauri-apps/api@2": "2.9.1",
     "npm:@tauri-apps/cli@2": "2.9.6",
     "npm:@tauri-apps/plugin-global-shortcut@~2.3.1": "2.3.1",
@@ -1337,6 +1338,38 @@
         "tailwindcss",
         "vite"
       ]
+    },
+    "@tanstack/devtools-event-client@0.4.3": {
+      "integrity": "sha512-OZI6QyULw0FI0wjgmeYzCIfbgPsOEzwJtCpa69XrfLMtNXLGnz3d/dIabk7frg0TmHo+Ah49w5I4KC7Tufwsvw==",
+      "bin": true
+    },
+    "@tanstack/pacer@0.20.0": {
+      "integrity": "sha512-P5jKuB0xF3DUB6jQA0XFO4ZqjKD10aoyelhMZi51j2y6ppKeea5bIIvPN3WihACqHXuZqs16HdlJPGLpCxq2iw==",
+      "dependencies": [
+        "@tanstack/devtools-event-client",
+        "@tanstack/store"
+      ]
+    },
+    "@tanstack/react-pacer@0.21.0_react@19.2.3_react-dom@19.2.3__react@19.2.3": {
+      "integrity": "sha512-RwscVPQTzqqoAnhnotu7xr9VlME96BivqHQPiVzXe9SntdJ7D5CKjh7ObErFsnDOA11OhlD+FhvH6dDit5NRnA==",
+      "dependencies": [
+        "@tanstack/pacer",
+        "@tanstack/react-store",
+        "react",
+        "react-dom"
+      ]
+    },
+    "@tanstack/react-store@0.9.3_react@19.2.3_react-dom@19.2.3__react@19.2.3": {
+      "integrity": "sha512-y2iHd/N9OkoQbFJLUX1T9vbc2O9tjH0pQRgTcx1/Nz4IlwLvkgpuglXUx+mXt0g5ZDFrEeDnONPqkbfxXJKwRg==",
+      "dependencies": [
+        "@tanstack/store",
+        "react",
+        "react-dom",
+        "use-sync-external-store"
+      ]
+    },
+    "@tanstack/store@0.9.3": {
+      "integrity": "sha512-8reSzl/qGWGGVKhBoxXPMWzATSbZLZFWhwBAFO9NAyp0TxzfBP0mIrGb8CP8KrQTmvzXlR/vFPPUrHTLBGyFyw=="
     },
     "@tauri-apps/api@2.9.1": {
       "integrity": "sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw=="
@@ -4285,6 +4318,7 @@
         "npm:@semantic-release/npm@^11.0.2",
         "npm:@semantic-release/release-notes-generator@^12.1.0",
         "npm:@tailwindcss/vite@^4.1.18",
+        "npm:@tanstack/react-pacer@0.21",
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
         "npm:@tauri-apps/plugin-global-shortcut@~2.3.1",
