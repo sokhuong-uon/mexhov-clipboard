@@ -172,7 +172,7 @@ export function LinkPreview({ url }: { url: string }) {
                 />
               }
             >
-              <QrCode className="size-2.5" />
+              <QrCode className="size-4" />
             </TooltipTrigger>
             <TooltipContent className="pointer-events-none">
               Show QR code
