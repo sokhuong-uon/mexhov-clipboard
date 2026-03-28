@@ -10,13 +10,13 @@ mod window_state;
 
 use clipboard::ClipboardManager;
 use commands::{
-    db_bump_item, db_clear_all, db_delete_item, db_get_all_items, db_insert_item,
-    db_toggle_favorite, db_update_sort_orders,
+    db_bump_item, db_clear_all, db_delete_item, db_get_all_items, db_get_item_count,
+    db_insert_item, db_toggle_favorite, db_update_sort_orders,
 };
 use commands::{
-    detect_env_content, get_system_theme, handle_command, hide_window,
+    detect_env_content, get_setting, get_system_theme, handle_command, hide_window,
     is_cosmic_data_control_enabled, is_wayland_session, parse_command_from_args, parse_env_content,
-    read_clipboard, read_clipboard_image, reinitialize_clipboard, show_window,
+    read_clipboard, read_clipboard_image, reinitialize_clipboard, set_setting, show_window,
     show_window_at_cursor, toggle_window, write_clipboard, write_clipboard_image,
 };
 use db::Database;
@@ -69,8 +69,11 @@ fn main() {
             db_clear_all,
             db_toggle_favorite,
             db_update_sort_orders,
+            db_get_item_count,
             detect_env_content,
             parse_env_content,
+            get_setting,
+            set_setting,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

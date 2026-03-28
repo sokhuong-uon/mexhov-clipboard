@@ -109,16 +109,36 @@ impl Database {
         self.inner.lock().map_err(e2s)
     }
 
-    pub fn get_all_items(&self) -> DbResult<Vec<ClipboardItemRow>> {
+    pub fn get_all_items(&self, limit: i64, offset: i64) -> DbResult<Vec<ClipboardItemRow>> {
         let inner = self.lock()?;
         let ci = &inner.schema.clipboard_items;
 
         let rows: Vec<SelectClipboardItems> = inner
             .db
-            .select(())
-            .from(*ci)
-            .order_by(asc(ci.sort_order))
-            .all()
+            .conn()
+            .prepare("SELECT * FROM clipboard_items ORDER BY sort_order ASC LIMIT ?1 OFFSET ?2")
+            .and_then(|mut stmt| {
+                stmt.query_map(rusqlite::params![limit, offset], |row| {
+                    Ok(SelectClipboardItems {
+                        id: row.get("id")?,
+                        content_type: row.get("content_type")?,
+                        text_content: row.get("text_content")?,
+                        image_data: row.get("image_data")?,
+                        image_width: row.get("image_width")?,
+                        image_height: row.get("image_height")?,
+                        char_count: row.get("char_count")?,
+                        line_count: row.get("line_count")?,
+                        source_app: row.get("source_app")?,
+                        is_favorite: row.get("is_favorite")?,
+                        sort_order: row.get("sort_order")?,
+                        copy_count: row.get("copy_count")?,
+                        kv_key: row.get("kv_key")?,
+                        created_at: row.get("created_at")?,
+                        updated_at: row.get("updated_at")?,
+                    })
+                })
+                .and_then(|rows| rows.collect::<Result<Vec<_>, _>>())
+            })
             .map_err(e2s)?;
 
         Ok(rows.into_iter().map(ClipboardItemRow::from).collect())
@@ -328,6 +348,38 @@ impl Database {
             .map_err(e2s)?;
 
         Ok(result.0)
+    }
+
+    pub fn get_setting(&self, key: &str) -> DbResult<Option<String>> {
+        let inner = self.lock()?;
+        let s = &inner.schema.settings;
+
+        let rows: Vec<SelectSettings> = inner
+            .db
+            .select(())
+            .from(*s)
+            .r#where(eq(s.key, key))
+            .limit(1)
+            .all()
+            .map_err(e2s)?;
+
+        Ok(rows.into_iter().next().map(|r| r.value))
+    }
+
+    pub fn set_setting(&self, key: &str, value: &str) -> DbResult<()> {
+        let inner = self.lock()?;
+
+        // Upsert via raw SQL since drizzle may not support ON CONFLICT
+        inner
+            .db
+            .conn()
+            .execute(
+                "INSERT INTO settings (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = ?2",
+                rusqlite::params![key, value],
+            )
+            .map_err(e2s)?;
+
+        Ok(())
     }
 }
 

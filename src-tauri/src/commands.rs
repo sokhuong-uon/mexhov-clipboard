@@ -235,11 +235,31 @@ pub fn parse_env_content(text: String) -> Vec<(String, String)> {
     pairs
 }
 
+// Settings commands
+
+#[tauri::command]
+pub fn get_setting(key: String, database: State<'_, Database>) -> Result<Option<String>, String> {
+    database.get_setting(&key)
+}
+
+#[tauri::command]
+pub fn set_setting(
+    key: String,
+    value: String,
+    database: State<'_, Database>,
+) -> Result<(), String> {
+    database.set_setting(&key, &value)
+}
+
 // Database commands
 
 #[tauri::command]
-pub fn db_get_all_items(database: State<'_, Database>) -> Result<Vec<ClipboardItemRow>, String> {
-    database.get_all_items()
+pub fn db_get_all_items(
+    limit: i64,
+    offset: i64,
+    database: State<'_, Database>,
+) -> Result<Vec<ClipboardItemRow>, String> {
+    database.get_all_items(limit, offset)
 }
 
 #[tauri::command]
@@ -283,4 +303,9 @@ pub fn db_update_sort_orders(
     database: State<'_, Database>,
 ) -> Result<(), String> {
     database.update_sort_orders(items)
+}
+
+#[tauri::command]
+pub fn db_get_item_count(database: State<'_, Database>) -> Result<i64, String> {
+    database.get_item_count()
 }

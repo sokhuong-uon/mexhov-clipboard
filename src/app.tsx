@@ -8,6 +8,7 @@ import { ClipboardHeader } from "@/components/clipboard-window-header";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { useClipboard } from "@/hooks/use-clipboard";
+import { useSettings } from "@/hooks/use-settings";
 import { useSystemTheme } from "@/hooks/use-system-theme";
 import { useClipboardHistory } from "@/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
@@ -18,11 +19,15 @@ function App() {
   const [isMonitoring, setIsMonitoring] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const { historyLimit, setHistoryLimit } = useSettings();
+
   const { readContent, write, writeImage, reinitialize, error, dismissError } =
     useClipboard();
 
   const {
     history,
+    hasMore,
+    loadMore,
     setCurrentContent,
     addContentToHistory,
     deleteItem,
@@ -30,7 +35,7 @@ function App() {
     toggleFavorite,
     reorderItems,
     splitEnvItem,
-  } = useClipboardHistory();
+  } = useClipboardHistory(historyLimit);
 
   const { systemInfo, previousContentRef } = useClipboardMonitor({
     onClipboardChange: addContentToHistory,
@@ -117,6 +122,8 @@ function App() {
           systemInfo={systemInfo}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          historyLimit={historyLimit}
+          onHistoryLimitChange={setHistoryLimit}
         />
 
         {error && (
@@ -136,6 +143,8 @@ function App() {
             onReorder={reorderItems}
             onSplitEnv={splitEnvItem}
             isSearching={isSearching}
+            hasMore={hasMore && !isSearching}
+            onLoadMore={loadMore}
           />
         </div>
       </div>

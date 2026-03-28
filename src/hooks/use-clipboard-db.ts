@@ -22,7 +22,10 @@ type UpdateSortOrderParams = {
 };
 
 export const clipboardDb = {
-  getAllItems: () => invoke<ClipboardItem[]>("db_get_all_items"),
+  getAllItems: (limit: number, offset = 0) =>
+    invoke<ClipboardItem[]>("db_get_all_items", { limit, offset }),
+
+  getItemCount: () => invoke<number>("db_get_item_count"),
 
   insertItem: (params: InsertParams) =>
     invoke<ClipboardItem>("db_insert_item", { params }),

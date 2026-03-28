@@ -23,7 +23,15 @@ pub struct ClipboardItems {
     pub updated_at: String,
 }
 
+#[SQLiteTable]
+pub struct Settings {
+    #[column(primary)]
+    pub key: String,
+    pub value: String,
+}
+
 #[derive(SQLiteSchema)]
 pub struct Schema {
     pub clipboard_items: ClipboardItems,
+    pub settings: Settings,
 }

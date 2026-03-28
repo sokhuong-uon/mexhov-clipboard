@@ -1,4 +1,10 @@
-import { CirclePause, CirclePlay, EllipsisVertical, Search, Trash2 } from "lucide-react";
+import {
+  CirclePause,
+  CirclePlay,
+  EllipsisVertical,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { SystemInfo } from "@/types/clipboard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,10 +12,19 @@ import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+const HISTORY_LIMIT_OPTIONS = [25, 50, 100, 200, 500] as const;
 
 type ClipboardHeaderProps = {
   isMonitoring: boolean;
@@ -19,6 +34,8 @@ type ClipboardHeaderProps = {
   systemInfo: SystemInfo;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  historyLimit: number;
+  onHistoryLimitChange: (limit: number) => void;
 };
 
 export const ClipboardHeader = ({
@@ -29,6 +46,8 @@ export const ClipboardHeader = ({
   systemInfo,
   searchQuery,
   onSearchChange,
+  historyLimit,
+  onHistoryLimitChange,
 }: ClipboardHeaderProps) => {
   return (
     <header className="flex items-center gap-2 p-4">
@@ -78,14 +97,38 @@ export const ClipboardHeader = ({
               </>
             )}
           </DropdownMenuItem>
+
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              History limit ({historyLimit})
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Max items to keep</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={historyLimit}
+                  onValueChange={(value) =>
+                    onHistoryLimitChange(value as number)
+                  }
+                >
+                  {HISTORY_LIMIT_OPTIONS.map((option) => (
+                    <DropdownMenuRadioItem key={option} value={option}>
+                      {option}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
           {hasHistory && (
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={onClearAll}
-            >
-              <Trash2 className="size-4" />
-              Clear all history
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={onClearAll}>
+                <Trash2 className="size-4" />
+                Clear all history
+              </DropdownMenuItem>
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

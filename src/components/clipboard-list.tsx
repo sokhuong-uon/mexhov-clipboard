@@ -4,6 +4,7 @@ import { isSortable } from "@dnd-kit/react/sortable";
 import { AnimatePresence } from "motion/react";
 
 import { EmptyState } from "@/components/clipboard-empty-state";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
 import { SortableItem } from "./sortable-item";
@@ -17,6 +18,8 @@ type ClipboardListProps = {
   onReorder: (activeId: number, overId: number) => void;
   onSplitEnv?: (id: number) => void;
   isSearching?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
 };
 
 export const ClipboardList = ({
@@ -27,6 +30,8 @@ export const ClipboardList = ({
   onReorder,
   onSplitEnv,
   isSearching = false,
+  hasMore = false,
+  onLoadMore,
 }: ClipboardListProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -69,6 +74,18 @@ export const ClipboardList = ({
   if (items.length === 0) {
     return <EmptyState />;
   }
+
+  const loadMoreButton = hasMore && onLoadMore && (
+    <li className="list-none">
+      <Button
+        variant="ghost"
+        className="w-full text-muted-foreground"
+        onClick={onLoadMore}
+      >
+        Load more
+      </Button>
+    </li>
+  );
 
   if (isSearching) {
     return (
@@ -128,6 +145,7 @@ export const ClipboardList = ({
               />
             ))}
           </AnimatePresence>
+          {loadMoreButton}
         </ul>
       </ScrollArea>
     </DragDropProvider>

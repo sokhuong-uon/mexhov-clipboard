@@ -25,8 +25,6 @@ async function enrichAllWithEnvDetection(
   return Promise.all(items.map(enrichWithEnvDetection));
 }
 
-const MAX_HISTORY_ITEMS = 50;
-
 const debugLog = (label: string, items: ClipboardItem[]) => {
   console.group(`[clipboard-history] ${label}`);
   console.table(
@@ -45,30 +43,55 @@ const debugLog = (label: string, items: ClipboardItem[]) => {
   console.groupEnd();
 };
 
-export const useClipboardHistory = () => {
+export const useClipboardHistory = (maxItems: number) => {
   const [history, setHistory] = useState<ClipboardItem[]>([]);
   const [currentContent, setCurrentContent] = useState<ClipboardContent>({
     type: "empty",
   });
   const [isLoaded, setIsLoaded] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const historyRef = useRef(history);
   historyRef.current = history;
 
-  // Load history from database on mount
+  const hasMore = history.length < totalCount;
+
+  // Load history from database on mount and when limit changes
   useEffect(() => {
-    clipboardDb
-      .getAllItems()
-      .then(enrichAllWithEnvDetection)
-      .then((items) => {
+    Promise.all([
+      clipboardDb.getAllItems(maxItems).then(enrichAllWithEnvDetection),
+      clipboardDb.getItemCount(),
+    ])
+      .then(([items, count]) => {
         debugLog("LOADED from DB", items);
         setHistory(items);
+        setTotalCount(count);
         setIsLoaded(true);
       })
       .catch((err) => {
         console.error("Failed to load clipboard history:", err);
         setIsLoaded(true);
       });
-  }, []);
+  }, [maxItems]);
+
+  const loadMore = useCallback(async () => {
+    const currentLen = historyRef.current.length;
+    try {
+      const moreItems = await clipboardDb
+        .getAllItems(maxItems, currentLen)
+        .then(enrichAllWithEnvDetection);
+      if (moreItems.length > 0) {
+        setHistory((prev) => {
+          const existingIds = new Set(prev.map((i) => i.id));
+          const unique = moreItems.filter((i) => !existingIds.has(i.id));
+          const next = [...prev, ...unique];
+          debugLog("after LOAD MORE", next);
+          return next;
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load more items:", err);
+    }
+  }, [maxItems]);
 
   // Generate a sort key that places a new item at the top (before the current first)
   const getTopSortOrder = useCallback((excludeId?: number) => {
@@ -125,12 +148,12 @@ export const useClipboardHistory = () => {
 
         setHistory((prev) => {
           const next = [item, ...prev];
-          if (next.length > MAX_HISTORY_ITEMS) {
-            const toDelete = next.slice(MAX_HISTORY_ITEMS);
+          if (next.length > maxItems) {
+            const toDelete = next.slice(maxItems);
             toDelete.forEach((i) =>
               clipboardDb.deleteItem(i.id).catch(() => {}),
             );
-            const trimmed = next.slice(0, MAX_HISTORY_ITEMS);
+            const trimmed = next.slice(0, maxItems);
             debugLog("after INSERT text (trimmed)", trimmed);
             return trimmed;
           }
@@ -190,12 +213,12 @@ export const useClipboardHistory = () => {
 
         setHistory((prev) => {
           const next = [item, ...prev];
-          if (next.length > MAX_HISTORY_ITEMS) {
-            const toDelete = next.slice(MAX_HISTORY_ITEMS);
+          if (next.length > maxItems) {
+            const toDelete = next.slice(maxItems);
             toDelete.forEach((i) =>
               clipboardDb.deleteItem(i.id).catch(() => {}),
             );
-            const trimmed = next.slice(0, MAX_HISTORY_ITEMS);
+            const trimmed = next.slice(0, maxItems);
             debugLog("after INSERT image (trimmed)", trimmed);
             return trimmed;
           }
@@ -385,6 +408,8 @@ export const useClipboardHistory = () => {
   return {
     history,
     isLoaded,
+    hasMore,
+    loadMore,
     currentContent,
     setCurrentContent,
     addTextToHistory,
