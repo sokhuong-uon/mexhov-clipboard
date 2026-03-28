@@ -1,6 +1,6 @@
 import "@/main.css";
 import { invoke } from "@tauri-apps/api/core";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { ErrorBanner } from "@/components/clipboard-error-banner";
 import { ClipboardList } from "@/components/clipboard-list";
@@ -16,6 +16,7 @@ import { ClipboardContent, ClipboardItem } from "@/types/clipboard";
 function App() {
   useSystemTheme();
   const [isMonitoring, setIsMonitoring] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { readContent, write, writeImage, reinitialize, error, dismissError } =
     useClipboard();
@@ -88,6 +89,22 @@ function App() {
     }
   }, [reinitialize, readContent, previousContentRef, setCurrentContent]);
 
+  const filteredItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return history;
+    return history.filter((item) => {
+      if (item.content_type === "text" && item.text_content) {
+        return item.text_content.toLowerCase().includes(q);
+      }
+      if (item.content_type === "image") {
+        return "image".includes(q);
+      }
+      return false;
+    });
+  }, [history, searchQuery]);
+
+  const isSearching = searchQuery.trim().length > 0;
+
   return (
     <TooltipProvider>
       <div className="flex flex-col h-full bg-background text-foreground">
@@ -97,6 +114,8 @@ function App() {
           hasHistory={history.length > 0}
           onClearAll={clearAll}
           systemInfo={systemInfo}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
 
         {error && (
@@ -109,11 +128,12 @@ function App() {
 
         <div className="flex-1 overflow-y-auto">
           <ClipboardList
-            items={history}
+            items={filteredItems}
             onCopy={handleCopy}
             onDelete={deleteItem}
             onToggleFavorite={toggleFavorite}
             onReorder={reorderItems}
+            isSearching={isSearching}
           />
         </div>
       </div>
