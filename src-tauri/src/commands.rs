@@ -1,6 +1,7 @@
 use std::io::Cursor;
 
 use crate::clipboard::ClipboardManager;
+use scraper::{Html, Selector};
 use crate::db::{ClipboardItemRow, Database, InsertClipboardItemParams, UpdateSortOrderParams};
 use crate::window_state::{is_visible as window_is_visible, set_visible as window_set_visible};
 use tauri::PhysicalPosition;
@@ -233,6 +234,106 @@ pub fn parse_env_content(text: String) -> Vec<(String, String)> {
         }
     }
     pairs
+}
+
+#[derive(serde::Serialize)]
+pub struct LinkPreviewData {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub image: Option<String>,
+    pub favicon: Option<String>,
+    pub site_name: Option<String>,
+}
+
+#[tauri::command]
+pub async fn fetch_link_preview(url: String) -> Result<LinkPreviewData, String> {
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(5))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let response = client
+        .get(&url)
+        .header("User-Agent", "Mozilla/5.0 (compatible; LinkPreview/1.0)")
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let html_text = response.text().await.map_err(|e| e.to_string())?;
+    let document = Html::parse_document(&html_text);
+
+    let og_title = select_meta_content(&document, "og:title");
+    let og_description = select_meta_content(&document, "og:description");
+    let og_image = select_meta_content(&document, "og:image");
+    let og_site_name = select_meta_content(&document, "og:site_name");
+
+    let title = og_title.or_else(|| {
+        Selector::parse("title")
+            .ok()
+            .and_then(|sel| document.select(&sel).next())
+            .map(|el| el.text().collect::<String>())
+    });
+
+    let description =
+        og_description.or_else(|| select_meta_content_by_name(&document, "description"));
+
+    // Resolve favicon
+    let favicon = select_link_href(&document, "icon")
+        .or_else(|| select_link_href(&document, "shortcut icon"))
+        .map(|href| resolve_url(&url, &href))
+        .or_else(|| {
+            url::Url::parse(&url)
+                .ok()
+                .map(|u| format!("{}://{}/favicon.ico", u.scheme(), u.host_str().unwrap_or("")))
+        });
+
+    // Resolve og:image relative URLs
+    let image = og_image.map(|img| resolve_url(&url, &img));
+
+    Ok(LinkPreviewData {
+        title,
+        description,
+        image,
+        favicon,
+        site_name: og_site_name,
+    })
+}
+
+fn select_meta_content(document: &Html, property: &str) -> Option<String> {
+    let selector =
+        Selector::parse(&format!("meta[property=\"{}\"]", property)).ok()?;
+    document
+        .select(&selector)
+        .next()
+        .and_then(|el| el.value().attr("content").map(|s| s.to_string()))
+}
+
+fn select_meta_content_by_name(document: &Html, name: &str) -> Option<String> {
+    let selector = Selector::parse(&format!("meta[name=\"{}\"]", name)).ok()?;
+    document
+        .select(&selector)
+        .next()
+        .and_then(|el| el.value().attr("content").map(|s| s.to_string()))
+}
+
+fn select_link_href(document: &Html, rel: &str) -> Option<String> {
+    let selector = Selector::parse(&format!("link[rel=\"{}\"]", rel)).ok()?;
+    document
+        .select(&selector)
+        .next()
+        .and_then(|el| el.value().attr("href").map(|s| s.to_string()))
+}
+
+fn resolve_url(base: &str, href: &str) -> String {
+    if href.starts_with("http://") || href.starts_with("https://") {
+        return href.to_string();
+    }
+    if let Ok(base_url) = url::Url::parse(base) {
+        if let Ok(resolved) = base_url.join(href) {
+            return resolved.to_string();
+        }
+    }
+    href.to_string()
 }
 
 // Settings commands

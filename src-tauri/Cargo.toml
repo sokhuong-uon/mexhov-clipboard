@@ -26,6 +26,9 @@ tokio = { version = "1", features = ["time"] }
 png = "0.17"
 base64 = "0.22"
 dotenvy = "0.15"
+reqwest = { version = "0.12", features = ["rustls-tls"], default-features = false }
+scraper = "0.22"
+url = "2"
 drizzle = { git = "https://github.com/themixednuts/drizzle-rs", features = ["rusqlite"] }
 rusqlite = { version = "0.37", features = ["bundled"] }
 

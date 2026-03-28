@@ -91,7 +91,7 @@ export const ClipboardList = ({
     return (
       <ScrollArea className="h-full">
         <ul
-          className="flex flex-col gap-3 p-4"
+          className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2"
           role="listbox"
           aria-label="Search results"
         >
@@ -131,7 +131,7 @@ export const ClipboardList = ({
       }}
     >
       <ScrollArea className="h-full">
-        <ul className="flex flex-col gap-3 p-4">
+        <ul className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
           <AnimatePresence initial={false}>
             {items.map((item, index) => (
               <SortableItem

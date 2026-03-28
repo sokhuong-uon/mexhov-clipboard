@@ -14,10 +14,10 @@ use commands::{
     db_insert_item, db_toggle_favorite, db_update_sort_orders,
 };
 use commands::{
-    detect_env_content, get_setting, get_system_theme, handle_command, hide_window,
-    is_cosmic_data_control_enabled, is_wayland_session, parse_command_from_args, parse_env_content,
-    read_clipboard, read_clipboard_image, reinitialize_clipboard, set_setting, show_window,
-    show_window_at_cursor, toggle_window, write_clipboard, write_clipboard_image,
+    detect_env_content, fetch_link_preview, get_setting, get_system_theme, handle_command,
+    hide_window, is_cosmic_data_control_enabled, is_wayland_session, parse_command_from_args,
+    parse_env_content, read_clipboard, read_clipboard_image, reinitialize_clipboard, set_setting,
+    show_window, show_window_at_cursor, toggle_window, write_clipboard, write_clipboard_image,
 };
 use db::Database;
 use tauri::Manager;
@@ -72,6 +72,7 @@ fn main() {
             db_get_item_count,
             detect_env_content,
             parse_env_content,
+            fetch_link_preview,
             get_setting,
             set_setting,
         ])

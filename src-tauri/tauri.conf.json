@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Mexdeclip",
-        "width": 512,
-        "maxWidth": 500,
+        "width": 400,
+        "maxWidth": 1000,
         "height": 600,
         "visible": false,
         "skipTaskbar": true

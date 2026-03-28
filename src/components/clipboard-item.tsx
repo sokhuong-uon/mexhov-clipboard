@@ -2,12 +2,12 @@ import {
   Copy,
   Trash2,
   Image,
-  GripVertical,
   SplitSquareHorizontal,
   GripHorizontal,
 } from "lucide-react";
 import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
 import { formatTime, truncateText, formatCharCount } from "@/utils/formatting";
+import { LinkPreview, isUrl } from "@/components/link-preview";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,6 +60,13 @@ export const ClipboardItem = ({
                   }}
                 />
               )}
+            </div>
+          ) : isUrl(item.text_content || "") ? (
+            <div className="flex flex-col gap-1.5">
+              <p className="wrap-break-word text-card-foreground text-sm leading-relaxed truncate">
+                {item.text_content}
+              </p>
+              <LinkPreview url={item.text_content!} />
             </div>
           ) : (
             <p className="wrap-break-word text-card-foreground text-sm leading-relaxed">
