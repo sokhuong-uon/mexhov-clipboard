@@ -1,21 +1,9 @@
-import {
-  Copy,
-  Trash2,
-  Image,
-  SplitSquareHorizontal,
-  GripHorizontal,
-} from "lucide-react";
+import { GripHorizontal } from "lucide-react";
 import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
-import { formatTime, truncateText, formatCharCount } from "@/utils/formatting";
-import { LinkPreview, isUrl } from "@/components/link-preview";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
+import { ClipboardItemContent } from "@/components/clipboard-item-content";
+import { ClipboardItemMeta } from "@/components/clipboard-item-meta";
+import { ClipboardItemActions } from "@/components/clipboard-item-actions";
 
 type ClipboardItemProps = {
   item: ClipboardItemType;
@@ -31,9 +19,6 @@ export const ClipboardItem = ({
   onDelete,
   onSplitEnv,
 }: ClipboardItemProps) => {
-  const isImage = item.content_type === "image";
-  const timestamp = new Date(parseInt(item.created_at));
-
   return (
     <Card className="gap-2 py-3 group">
       <CardContent className="flex items-start gap-2 px-1 relative">
@@ -42,135 +27,16 @@ export const ClipboardItem = ({
         </div>
 
         <div className="flex flex-col gap-1.5 flex-1 min-w-0 pl-2">
-          {isImage ? (
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Image className="size-4" />
-                <span className="text-sm">
-                  Image ({item.image_width}x{item.image_height})
-                </span>
-              </div>
-              {item.image_data && (
-                <img
-                  src={`data:image/png;base64,${item.image_data}`}
-                  alt="Clipboard image"
-                  className="max-w-full max-h-32 rounded-md object-contain bg-muted"
-                  style={{
-                    maxWidth: Math.min(item.image_width || 200, 200),
-                  }}
-                />
-              )}
-            </div>
-          ) : isUrl(item.text_content || "") ? (
-            <div className="flex flex-col gap-1.5">
-              <p className="wrap-break-word text-card-foreground text-sm leading-relaxed truncate">
-                {item.text_content}
-              </p>
-              <LinkPreview url={item.text_content!} />
-            </div>
-          ) : (
-            <p className="wrap-break-word text-card-foreground text-sm leading-relaxed">
-              {truncateText(item.text_content || "")}
-            </p>
-          )}
-
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-            {item.kv_key && (
-              <Badge
-                variant="outline"
-                className="text-[10px] px-1.5 py-0 h-4 font-mono text-sky-500 border-sky-500/40"
-              >
-                {item.kv_key}
-              </Badge>
-            )}
-            {item.is_env && !item.kv_key && (
-              <Badge
-                variant="outline"
-                className="text-[10px] px-1.5 py-0 h-4 text-amber-500 border-amber-500/40"
-              >
-                kv
-              </Badge>
-            )}
-            <span>{formatTime(timestamp)}</span>
-            {!isImage && item.char_count != null && (
-              <>
-                <span className="opacity-30">·</span>
-                <span>{formatCharCount(item.char_count)}</span>
-              </>
-            )}
-            {!isImage && item.line_count != null && item.line_count > 1 && (
-              <>
-                <span className="opacity-30">·</span>
-                <span>{item.line_count} lines</span>
-              </>
-            )}
-            {item.copy_count > 1 && (
-              <>
-                <span className="opacity-30">·</span>
-                <span>copied {item.copy_count}x</span>
-              </>
-            )}
-          </div>
+          <ClipboardItemContent item={item} />
+          <ClipboardItemMeta item={item} />
         </div>
 
-        <div className="flex flex-col items-center gap-0.5 shrink-0 pt-0.5">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => onCopy(item)}
-                  className="text-muted-foreground hover:text-foreground"
-                />
-              }
-            >
-              <Copy className="size-3.5" />
-            </TooltipTrigger>
-
-            <TooltipContent className="pointer-events-none">
-              Copy to clipboard
-            </TooltipContent>
-          </Tooltip>
-
-          {item.is_env && !item.kv_key && onSplitEnv && (
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => onSplitEnv(item.id)}
-                    className="text-muted-foreground hover:text-foreground"
-                  />
-                }
-              >
-                <SplitSquareHorizontal className="size-3.5" />
-              </TooltipTrigger>
-              <TooltipContent className="pointer-events-none">
-                Split into key-value items
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => onDelete(item.id)}
-                  className="text-muted-foreground hover:text-foreground"
-                />
-              }
-            >
-              <Trash2 className="size-3.5" />
-            </TooltipTrigger>
-            <TooltipContent className="pointer-events-none">
-              Delete from history
-            </TooltipContent>
-          </Tooltip>
-        </div>
+        <ClipboardItemActions
+          onCopy={() => onCopy(item)}
+          onDelete={() => onDelete(item.id)}
+          onSplitEnv={onSplitEnv ? () => onSplitEnv(item.id) : undefined}
+          showSplit={!!item.is_env && !item.kv_key}
+        />
       </CardContent>
     </Card>
   );

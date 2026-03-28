@@ -29,6 +29,7 @@ pub struct ClipboardItemRow {
     pub sort_order: String,
     pub copy_count: i64,
     pub kv_key: Option<String>,
+    pub detected_date: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -49,6 +50,7 @@ impl From<SelectClipboardItems> for ClipboardItemRow {
             sort_order: row.sort_order,
             copy_count: row.copy_count,
             kv_key: row.kv_key,
+            detected_date: row.detected_date,
             created_at: row.created_at,
             updated_at: row.updated_at,
         }
@@ -67,6 +69,7 @@ pub struct InsertClipboardItemParams {
     pub source_app: Option<String>,
     pub sort_order: String,
     pub kv_key: Option<String>,
+    pub detected_date: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -133,6 +136,7 @@ impl Database {
                         sort_order: row.get("sort_order")?,
                         copy_count: row.get("copy_count")?,
                         kv_key: row.get("kv_key")?,
+                        detected_date: row.get("detected_date")?,
                         created_at: row.get("created_at")?,
                         updated_at: row.get("updated_at")?,
                     })
@@ -152,7 +156,7 @@ impl Database {
             .db
             .conn()
             .execute(
-                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12)",
+                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13)",
                 rusqlite::params![
                     params.content_type,
                     params.text_content,
@@ -164,6 +168,7 @@ impl Database {
                     params.source_app,
                     params.sort_order,
                     params.kv_key,
+                    params.detected_date,
                     params.created_at,
                     params.updated_at,
                 ],

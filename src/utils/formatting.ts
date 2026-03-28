@@ -1,14 +1,7 @@
-export const formatTime = (date: Date): string => {
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
+import { formatDistanceToNow, format } from "date-fns";
 
-  if (seconds < 60) return "Just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return date.toLocaleDateString();
+export const formatTime = (date: Date): string => {
+  return formatDistanceToNow(date, { addSuffix: true });
 };
 
 export const truncateText = (text: string, maxLength: number = 100): string => {
@@ -19,4 +12,12 @@ export const truncateText = (text: string, maxLength: number = 100): string => {
 export const formatCharCount = (count: number): string => {
   if (count >= 1000) return `${(count / 1000).toFixed(1)}k chars`;
   return `${count} chars`;
+};
+
+export const formatRelativeDate = (iso: string): string => {
+  return formatDistanceToNow(new Date(iso), { addSuffix: true });
+};
+
+export const formatFullDate = (iso: string): string => {
+  return format(new Date(iso), "EEE, MMM d yyyy, h:mm:ss a OOO");
 };

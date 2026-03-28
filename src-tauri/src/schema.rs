@@ -19,6 +19,8 @@ pub struct ClipboardItems {
     pub copy_count: i64,
     /// Key name when this item was split from a key-value pair
     pub kv_key: Option<String>,
+    /// ISO 8601 date string when text content is detected as a date
+    pub detected_date: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }

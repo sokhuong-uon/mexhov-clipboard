@@ -1,5 +1,6 @@
 use std::io::Cursor;
 
+use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use crate::clipboard::ClipboardManager;
 use scraper::{Html, Selector};
 use crate::db::{ClipboardItemRow, Database, InsertClipboardItemParams, UpdateSortOrderParams};
@@ -234,6 +235,57 @@ pub fn parse_env_content(text: String) -> Vec<(String, String)> {
         }
     }
     pairs
+}
+
+/// Tries to parse text as a date string. Returns the ISO 8601 representation if detected.
+/// Only detects unambiguous formats: ISO 8601, RFC 2822, and JS toLocaleString() with time.
+#[tauri::command]
+pub fn detect_date_content(text: String) -> Result<Option<String>, String> {
+    let text = text.trim();
+
+    // ISO 8601 with timezone: 2026-03-28T14:30:00Z
+    if let Ok(dt) = text.parse::<DateTime<Utc>>() {
+        return Ok(Some(dt.to_rfc3339()));
+    }
+
+    // ISO 8601 with offset: 2026-03-28T14:30:00+05:00
+    if let Ok(dt) = DateTime::parse_from_rfc3339(text) {
+        return Ok(Some(dt.with_timezone(&Utc).to_rfc3339()));
+    }
+
+    // RFC 2822 / UTC string: Sat, 28 Mar 2026 14:30:00 GMT
+    if let Ok(dt) = DateTime::parse_from_rfc2822(text) {
+        return Ok(Some(dt.with_timezone(&Utc).to_rfc3339()));
+    }
+
+    // JS toLocaleString() US 12h: 3/28/2026, 2:30:00 PM
+    if let Ok(ndt) = NaiveDateTime::parse_from_str(text, "%m/%d/%Y, %I:%M:%S %p") {
+        return Ok(Some(ndt.and_utc().to_rfc3339()));
+    }
+
+    // JS toLocaleString() 24h: 3/28/2026, 14:30:00
+    if let Ok(ndt) = NaiveDateTime::parse_from_str(text, "%m/%d/%Y, %H:%M:%S") {
+        return Ok(Some(ndt.and_utc().to_rfc3339()));
+    }
+
+    // JS toLocaleString() without seconds 12h: 3/28/2026, 2:30 PM
+    if let Ok(ndt) = NaiveDateTime::parse_from_str(text, "%m/%d/%Y, %I:%M %p") {
+        return Ok(Some(ndt.and_utc().to_rfc3339()));
+    }
+
+    // JS toLocaleString() without seconds 24h: 3/28/2026, 14:30
+    if let Ok(ndt) = NaiveDateTime::parse_from_str(text, "%m/%d/%Y, %H:%M") {
+        return Ok(Some(ndt.and_utc().to_rfc3339()));
+    }
+
+    // ISO date-only: 2026-03-28
+    if let Ok(nd) = NaiveDate::parse_from_str(text, "%Y-%m-%d") {
+        if let Some(ndt) = nd.and_hms_opt(0, 0, 0) {
+            return Ok(Some(ndt.and_utc().to_rfc3339()));
+        }
+    }
+
+    Ok(None)
 }
 
 #[derive(serde::Serialize)]

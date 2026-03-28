@@ -12,6 +12,7 @@ type InsertParams = {
   source_app: string | null;
   sort_order: string;
   kv_key: string | null;
+  detected_date: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -109,6 +109,10 @@ export const useClipboardHistory = (maxItems: number) => {
       const lineCount = text.split("\n").length;
 
       try {
+        const detectedDate = await invoke<string | null>(
+          "detect_date_content",
+          { text },
+        );
         const rawItem = await clipboardDb.insertItem({
           content_type: "text",
           text_content: text,
@@ -120,6 +124,7 @@ export const useClipboardHistory = (maxItems: number) => {
           source_app: null,
           sort_order: sortOrder,
           kv_key: null,
+          detected_date: detectedDate,
           created_at: now,
           updated_at: now,
         });
@@ -183,6 +188,7 @@ export const useClipboardHistory = (maxItems: number) => {
           source_app: null,
           sort_order: sortOrder,
           kv_key: null,
+          detected_date: null,
           created_at: now,
           updated_at: now,
         });
@@ -328,6 +334,7 @@ export const useClipboardHistory = (maxItems: number) => {
           source_app: null,
           sort_order: keySortOrder,
           kv_key: null,
+          detected_date: null,
           created_at: now,
           updated_at: now,
         });
@@ -349,6 +356,7 @@ export const useClipboardHistory = (maxItems: number) => {
           source_app: null,
           sort_order: valueSortOrder,
           kv_key: key,
+          detected_date: null,
           created_at: now,
           updated_at: now,
         });
