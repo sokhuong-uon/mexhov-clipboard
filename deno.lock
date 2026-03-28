@@ -27,6 +27,7 @@
     "npm:lucide-react@0.562": "0.562.0_react@19.2.3",
     "npm:motion@^12.38.0": "12.38.0_react@19.2.3_react-dom@19.2.3__react@19.2.3",
     "npm:next-themes@~0.4.6": "0.4.6_react@19.2.3_react-dom@19.2.3__react@19.2.3",
+    "npm:qrcode.react@^4.2.0": "4.2.0_react@19.2.3",
     "npm:react-dom@^19.1.0": "19.2.3_react@19.2.3",
     "npm:react@^19.1.0": "19.2.3",
     "npm:semantic-release@23": "23.1.1_typescript@5.8.3_marked@12.0.2",
@@ -3373,6 +3374,12 @@
         "ipaddr.js"
       ]
     },
+    "qrcode.react@4.2.0_react@19.2.3": {
+      "integrity": "sha512-QpgqWi8rD9DsS9EP3z7BT+5lY5SFhsqGjpgW5DY/i3mK4M9DTBNz3ErMi8BWYEfI3L0d8GIbGmcdFAS1uIRGjA==",
+      "dependencies": [
+        "react"
+      ]
+    },
     "qs@6.15.0": {
       "integrity": "sha512-mAZTtNCeetKMH+pSjrb76NAM8V9a05I9aBZOHztWy/UqcJdQYNsf59vrRKWnojAT9Y+GbIvoTBC++CPHqpDBhQ==",
       "dependencies": [
@@ -4287,6 +4294,7 @@
         "npm:lucide-react@0.562",
         "npm:motion@^12.38.0",
         "npm:next-themes@~0.4.6",
+        "npm:qrcode.react@^4.2.0",
         "npm:react-dom@^19.1.0",
         "npm:react@^19.1.0",
         "npm:semantic-release@23",
