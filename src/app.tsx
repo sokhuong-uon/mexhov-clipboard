@@ -14,7 +14,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { useSystemTheme } from "@/hooks/use-system-theme";
 import { useClipboardHistory } from "@/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
-import { ClipboardContent, ClipboardItem } from "@/types/clipboard";
+import { ClipboardItem } from "@/types/clipboard";
 
 function App() {
   useSystemTheme();
@@ -51,40 +51,13 @@ function App() {
 
   const handleCopy = useCallback(
     async (item: ClipboardItem) => {
-      const wasMonitoring = isMonitoring;
-      setIsMonitoring(false);
-
-      try {
-        if (item.content_type === "text" && item.text_content) {
-          await write(item.text_content);
-          const newContent: ClipboardContent = {
-            type: "text",
-            text: item.text_content,
-          };
-          previousContentRef.current = newContent;
-          setCurrentContent(newContent);
-        } else if (item.content_type === "image" && item.image_data) {
-          await writeImage(item.image_data);
-          const newContent: ClipboardContent = {
-            type: "image",
-            base64Data: item.image_data,
-            width: item.image_width || 0,
-            height: item.image_height || 0,
-          };
-          previousContentRef.current = newContent;
-          setCurrentContent(newContent);
-        }
-      } finally {
-        setTimeout(() => {
-          if (wasMonitoring) {
-            setIsMonitoring(true);
-          }
-        }, 200);
+      if (item.content_type === "text" && item.text_content) {
+        await write(item.text_content);
+      } else if (item.content_type === "image" && item.image_data) {
+        await writeImage(item.image_data);
       }
-
-      await invoke("hide_window");
     },
-    [write, writeImage, isMonitoring, previousContentRef, setCurrentContent],
+    [write, writeImage],
   );
 
   const handleRetry = useCallback(async () => {
