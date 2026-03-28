@@ -2,7 +2,6 @@ import { Clock } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import {
   formatTime,
-  formatCharCount,
   formatRelativeDate,
   formatFullDate,
 } from "@/utils/formatting";
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/tooltip";
 
 export const ClipboardItemMeta = ({ item }: { item: ClipboardItem }) => {
-  const isImage = item.content_type === "image";
   const timestamp = new Date(parseInt(item.created_at));
 
   return (
@@ -54,18 +52,6 @@ export const ClipboardItemMeta = ({ item }: { item: ClipboardItem }) => {
         </Tooltip>
       )}
       <span>{formatTime(timestamp)}</span>
-      {!isImage && item.char_count != null && (
-        <>
-          <span className="opacity-30">·</span>
-          <span>{formatCharCount(item.char_count)}</span>
-        </>
-      )}
-      {!isImage && item.line_count != null && item.line_count > 1 && (
-        <>
-          <span className="opacity-30">·</span>
-          <span>{item.line_count} lines</span>
-        </>
-      )}
       {item.copy_count > 1 && (
         <>
           <span className="opacity-30">·</span>

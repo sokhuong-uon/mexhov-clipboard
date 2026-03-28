@@ -1,29 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import {
-  generateKeyBetween,
-  generateNKeysBetween,
-} from "jittered-fractional-indexing";
+import { generateKeyBetween } from "jittered-fractional-indexing";
 import { ClipboardItem, ClipboardContent } from "@/types/clipboard";
 import { clipboardDb } from "@/hooks/use-clipboard-db";
-
-async function enrichWithEnvDetection(
-  item: ClipboardItem,
-): Promise<ClipboardItem> {
-  if (item.content_type === "text" && item.text_content) {
-    const isEnv = await invoke<boolean>("detect_env_content", {
-      text: item.text_content,
-    });
-    return { ...item, is_env: isEnv };
-  }
-  return item;
-}
-
-async function enrichAllWithEnvDetection(
-  items: ClipboardItem[],
-): Promise<ClipboardItem[]> {
-  return Promise.all(items.map(enrichWithEnvDetection));
-}
+import {
+  enrichWithEnvDetection,
+  enrichAllWithEnvDetection,
+} from "@/hooks/clipboard-enrichment";
+import { splitEnvItemInDb } from "@/hooks/clipboard-split-env";
 
 export const useClipboardHistory = (maxItems: number) => {
   const [history, setHistory] = useState<ClipboardItem[]>([]);
@@ -37,7 +21,6 @@ export const useClipboardHistory = (maxItems: number) => {
 
   const hasMore = history.length < totalCount;
 
-  // Load history from database on mount and when limit changes
   useEffect(() => {
     Promise.all([
       clipboardDb.getAllItems(maxItems).then(enrichAllWithEnvDetection),
@@ -64,8 +47,7 @@ export const useClipboardHistory = (maxItems: number) => {
         setHistory((prev) => {
           const existingIds = new Set(prev.map((i) => i.id));
           const unique = moreItems.filter((i) => !existingIds.has(i.id));
-          const next = [...prev, ...unique];
-          return next;
+          return [...prev, ...unique];
         });
       }
     } catch (err) {
@@ -73,30 +55,51 @@ export const useClipboardHistory = (maxItems: number) => {
     }
   }, [maxItems]);
 
-  // Generate a sort key that places a new item at the top (before the current first)
   const getTopSortOrder = useCallback((excludeId?: number) => {
     const items = historyRef.current;
     const first = excludeId ? items.find((i) => i.id !== excludeId) : items[0];
     return generateKeyBetween(null, first?.sort_order ?? null);
   }, []);
 
+  const bumpExisting = useCallback(
+    async (existingId: number) => {
+      const newSortOrder = getTopSortOrder(existingId);
+      const updated = await clipboardDb.bumpItem(existingId, newSortOrder);
+      setHistory((prev) => [
+        updated,
+        ...prev.filter((i) => i.id !== existingId),
+      ]);
+    },
+    [getTopSortOrder],
+  );
+
+  const insertAndTrim = useCallback(
+    (item: ClipboardItem) => {
+      setHistory((prev) => {
+        const next = [item, ...prev];
+        if (next.length > maxItems) {
+          next
+            .slice(maxItems)
+            .forEach((i) => clipboardDb.deleteItem(i.id).catch(() => {}));
+          return next.slice(0, maxItems);
+        }
+        return next;
+      });
+    },
+    [maxItems],
+  );
+
   const addTextToHistory = useCallback(
     async (text: string) => {
       if (!text.trim()) return;
 
-      const items = historyRef.current;
-      const existing = items.find(
+      const existing = historyRef.current.find(
         (item) => item.content_type === "text" && item.text_content === text,
       );
 
       if (existing) {
-        const newSortOrder = getTopSortOrder(existing.id);
         try {
-          const updated = await clipboardDb.bumpItem(existing.id, newSortOrder);
-          setHistory((prev) => {
-            const next = [updated, ...prev.filter((i) => i.id !== existing.id)];
-            return next;
-          });
+          await bumpExisting(existing.id);
         } catch (err) {
           console.error("Failed to bump clipboard item:", err);
         }
@@ -105,8 +108,6 @@ export const useClipboardHistory = (maxItems: number) => {
 
       const now = Date.now().toString();
       const sortOrder = getTopSortOrder();
-      const charCount = text.length;
-      const lineCount = text.split("\n").length;
 
       try {
         const detectedDate = await invoke<string | null>(
@@ -119,8 +120,8 @@ export const useClipboardHistory = (maxItems: number) => {
           image_data: null,
           image_width: null,
           image_height: null,
-          char_count: charCount,
-          line_count: lineCount,
+          char_count: text.length,
+          line_count: text.split("\n").length,
           source_app: null,
           sort_order: sortOrder,
           kv_key: null,
@@ -129,44 +130,26 @@ export const useClipboardHistory = (maxItems: number) => {
           updated_at: now,
         });
         const item = await enrichWithEnvDetection(rawItem);
-
-        setHistory((prev) => {
-          const next = [item, ...prev];
-          if (next.length > maxItems) {
-            const toDelete = next.slice(maxItems);
-            toDelete.forEach((i) =>
-              clipboardDb.deleteItem(i.id).catch(() => {}),
-            );
-            const trimmed = next.slice(0, maxItems);
-            return trimmed;
-          }
-          return next;
-        });
+        insertAndTrim(item);
       } catch (err) {
         console.error("Failed to insert clipboard item:", err);
       }
     },
-    [getTopSortOrder],
+    [getTopSortOrder, bumpExisting, insertAndTrim],
   );
 
   const addImageToHistory = useCallback(
     async (base64Data: string, width: number, height: number) => {
       if (!base64Data) return;
 
-      const items = historyRef.current;
-      const existing = items.find(
+      const existing = historyRef.current.find(
         (item) =>
           item.content_type === "image" && item.image_data === base64Data,
       );
 
       if (existing) {
-        const newSortOrder = getTopSortOrder(existing.id);
         try {
-          const updated = await clipboardDb.bumpItem(existing.id, newSortOrder);
-          setHistory((prev) => {
-            const next = [updated, ...prev.filter((i) => i.id !== existing.id)];
-            return next;
-          });
+          await bumpExisting(existing.id);
         } catch (err) {
           console.error("Failed to bump clipboard item:", err);
         }
@@ -192,24 +175,12 @@ export const useClipboardHistory = (maxItems: number) => {
           created_at: now,
           updated_at: now,
         });
-
-        setHistory((prev) => {
-          const next = [item, ...prev];
-          if (next.length > maxItems) {
-            const toDelete = next.slice(maxItems);
-            toDelete.forEach((i) =>
-              clipboardDb.deleteItem(i.id).catch(() => {}),
-            );
-            const trimmed = next.slice(0, maxItems);
-            return trimmed;
-          }
-          return next;
-        });
+        insertAndTrim(item);
       } catch (err) {
         console.error("Failed to insert clipboard item:", err);
       }
     },
-    [getTopSortOrder],
+    [getTopSortOrder, bumpExisting, insertAndTrim],
   );
 
   const addContentToHistory = useCallback(
@@ -277,11 +248,9 @@ export const useClipboardHistory = (maxItems: number) => {
     const newSortOrder = generateKeyBetween(before, after);
 
     const updated = { ...moved, sort_order: newSortOrder };
-    const newHistory = reordered.map((item) =>
-      item.id === activeId ? updated : item,
+    setHistory(
+      reordered.map((item) => (item.id === activeId ? updated : item)),
     );
-
-    setHistory(newHistory);
 
     try {
       await clipboardDb.updateSortOrders([
@@ -299,91 +268,20 @@ export const useClipboardHistory = (maxItems: number) => {
     if (itemIndex === -1) return;
 
     const item = items[itemIndex];
-    if (item.content_type !== "text" || !item.text_content) return;
-
-    const pairs = await invoke<[string, string][]>("parse_env_content", {
-      text: item.text_content,
-    });
-    if (pairs.length === 0) return;
-
-    // Insert new items in-place: between the previous and next neighbors
     const beforeSort = itemIndex > 0 ? items[itemIndex - 1].sort_order : null;
     const afterSort =
       itemIndex < items.length - 1 ? items[itemIndex + 1].sort_order : null;
 
-    // 2 slots per pair (key + value)
-    const totalSlots = pairs.length * 2;
-    const sortKeys = generateNKeysBetween(beforeSort, afterSort, totalSlots);
-
-    const now = Date.now().toString();
-    const newItems: ClipboardItem[] = [];
-
-    for (let i = 0; i < pairs.length; i++) {
-      const [key, value] = pairs[i];
-      const keySortOrder = sortKeys[i * 2];
-      const valueSortOrder = sortKeys[i * 2 + 1];
-
-      // Insert the key as a clipboard item
-      try {
-        const keyItem = await clipboardDb.insertItem({
-          content_type: "text",
-          text_content: key,
-          image_data: null,
-          image_width: null,
-          image_height: null,
-          char_count: key.length,
-          line_count: 1,
-          source_app: null,
-          sort_order: keySortOrder,
-          kv_key: null,
-          detected_date: null,
-          created_at: now,
-          updated_at: now,
-        });
-        newItems.push(keyItem);
-      } catch (err) {
-        console.error("Failed to insert split env key:", err);
-      }
-
-      // Insert the value as a clipboard item labeled with its key
-      try {
-        const valueItem = await clipboardDb.insertItem({
-          content_type: "text",
-          text_content: value,
-          image_data: null,
-          image_width: null,
-          image_height: null,
-          char_count: value.length,
-          line_count: value.split("\n").length,
-          source_app: null,
-          sort_order: valueSortOrder,
-          kv_key: key,
-          detected_date: null,
-          created_at: now,
-          updated_at: now,
-        });
-        newItems.push(valueItem);
-      } catch (err) {
-        console.error("Failed to insert split env value:", err);
-      }
-    }
-
-    // Delete the original item
-    try {
-      await clipboardDb.deleteItem(id);
-    } catch (err) {
-      console.error("Failed to delete original env item:", err);
-    }
+    const newItems = await splitEnvItemInDb(item, beforeSort, afterSort);
+    if (!newItems) return;
 
     setHistory((prev) => {
       const without = prev.filter((i) => i.id !== id);
-      // Insert newItems at the original position
-      const next = [
+      return [
         ...without.slice(0, itemIndex),
         ...newItems,
         ...without.slice(itemIndex),
       ];
-      return next;
     });
   }, []);
 
