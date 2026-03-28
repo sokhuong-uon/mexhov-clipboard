@@ -15,6 +15,7 @@ export type ClipboardItem = {
   copy_count: number;
   kv_key: string | null;
   detected_date: string | null;
+  detected_color: string | null;
   created_at: string;
   updated_at: string;
   is_env?: boolean;

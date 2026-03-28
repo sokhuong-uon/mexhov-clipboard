@@ -21,6 +21,8 @@ pub struct ClipboardItems {
     pub kv_key: Option<String>,
     /// ISO 8601 date string when text content is detected as a date
     pub detected_date: Option<String>,
+    /// CSS color value when text content is detected as a color
+    pub detected_color: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }

@@ -30,6 +30,7 @@ reqwest = { version = "0.12", features = ["rustls-tls"], default-features = fals
 scraper = "0.22"
 url = "2"
 chrono = "0.4"
+csscolorparser = "0.8"
 drizzle = { git = "https://github.com/themixednuts/drizzle-rs", features = ["rusqlite"] }
 rusqlite = { version = "0.37", features = ["bundled"] }
 

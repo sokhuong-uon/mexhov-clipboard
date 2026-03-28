@@ -40,6 +40,7 @@ export async function splitEnvItemInDb(
         sort_order: sortKeys[i * 2],
         kv_key: null,
         detected_date: null,
+        detected_color: null,
         created_at: now,
         updated_at: now,
       });
@@ -61,6 +62,7 @@ export async function splitEnvItemInDb(
         sort_order: sortKeys[i * 2 + 1],
         kv_key: key,
         detected_date: null,
+        detected_color: null,
         created_at: now,
         updated_at: now,
       });

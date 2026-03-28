@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Image, ChevronDown } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import { LinkPreview, isUrl } from "@/components/link-preview";
+import { ClipboardItemColor } from "@/components/clipboard-item-color";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -63,6 +64,10 @@ export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
         )}
       </div>
     );
+  }
+
+  if (item.detected_color) {
+    return <ClipboardItemColor item={item} />;
   }
 
   if (isUrl(item.text_content || "")) {

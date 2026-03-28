@@ -13,6 +13,7 @@ type InsertParams = {
   sort_order: string;
   kv_key: string | null;
   detected_date: string | null;
+  detected_color: string | null;
   created_at: string;
   updated_at: string;
 };

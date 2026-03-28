@@ -110,10 +110,10 @@ export const useClipboardHistory = (maxItems: number) => {
       const sortOrder = getTopSortOrder();
 
       try {
-        const detectedDate = await invoke<string | null>(
-          "detect_date_content",
-          { text },
-        );
+        const [detectedDate, detectedColor] = await Promise.all([
+          invoke<string | null>("detect_date_content", { text }),
+          invoke<string | null>("detect_color_content", { text }),
+        ]);
         const rawItem = await clipboardDb.insertItem({
           content_type: "text",
           text_content: text,
@@ -126,6 +126,7 @@ export const useClipboardHistory = (maxItems: number) => {
           sort_order: sortOrder,
           kv_key: null,
           detected_date: detectedDate,
+          detected_color: detectedColor,
           created_at: now,
           updated_at: now,
         });
@@ -172,6 +173,7 @@ export const useClipboardHistory = (maxItems: number) => {
           sort_order: sortOrder,
           kv_key: null,
           detected_date: null,
+          detected_color: null,
           created_at: now,
           updated_at: now,
         });

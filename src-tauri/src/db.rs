@@ -30,6 +30,7 @@ pub struct ClipboardItemRow {
     pub copy_count: i64,
     pub kv_key: Option<String>,
     pub detected_date: Option<String>,
+    pub detected_color: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -51,6 +52,7 @@ impl From<SelectClipboardItems> for ClipboardItemRow {
             copy_count: row.copy_count,
             kv_key: row.kv_key,
             detected_date: row.detected_date,
+            detected_color: row.detected_color,
             created_at: row.created_at,
             updated_at: row.updated_at,
         }
@@ -70,6 +72,7 @@ pub struct InsertClipboardItemParams {
     pub sort_order: String,
     pub kv_key: Option<String>,
     pub detected_date: Option<String>,
+    pub detected_color: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -137,6 +140,7 @@ impl Database {
                         copy_count: row.get("copy_count")?,
                         kv_key: row.get("kv_key")?,
                         detected_date: row.get("detected_date")?,
+                        detected_color: row.get("detected_color")?,
                         created_at: row.get("created_at")?,
                         updated_at: row.get("updated_at")?,
                     })
@@ -156,7 +160,7 @@ impl Database {
             .db
             .conn()
             .execute(
-                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13)",
+                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, detected_color, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13, ?14)",
                 rusqlite::params![
                     params.content_type,
                     params.text_content,
@@ -169,6 +173,7 @@ impl Database {
                     params.sort_order,
                     params.kv_key,
                     params.detected_date,
+                    params.detected_color,
                     params.created_at,
                     params.updated_at,
                 ],

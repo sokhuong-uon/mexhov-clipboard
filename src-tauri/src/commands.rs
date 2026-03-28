@@ -288,6 +288,21 @@ pub fn detect_date_content(text: String) -> Result<Option<String>, String> {
     Ok(None)
 }
 
+/// Detects if text is a CSS color value. Returns the hex representation if detected.
+/// Supports: hex, rgb/rgba, hsl/hsla, hwb, lab, lch, oklab, oklch, and named CSS colors.
+#[tauri::command]
+pub fn detect_color_content(text: String) -> Result<Option<String>, String> {
+    let text = text.trim();
+    // Reject strings that are too long or contain newlines (not a color)
+    if text.len() > 100 || text.contains('\n') {
+        return Ok(None);
+    }
+    match csscolorparser::parse(text) {
+        Ok(color) => Ok(Some(color.to_hex_string())),
+        Err(_) => Ok(None),
+    }
+}
+
 #[derive(serde::Serialize)]
 pub struct LinkPreviewData {
     pub title: Option<String>,
