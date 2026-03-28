@@ -9,7 +9,10 @@ pub async fn read() -> Result<String, String> {
             } else {
                 let stderr = String::from_utf8_lossy(&output.stderr);
 
-                if stderr.contains("No selection") || stderr.is_empty() {
+                if stderr.contains("No selection")
+                    || stderr.contains("Nothing is copied")
+                    || stderr.is_empty()
+                {
                     Ok(String::new())
                 } else {
                     Err(format!("wl-paste failed: {}", stderr))
@@ -51,7 +54,10 @@ pub async fn read_image() -> Result<Option<Vec<u8>>, String> {
                 Ok(Some(output.stdout))
             } else {
                 let stderr = String::from_utf8_lossy(&output.stderr);
-                if stderr.contains("No selection") || stderr.is_empty() {
+                if stderr.contains("No selection")
+                    || stderr.contains("Nothing is copied")
+                    || stderr.is_empty()
+                {
                     Ok(None)
                 } else {
                     // Try without specifying type as fallback

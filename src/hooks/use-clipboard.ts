@@ -20,7 +20,10 @@ export const useClipboard = () => {
       const errorMessage = logError("Failed to read clipboard", error);
 
       // Only show error for persistent failures
-      if (!errorMessage.includes("No selection")) {
+      if (
+        !errorMessage.includes("No selection") &&
+        !errorMessage.includes("Nothing is copied")
+      ) {
         setError({
           id: Date.now().toString(),
           message: `Clipboard read failed: ${errorMessage}`,
@@ -51,7 +54,8 @@ export const useClipboard = () => {
       // Don't show error for no image available
       if (
         !errorMessage.includes("No selection") &&
-        !errorMessage.includes("ContentNotAvailable")
+        !errorMessage.includes("ContentNotAvailable") &&
+        !errorMessage.includes("Nothing is copied")
       ) {
         setError({
           id: Date.now().toString(),
