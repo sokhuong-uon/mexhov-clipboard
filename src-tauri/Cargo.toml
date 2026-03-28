@@ -25,6 +25,7 @@ arboard = "3.3"
 tokio = { version = "1", features = ["time"] }
 png = "0.17"
 base64 = "0.22"
+dotenvy = "0.15"
 drizzle = { git = "https://github.com/themixednuts/drizzle-rs", features = ["rusqlite"] }
 rusqlite = { version = "0.37", features = ["bundled"] }
 

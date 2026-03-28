@@ -29,6 +29,7 @@ function App() {
     clearAll,
     toggleFavorite,
     reorderItems,
+    splitEnvItem,
   } = useClipboardHistory();
 
   const { systemInfo, previousContentRef } = useClipboardMonitor({
@@ -133,6 +134,7 @@ function App() {
             onDelete={deleteItem}
             onToggleFavorite={toggleFavorite}
             onReorder={reorderItems}
+            onSplitEnv={splitEnvItem}
             isSearching={isSearching}
           />
         </div>

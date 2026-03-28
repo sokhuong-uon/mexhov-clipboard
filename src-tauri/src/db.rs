@@ -28,6 +28,7 @@ pub struct ClipboardItemRow {
     pub is_favorite: bool,
     pub sort_order: String,
     pub copy_count: i64,
+    pub kv_key: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -47,6 +48,7 @@ impl From<SelectClipboardItems> for ClipboardItemRow {
             is_favorite: row.is_favorite != 0,
             sort_order: row.sort_order,
             copy_count: row.copy_count,
+            kv_key: row.kv_key,
             created_at: row.created_at,
             updated_at: row.updated_at,
         }
@@ -64,6 +66,7 @@ pub struct InsertClipboardItemParams {
     pub line_count: Option<i64>,
     pub source_app: Option<String>,
     pub sort_order: String,
+    pub kv_key: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -129,7 +132,7 @@ impl Database {
             .db
             .conn()
             .execute(
-                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11)",
+                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12)",
                 rusqlite::params![
                     params.content_type,
                     params.text_content,
@@ -140,6 +143,7 @@ impl Database {
                     params.line_count,
                     params.source_app,
                     params.sort_order,
+                    params.kv_key,
                     params.created_at,
                     params.updated_at,
                 ],

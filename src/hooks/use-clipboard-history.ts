@@ -1,7 +1,29 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { generateKeyBetween } from "jittered-fractional-indexing";
+import { invoke } from "@tauri-apps/api/core";
+import {
+  generateKeyBetween,
+  generateNKeysBetween,
+} from "jittered-fractional-indexing";
 import { ClipboardItem, ClipboardContent } from "@/types/clipboard";
 import { clipboardDb } from "@/hooks/use-clipboard-db";
+
+async function enrichWithEnvDetection(
+  item: ClipboardItem,
+): Promise<ClipboardItem> {
+  if (item.content_type === "text" && item.text_content) {
+    const isEnv = await invoke<boolean>("detect_env_content", {
+      text: item.text_content,
+    });
+    return { ...item, is_env: isEnv };
+  }
+  return item;
+}
+
+async function enrichAllWithEnvDetection(
+  items: ClipboardItem[],
+): Promise<ClipboardItem[]> {
+  return Promise.all(items.map(enrichWithEnvDetection));
+}
 
 const MAX_HISTORY_ITEMS = 50;
 
@@ -36,6 +58,7 @@ export const useClipboardHistory = () => {
   useEffect(() => {
     clipboardDb
       .getAllItems()
+      .then(enrichAllWithEnvDetection)
       .then((items) => {
         debugLog("LOADED from DB", items);
         setHistory(items);
@@ -84,7 +107,7 @@ export const useClipboardHistory = () => {
       const lineCount = text.split("\n").length;
 
       try {
-        const item = await clipboardDb.insertItem({
+        const rawItem = await clipboardDb.insertItem({
           content_type: "text",
           text_content: text,
           image_data: null,
@@ -94,9 +117,11 @@ export const useClipboardHistory = () => {
           line_count: lineCount,
           source_app: null,
           sort_order: sortOrder,
+          kv_key: null,
           created_at: now,
           updated_at: now,
         });
+        const item = await enrichWithEnvDetection(rawItem);
 
         setHistory((prev) => {
           const next = [item, ...prev];
@@ -158,6 +183,7 @@ export const useClipboardHistory = () => {
           line_count: null,
           source_app: null,
           sort_order: sortOrder,
+          kv_key: null,
           created_at: now,
           updated_at: now,
         });
@@ -263,6 +289,99 @@ export const useClipboardHistory = () => {
     }
   }, []);
 
+  const splitEnvItem = useCallback(async (id: number) => {
+    const items = historyRef.current;
+    const itemIndex = items.findIndex((i) => i.id === id);
+    if (itemIndex === -1) return;
+
+    const item = items[itemIndex];
+    if (item.content_type !== "text" || !item.text_content) return;
+
+    const pairs = await invoke<[string, string][]>("parse_env_content", {
+      text: item.text_content,
+    });
+    if (pairs.length === 0) return;
+
+    // Insert new items in-place: between the previous and next neighbors
+    const beforeSort = itemIndex > 0 ? items[itemIndex - 1].sort_order : null;
+    const afterSort =
+      itemIndex < items.length - 1 ? items[itemIndex + 1].sort_order : null;
+
+    // 2 slots per pair (key + value)
+    const totalSlots = pairs.length * 2;
+    const sortKeys = generateNKeysBetween(beforeSort, afterSort, totalSlots);
+
+    const now = Date.now().toString();
+    const newItems: ClipboardItem[] = [];
+
+    for (let i = 0; i < pairs.length; i++) {
+      const [key, value] = pairs[i];
+      const keySortOrder = sortKeys[i * 2];
+      const valueSortOrder = sortKeys[i * 2 + 1];
+
+      // Insert the key as a clipboard item
+      try {
+        const keyItem = await clipboardDb.insertItem({
+          content_type: "text",
+          text_content: key,
+          image_data: null,
+          image_width: null,
+          image_height: null,
+          char_count: key.length,
+          line_count: 1,
+          source_app: null,
+          sort_order: keySortOrder,
+          kv_key: null,
+          created_at: now,
+          updated_at: now,
+        });
+        newItems.push(keyItem);
+      } catch (err) {
+        console.error("Failed to insert split env key:", err);
+      }
+
+      // Insert the value as a clipboard item labeled with its key
+      try {
+        const valueItem = await clipboardDb.insertItem({
+          content_type: "text",
+          text_content: value,
+          image_data: null,
+          image_width: null,
+          image_height: null,
+          char_count: value.length,
+          line_count: value.split("\n").length,
+          source_app: null,
+          sort_order: valueSortOrder,
+          kv_key: key,
+          created_at: now,
+          updated_at: now,
+        });
+        newItems.push(valueItem);
+      } catch (err) {
+        console.error("Failed to insert split env value:", err);
+      }
+    }
+
+    // Delete the original item
+    try {
+      await clipboardDb.deleteItem(id);
+    } catch (err) {
+      console.error("Failed to delete original env item:", err);
+    }
+
+    setHistory((prev) => {
+      const without = prev.filter((i) => i.id !== id);
+      // Insert newItems at the original position
+      const next = [
+        ...without.slice(0, itemIndex),
+        ...newItems,
+        ...without.slice(itemIndex),
+      ];
+      debugLog("after SPLIT env", next);
+      return next;
+    });
+  }, []);
+
   return {
     history,
     isLoaded,
@@ -275,5 +394,6 @@ export const useClipboardHistory = () => {
     clearAll,
     toggleFavorite,
     reorderItems,
+    splitEnvItem,
   };
 };

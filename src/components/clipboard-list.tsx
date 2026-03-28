@@ -15,6 +15,7 @@ type ClipboardListProps = {
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
   onReorder: (activeId: number, overId: number) => void;
+  onSplitEnv?: (id: number) => void;
   isSearching?: boolean;
 };
 
@@ -24,6 +25,7 @@ export const ClipboardList = ({
   onDelete,
   onToggleFavorite,
   onReorder,
+  onSplitEnv,
   isSearching = false,
 }: ClipboardListProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -85,6 +87,7 @@ export const ClipboardList = ({
                 onCopy={onCopy}
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}
+                onSplitEnv={onSplitEnv}
               />
             ))}
           </AnimatePresence>
@@ -121,6 +124,7 @@ export const ClipboardList = ({
                 onCopy={onCopy}
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}
+                onSplitEnv={onSplitEnv}
               />
             ))}
           </AnimatePresence>

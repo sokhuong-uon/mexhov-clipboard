@@ -1,6 +1,7 @@
-import { Copy, Trash2, Image, Star, GripVertical } from "lucide-react";
+import { Copy, Trash2, Image, GripVertical, SplitSquareHorizontal } from "lucide-react";
 import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
 import { formatTime, truncateText, formatCharCount } from "@/utils/formatting";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,14 +14,15 @@ type ClipboardItemProps = {
   item: ClipboardItemType;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
-  onToggleFavorite: (id: number) => void;
+  onToggleFavorite?: (id: number) => void;
+  onSplitEnv?: (id: number) => void;
 };
 
 export const ClipboardItem = ({
   item,
   onCopy,
   onDelete,
-  onToggleFavorite,
+  onSplitEnv,
 }: ClipboardItemProps) => {
   const isImage = item.content_type === "image";
   const timestamp = new Date(parseInt(item.created_at));
@@ -59,6 +61,22 @@ export const ClipboardItem = ({
           )}
 
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            {item.kv_key && (
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1.5 py-0 h-4 font-mono text-sky-500 border-sky-500/40"
+              >
+                {item.kv_key}
+              </Badge>
+            )}
+            {item.is_env && !item.kv_key && (
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1.5 py-0 h-4 text-amber-500 border-amber-500/40"
+              >
+                kv
+              </Badge>
+            )}
             <span>{formatTime(timestamp)}</span>
             {!isImage && item.char_count != null && (
               <>
@@ -81,30 +99,7 @@ export const ClipboardItem = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-0.5 shrink-0 pt-0.5">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => onToggleFavorite(item.id)}
-                />
-              }
-            >
-              <Star
-                className={`size-3.5 ${
-                  item.is_favorite
-                    ? "fill-amber-400 text-amber-400"
-                    : "text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                }`}
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              {item.is_favorite ? "Unfavorite" : "Favorite"}
-            </TooltipContent>
-          </Tooltip>
-
+        <div className="flex flex-col items-center gap-0.5 shrink-0 pt-0.5">
           <Tooltip>
             <TooltipTrigger
               render={
@@ -112,15 +107,37 @@ export const ClipboardItem = ({
                   variant="ghost"
                   size="icon-xs"
                   onClick={() => onCopy(item)}
+                  className="text-muted-foreground hover:text-foreground"
                 />
               }
             >
               <Copy className="size-3.5" />
             </TooltipTrigger>
-            <TooltipContent>
-              {isImage ? "Copy image to clipboard" : "Copy to clipboard"}
+
+            <TooltipContent className="pointer-events-none">
+              Copy to clipboard
             </TooltipContent>
           </Tooltip>
+
+          {item.is_env && !item.kv_key && onSplitEnv && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => onSplitEnv(item.id)}
+                    className="text-muted-foreground hover:text-foreground"
+                  />
+                }
+              >
+                <SplitSquareHorizontal className="size-3.5" />
+              </TooltipTrigger>
+              <TooltipContent className="pointer-events-none">
+                Split into key-value items
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           <Tooltip>
             <TooltipTrigger
@@ -129,12 +146,15 @@ export const ClipboardItem = ({
                   variant="ghost"
                   size="icon-xs"
                   onClick={() => onDelete(item.id)}
+                  className="text-muted-foreground hover:text-foreground"
                 />
               }
             >
               <Trash2 className="size-3.5" />
             </TooltipTrigger>
-            <TooltipContent>Delete from history</TooltipContent>
+            <TooltipContent className="pointer-events-none">
+              Delete from history
+            </TooltipContent>
           </Tooltip>
         </div>
       </CardContent>

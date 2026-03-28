@@ -10,12 +10,14 @@ export const SearchResultItem = ({
   onCopy,
   onDelete,
   onToggleFavorite,
+  onSplitEnv,
 }: {
   item: ClipboardItemType;
   isActive: boolean;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
+  onSplitEnv?: (id: number) => void;
 }) => {
   const ref = useRef<HTMLLIElement>(null);
 
@@ -44,6 +46,7 @@ export const SearchResultItem = ({
         onCopy={onCopy}
         onDelete={onDelete}
         onToggleFavorite={onToggleFavorite}
+        onSplitEnv={onSplitEnv}
       />
     </motion.li>
   );

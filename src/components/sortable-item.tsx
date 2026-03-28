@@ -10,12 +10,14 @@ export const SortableItem = ({
   onCopy,
   onDelete,
   onToggleFavorite,
+  onSplitEnv,
 }: {
   item: ClipboardItemType;
   index: number;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
+  onSplitEnv?: (id: number) => void;
 }) => {
   const { ref, isDragging } = useSortable({
     id: item.id,
@@ -41,6 +43,7 @@ export const SortableItem = ({
         onCopy={onCopy}
         onDelete={onDelete}
         onToggleFavorite={onToggleFavorite}
+        onSplitEnv={onSplitEnv}
       />
     </motion.li>
   );

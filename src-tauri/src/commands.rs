@@ -1,3 +1,5 @@
+use std::io::Cursor;
+
 use crate::clipboard::ClipboardManager;
 use crate::db::{ClipboardItemRow, Database, InsertClipboardItemParams, UpdateSortOrderParams};
 use crate::window_state::{is_visible as window_is_visible, set_visible as window_set_visible};
@@ -203,6 +205,34 @@ pub fn get_system_theme() -> String {
     }
 
     "light".to_string()
+}
+
+#[tauri::command]
+pub fn detect_env_content(text: String) -> bool {
+    let cursor = Cursor::new(text.as_bytes());
+    let iter = dotenvy::from_read_iter(cursor);
+    let mut valid_count = 0;
+    for result in iter {
+        match result {
+            Ok(_) => valid_count += 1,
+            Err(_) => return false,
+        }
+    }
+    valid_count > 0
+}
+
+#[tauri::command]
+pub fn parse_env_content(text: String) -> Vec<(String, String)> {
+    let cursor = Cursor::new(text.as_bytes());
+    let iter = dotenvy::from_read_iter(cursor);
+    let mut pairs = Vec::new();
+    for result in iter {
+        match result {
+            Ok((key, value)) => pairs.push((key, value)),
+            Err(_) => break,
+        }
+    }
+    pairs
 }
 
 // Database commands

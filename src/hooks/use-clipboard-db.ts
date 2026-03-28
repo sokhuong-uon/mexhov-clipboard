@@ -11,6 +11,7 @@ type InsertParams = {
   line_count: number | null;
   source_app: string | null;
   sort_order: string;
+  kv_key: string | null;
   created_at: string;
   updated_at: string;
 };

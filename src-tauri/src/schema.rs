@@ -17,6 +17,8 @@ pub struct ClipboardItems {
     /// Fractional index string for drag-and-drop ordering
     pub sort_order: String,
     pub copy_count: i64,
+    /// Key name when this item was split from a key-value pair
+    pub kv_key: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }

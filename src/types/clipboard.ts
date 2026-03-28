@@ -13,8 +13,10 @@ export type ClipboardItem = {
   is_favorite: boolean;
   sort_order: string;
   copy_count: number;
+  kv_key: string | null;
   created_at: string;
   updated_at: string;
+  is_env?: boolean;
 };
 
 export type ClipboardError = {
