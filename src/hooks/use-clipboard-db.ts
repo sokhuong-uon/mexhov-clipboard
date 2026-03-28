@@ -44,4 +44,6 @@ export const clipboardDb = {
 
   updateSortOrders: (items: UpdateSortOrderParams[]) =>
     invoke<void>("db_update_sort_orders", { items }),
+
+  dedupItem: (id: number) => invoke<number>("db_dedup_item", { id }),
 };

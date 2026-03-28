@@ -15,6 +15,7 @@
     "npm:@semantic-release/release-notes-generator@^12.1.0": "12.1.0_semantic-release@23.1.1__typescript@5.8.3__marked@12.0.2_typescript@5.8.3",
     "npm:@tailwindcss/vite@^4.1.18": "4.1.18_vite@7.3.0__picomatch@4.0.3",
     "npm:@tanstack/react-pacer@0.21": "0.21.0_react@19.2.3_react-dom@19.2.3__react@19.2.3",
+    "npm:@tanstack/react-query@^5.95.2": "5.95.2_react@19.2.3",
     "npm:@tauri-apps/api@2": "2.9.1",
     "npm:@tauri-apps/cli@2": "2.9.6",
     "npm:@tauri-apps/plugin-global-shortcut@~2.3.1": "2.3.1",
@@ -1350,6 +1351,9 @@
         "@tanstack/store"
       ]
     },
+    "@tanstack/query-core@5.95.2": {
+      "integrity": "sha512-o4T8vZHZET4Bib3jZ/tCW9/7080urD4c+0/AUaYVpIqOsr7y0reBc1oX3ttNaSW5mYyvZHctiQ/UOP2PfdmFEQ=="
+    },
     "@tanstack/react-pacer@0.21.0_react@19.2.3_react-dom@19.2.3__react@19.2.3": {
       "integrity": "sha512-RwscVPQTzqqoAnhnotu7xr9VlME96BivqHQPiVzXe9SntdJ7D5CKjh7ObErFsnDOA11OhlD+FhvH6dDit5NRnA==",
       "dependencies": [
@@ -1357,6 +1361,13 @@
         "@tanstack/react-store",
         "react",
         "react-dom"
+      ]
+    },
+    "@tanstack/react-query@5.95.2_react@19.2.3": {
+      "integrity": "sha512-/wGkvLj/st5Ud1Q76KF1uFxScV7WeqN1slQx5280ycwAyYkIPGaRZAEgHxe3bjirSd5Zpwkj6zNcR4cqYni/ZA==",
+      "dependencies": [
+        "@tanstack/query-core",
+        "react"
       ]
     },
     "@tanstack/react-store@0.9.3_react@19.2.3_react-dom@19.2.3__react@19.2.3": {
@@ -4319,6 +4330,7 @@
         "npm:@semantic-release/release-notes-generator@^12.1.0",
         "npm:@tailwindcss/vite@^4.1.18",
         "npm:@tanstack/react-pacer@0.21",
+        "npm:@tanstack/react-query@^5.95.2",
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
         "npm:@tauri-apps/plugin-global-shortcut@~2.3.1",

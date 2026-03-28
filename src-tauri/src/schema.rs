@@ -23,6 +23,8 @@ pub struct ClipboardItems {
     pub detected_date: Option<String>,
     /// CSS color value when text content is detected as a color
     pub detected_color: Option<String>,
+    /// SHA-256 hash of content for fast deduplication
+    pub content_hash: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }

@@ -70,7 +70,8 @@ export const useClipboard = () => {
 
   // Read clipboard content (text or image)
   const readContent = useCallback(async (): Promise<ClipboardContent> => {
-    // Try to read image first (higher priority for image content)
+    // Try image first (higher priority) — Rust-side cache avoids
+    // re-encoding when the image hasn't changed between polls.
     try {
       const imageResult = await readImage();
       if (imageResult) {
@@ -85,7 +86,6 @@ export const useClipboard = () => {
       // Image read failed, try text
     }
 
-    // Fall back to text
     const text = await read();
     if (text) {
       return { type: "text", text };

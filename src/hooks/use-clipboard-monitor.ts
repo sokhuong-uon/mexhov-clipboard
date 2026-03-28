@@ -138,9 +138,8 @@ export const useClipboardMonitor = ({
               previousContentRef.current = content;
               onCurrentContentUpdate(content);
               onClipboardChange(content);
-            } else {
-              onCurrentContentUpdate(content);
             }
+            // Skip onCurrentContentUpdate when unchanged — no state change needed
           }
         } finally {
           isReadingRef.current = false;

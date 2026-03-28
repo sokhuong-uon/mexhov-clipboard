@@ -5,6 +5,7 @@ use drizzle::sqlite::prelude::*;
 use drizzle::sqlite::rusqlite::Drizzle;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 use crate::schema::*;
 
@@ -31,6 +32,7 @@ pub struct ClipboardItemRow {
     pub kv_key: Option<String>,
     pub detected_date: Option<String>,
     pub detected_color: Option<String>,
+    pub content_hash: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -53,10 +55,31 @@ impl From<SelectClipboardItems> for ClipboardItemRow {
             kv_key: row.kv_key,
             detected_date: row.detected_date,
             detected_color: row.detected_color,
+            content_hash: row.content_hash,
             created_at: row.created_at,
             updated_at: row.updated_at,
         }
     }
+}
+
+fn compute_content_hash(content_type: &str, text_content: &Option<String>, image_data: &Option<String>) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(content_type.as_bytes());
+    hasher.update(b":");
+    match content_type {
+        "text" => {
+            if let Some(text) = text_content {
+                hasher.update(text.as_bytes());
+            }
+        }
+        "image" => {
+            if let Some(data) = image_data {
+                hasher.update(data.as_bytes());
+            }
+        }
+        _ => {}
+    }
+    format!("{:x}", hasher.finalize())
 }
 
 #[derive(Debug, Deserialize)]
@@ -104,6 +127,12 @@ impl Database {
         let schema = Schema::new();
         db.push(&schema).map_err(e2s)?;
 
+        // Create index on content_hash for fast deduplication
+        db.conn().execute(
+            "CREATE INDEX IF NOT EXISTS idx_clipboard_items_content_hash ON clipboard_items(content_hash)",
+            [],
+        ).map_err(e2s)?;
+
         let schema = Schema::new();
         let inner = DatabaseInner { db, schema };
         Ok(Self {
@@ -117,7 +146,7 @@ impl Database {
 
     pub fn get_all_items(&self, limit: i64, offset: i64) -> DbResult<Vec<ClipboardItemRow>> {
         let inner = self.lock()?;
-        let ci = &inner.schema.clipboard_items;
+        let _ci = &inner.schema.clipboard_items;
 
         let rows: Vec<SelectClipboardItems> = inner
             .db
@@ -141,6 +170,7 @@ impl Database {
                         kv_key: row.get("kv_key")?,
                         detected_date: row.get("detected_date")?,
                         detected_color: row.get("detected_color")?,
+                        content_hash: row.get("content_hash")?,
                         created_at: row.get("created_at")?,
                         updated_at: row.get("updated_at")?,
                     })
@@ -156,11 +186,13 @@ impl Database {
         let inner = self.lock()?;
         let ci = &inner.schema.clipboard_items;
 
+        let content_hash = compute_content_hash(&params.content_type, &params.text_content, &params.image_data);
+
         inner
             .db
             .conn()
             .execute(
-                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, detected_color, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13, ?14)",
+                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, detected_color, content_hash, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13, ?14, ?15)",
                 rusqlite::params![
                     params.content_type,
                     params.text_content,
@@ -174,6 +206,7 @@ impl Database {
                     params.kv_key,
                     params.detected_date,
                     params.detected_color,
+                    content_hash,
                     params.created_at,
                     params.updated_at,
                 ],
@@ -192,42 +225,35 @@ impl Database {
         Ok(ClipboardItemRow::from(row))
     }
 
-    pub fn find_duplicate_text(&self, text: &str) -> DbResult<Option<ClipboardItemRow>> {
+    /// Delete all duplicates of an item by content_hash, keeping only the given ID.
+    /// Returns the number of deleted rows.
+    pub fn delete_duplicates(&self, id: i64) -> DbResult<i64> {
         let inner = self.lock()?;
         let ci = &inner.schema.clipboard_items;
 
-        let rows: Vec<SelectClipboardItems> = inner
+        // Get the item's content_hash
+        let item: SelectClipboardItems = inner
             .db
             .select(())
             .from(*ci)
-            .r#where(and([
-                eq(ci.content_type, "text"),
-                eq(ci.text_content, text),
-            ]))
-            .limit(1)
-            .all()
+            .r#where(eq(ci.id, id))
+            .get()
             .map_err(e2s)?;
 
-        Ok(rows.into_iter().next().map(ClipboardItemRow::from))
-    }
+        let Some(hash) = item.content_hash else {
+            return Ok(0);
+        };
 
-    pub fn find_duplicate_image(&self, image_data: &str) -> DbResult<Option<ClipboardItemRow>> {
-        let inner = self.lock()?;
-        let ci = &inner.schema.clipboard_items;
-
-        let rows: Vec<SelectClipboardItems> = inner
+        let deleted = inner
             .db
-            .select(())
-            .from(*ci)
-            .r#where(and([
-                eq(ci.content_type, "image"),
-                eq(ci.image_data, image_data),
-            ]))
-            .limit(1)
-            .all()
+            .conn()
+            .execute(
+                "DELETE FROM clipboard_items WHERE content_hash = ?1 AND id != ?2",
+                rusqlite::params![hash, id],
+            )
             .map_err(e2s)?;
 
-        Ok(rows.into_iter().next().map(ClipboardItemRow::from))
+        Ok(deleted as i64)
     }
 
     pub fn bump_item(&self, id: i64, sort_order: &str) -> DbResult<ClipboardItemRow> {

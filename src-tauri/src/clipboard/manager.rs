@@ -2,15 +2,33 @@ use super::wayland;
 use super::x11::X11Clipboard;
 use crate::commands::is_cosmic_data_control_enabled;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+use std::sync::Mutex;
 
 fn is_wayland() -> bool {
     std::env::var("WAYLAND_DISPLAY").is_ok()
+}
+
+/// Cached image result to avoid re-encoding unchanged images
+struct ImageCache {
+    hash: u64,
+    base64_data: String,
+    width: u32,
+    height: u32,
+}
+
+fn hash_bytes(bytes: &[u8]) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    bytes.hash(&mut hasher);
+    hasher.finish()
 }
 
 pub struct ClipboardManager {
     x11_clipboard: Option<X11Clipboard>,
     is_wayland: bool,
     _is_cosmic_data_control_enabled: bool,
+    image_cache: Mutex<Option<ImageCache>>,
 }
 
 impl ClipboardManager {
@@ -26,6 +44,7 @@ impl ClipboardManager {
             },
             is_wayland,
             _is_cosmic_data_control_enabled: is_cosmic_data_control_enabled,
+            image_cache: Mutex::new(None),
         }
     }
 
@@ -48,44 +67,88 @@ impl ClipboardManager {
         }
     }
 
-    /// Read image from clipboard and return as base64-encoded PNG with dimensions
-    /// Returns None if no image is available
+    /// Read image from clipboard and return as base64-encoded PNG with dimensions.
+    /// Uses an internal cache to skip re-encoding when the image hasn't changed.
+    /// Returns None if no image is available.
     pub async fn read_image(&self) -> Result<Option<(String, u32, u32)>, String> {
         if self.is_wayland {
-            // Wayland returns PNG bytes directly
             match wayland::read_image().await? {
-                Some(png_bytes) => {
-                    // Decode PNG to get dimensions
-                    let decoder = png::Decoder::new(std::io::Cursor::new(&png_bytes));
-                    let reader = decoder
-                        .read_info()
-                        .map_err(|e| format!("Failed to decode PNG: {}", e))?;
-                    let info = reader.info();
-                    let width = info.width;
-                    let height = info.height;
-
-                    let base64_data = BASE64.encode(&png_bytes);
-                    Ok(Some((base64_data, width, height)))
+                Some(png_bytes) => self.process_image_bytes_png(png_bytes),
+                None => {
+                    self.clear_image_cache();
+                    Ok(None)
                 }
-                None => Ok(None),
             }
         } else {
             match &self.x11_clipboard {
                 Some(clipboard) => {
                     match clipboard.read_image().await? {
                         Some((rgba_bytes, width, height)) => {
-                            // Convert RGBA to PNG
+                            let hash = hash_bytes(&rgba_bytes);
+                            if let Some(cached) = self.get_cached_image(hash) {
+                                return Ok(Some(cached));
+                            }
+
                             let png_bytes = encode_rgba_to_png(&rgba_bytes, width, height)
                                 .map_err(|e| format!("Failed to encode image as PNG: {}", e))?;
-
                             let base64_data = BASE64.encode(&png_bytes);
+                            self.set_image_cache(hash, base64_data.clone(), width, height);
                             Ok(Some((base64_data, width, height)))
                         }
-                        None => Ok(None),
+                        None => {
+                            self.clear_image_cache();
+                            Ok(None)
+                        }
                     }
                 }
                 None => Err("X11 clipboard not initialized".to_string()),
             }
+        }
+    }
+
+    fn process_image_bytes_png(&self, png_bytes: Vec<u8>) -> Result<Option<(String, u32, u32)>, String> {
+        let hash = hash_bytes(&png_bytes);
+        if let Some(cached) = self.get_cached_image(hash) {
+            return Ok(Some(cached));
+        }
+
+        let decoder = png::Decoder::new(std::io::Cursor::new(&png_bytes));
+        let reader = decoder
+            .read_info()
+            .map_err(|e| format!("Failed to decode PNG: {}", e))?;
+        let info = reader.info();
+        let width = info.width;
+        let height = info.height;
+
+        let base64_data = BASE64.encode(&png_bytes);
+        self.set_image_cache(hash, base64_data.clone(), width, height);
+        Ok(Some((base64_data, width, height)))
+    }
+
+    fn get_cached_image(&self, hash: u64) -> Option<(String, u32, u32)> {
+        let cache = self.image_cache.lock().ok()?;
+        let cached = cache.as_ref()?;
+        if cached.hash == hash {
+            Some((cached.base64_data.clone(), cached.width, cached.height))
+        } else {
+            None
+        }
+    }
+
+    fn set_image_cache(&self, hash: u64, base64_data: String, width: u32, height: u32) {
+        if let Ok(mut cache) = self.image_cache.lock() {
+            *cache = Some(ImageCache {
+                hash,
+                base64_data,
+                width,
+                height,
+            });
+        }
+    }
+
+    fn clear_image_cache(&self) {
+        if let Ok(mut cache) = self.image_cache.lock() {
+            *cache = None;
         }
     }
 

@@ -10,7 +10,7 @@ mod window_state;
 
 use clipboard::ClipboardManager;
 use commands::{
-    db_bump_item, db_clear_all, db_delete_item, db_get_all_items, db_get_item_count,
+    db_bump_item, db_clear_all, db_dedup_item, db_delete_item, db_get_all_items, db_get_item_count,
     db_insert_item, db_toggle_favorite, db_update_sort_orders,
 };
 use commands::{
@@ -71,6 +71,7 @@ fn main() {
             db_toggle_favorite,
             db_update_sort_orders,
             db_get_item_count,
+            db_dedup_item,
             detect_env_content,
             parse_env_content,
             detect_date_content,

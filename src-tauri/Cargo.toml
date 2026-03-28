@@ -31,6 +31,7 @@ scraper = "0.22"
 url = "2"
 chrono = "0.4"
 csscolorparser = "0.8"
+sha2 = "0.10"
 tauri-plugin-opener = "2"
 drizzle = { git = "https://github.com/themixednuts/drizzle-rs", features = ["rusqlite"] }
 rusqlite = { version = "0.37", features = ["bundled"] }

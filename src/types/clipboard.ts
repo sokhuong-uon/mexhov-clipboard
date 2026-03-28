@@ -16,6 +16,7 @@ export type ClipboardItem = {
   kv_key: string | null;
   detected_date: string | null;
   detected_color: string | null;
+  content_hash: string | null;
   created_at: string;
   updated_at: string;
   is_env?: boolean;
