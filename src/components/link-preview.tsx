@@ -167,7 +167,10 @@ export function LinkPreview({ url }: { url: string }) {
                 <Button
                   variant="ghost"
                   size="icon-xs"
-                  onClick={() => setShowQr(true)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setShowQr(true);
+                  }}
                   className="text-muted-foreground hover:text-foreground ml-auto size-4"
                 />
               }
