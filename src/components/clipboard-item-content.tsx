@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Image, ChevronDown } from "lucide-react";
+import { Image, ChevronDown, Film } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import { LinkPreview, isUrl } from "@/components/link-preview";
 import { ClipboardItemColor } from "@/components/clipboard-item-color";
@@ -8,6 +8,18 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/collapsible";
+
+const IMAGE_EXT = /\.(gif|webp|png|jpg|jpeg|svg)(\?.*)?$/i;
+const VIDEO_EXT = /\.(mp4|webm|mov)(\?.*)?$/i;
+
+function getMediaType(url: string): "image" | "video" | null {
+  try {
+    const path = new URL(url).pathname;
+    if (IMAGE_EXT.test(path)) return "image";
+    if (VIDEO_EXT.test(path)) return "video";
+  } catch {}
+  return null;
+}
 
 const CollapsibleText = ({ text }: { text: string }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -71,6 +83,43 @@ export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
   }
 
   if (isUrl(item.text_content || "")) {
+    const mediaType = getMediaType(item.text_content!);
+
+    if (mediaType === "image") {
+      return (
+        <div className="flex flex-col gap-1.5">
+          <p className="wrap-break-word text-card-foreground text-sm leading-relaxed truncate">
+            {item.text_content}
+          </p>
+          <img
+            src={item.text_content!}
+            alt="Media preview"
+            loading="lazy"
+            className="max-w-full max-h-40 rounded-md object-contain bg-muted"
+          />
+        </div>
+      );
+    }
+
+    if (mediaType === "video") {
+      return (
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Film className="size-4" />
+            <p className="text-sm truncate flex-1">{item.text_content}</p>
+          </div>
+          <video
+            src={item.text_content!}
+            muted
+            loop
+            autoPlay
+            playsInline
+            className="max-w-full max-h-40 rounded-md object-contain bg-muted"
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col gap-1.5">
         <p className="wrap-break-word text-card-foreground text-sm leading-relaxed truncate">
