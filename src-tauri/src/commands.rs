@@ -1,6 +1,7 @@
 use std::io::Cursor;
 
 use crate::clipboard::ClipboardManager;
+use crate::clipboard_monitor::MonitorState;
 use crate::db::{ClipboardItemRow, Database, InsertClipboardItemParams, UpdateSortOrderParams};
 use crate::window_state::{is_visible as window_is_visible, set_visible as window_set_visible};
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
@@ -73,6 +74,13 @@ pub async fn write_clipboard_image(
 #[tauri::command]
 pub async fn reinitialize_clipboard(manager: State<'_, ClipboardManager>) -> Result<(), String> {
     manager.reinitialize()
+}
+
+#[tauri::command]
+pub fn set_monitoring(enabled: bool, state: State<'_, MonitorState>) {
+    state
+        .is_monitoring
+        .store(enabled, std::sync::atomic::Ordering::Relaxed);
 }
 
 #[tauri::command]

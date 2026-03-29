@@ -47,7 +47,6 @@ function App() {
   const { systemInfo, previousContentRef } = useClipboardMonitor({
     onClipboardChange: addContentToHistory,
     onCurrentContentUpdate: setCurrentContent,
-    readContent,
     isMonitoring,
   });
 
