@@ -6,7 +6,9 @@ import { ErrorBanner } from "@/components/clipboard-error-banner";
 import { ClipboardList } from "@/components/clipboard-list";
 import { ClipboardItemSkeletonList } from "@/components/clipboard-item-skeleton";
 import { ClipboardHeader } from "@/components/clipboard-window-header";
+import { GifView } from "@/components/gif-view";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 import { useClipboard } from "@/hooks/use-clipboard";
 import { useSettings } from "@/hooks/use-settings";
@@ -14,6 +16,7 @@ import { useSystemTheme } from "@/hooks/use-system-theme";
 import { useClipboardHistory } from "@/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
 import { ClipboardItem } from "@/types/clipboard";
+import type { KlipyItem } from "@/hooks/use-klipy";
 
 function App() {
   useSystemTheme();
@@ -88,51 +91,92 @@ function App() {
 
   const isSearching = searchQuery.trim().length > 0;
 
+  const handleGifSelect = useCallback(
+    async (item: KlipyItem) => {
+      const variant = item.file.hd ?? item.file.md ?? item.file.sm;
+      const url = variant?.gif?.url ?? variant?.webp?.url;
+      if (url) {
+        await write(url);
+      }
+    },
+    [write],
+  );
+
   return (
     <TooltipProvider>
-      <div className="flex flex-col h-full bg-background text-foreground">
-        <ClipboardHeader
-          isMonitoring={isMonitoring}
-          onToggleMonitoring={() => setIsMonitoring(!isMonitoring)}
-          hasHistory={history.length > 0}
-          onClearAll={clearAll}
-          systemInfo={systemInfo}
-          searchQuery={searchInput}
-          onSearchChange={(q) => {
-            setSearchInput(q);
-            setSearchQuery(q);
-          }}
-          historyLimit={historyLimit}
-          onHistoryLimitChange={setHistoryLimit}
-        />
+      <Tabs
+        defaultValue="clipboard"
+        className="h-full overflow-hidden bg-background text-foreground"
+      >
+        <div
+          data-tauri-drag-region
+          className="flex items-center gap-2 px-4 pt-3 pb-1 select-none"
+        >
+          <div data-tauri-drag-region className="select-none text-muted">
+            Mexhov
+          </div>
+          <TabsList className="ml-auto">
+            <TabsTrigger value="clipboard">Clipboard</TabsTrigger>
+            <TabsTrigger value="gif">GIFs</TabsTrigger>
+          </TabsList>
+        </div>
 
-        {error && (
-          <ErrorBanner
-            error={error}
-            onRetry={handleRetry}
-            onDismiss={dismissError}
+        <TabsContent
+          value="clipboard"
+          keepMounted
+          className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
+        >
+          <ClipboardHeader
+            isMonitoring={isMonitoring}
+            onToggleMonitoring={() => setIsMonitoring(!isMonitoring)}
+            hasHistory={history.length > 0}
+            onClearAll={clearAll}
+            systemInfo={systemInfo}
+            searchQuery={searchInput}
+            onSearchChange={(q) => {
+              setSearchInput(q);
+              setSearchQuery(q);
+            }}
+            historyLimit={historyLimit}
+            onHistoryLimitChange={setHistoryLimit}
           />
-        )}
 
-        <div className="flex-1 overflow-y-auto">
-          {!isLoaded ? (
-            <ClipboardItemSkeletonList />
-          ) : (
-            <ClipboardList
-              items={filteredItems}
-              currentContent={currentContent}
-              onCopy={handleCopy}
-              onDelete={deleteItem}
-              onToggleFavorite={toggleFavorite}
-              onReorder={reorderItems}
-              onSplitEnv={splitEnvItem}
-              isSearching={isSearching}
-              hasMore={hasMore && !isSearching}
-              onLoadMore={loadMore}
+          {error && (
+            <ErrorBanner
+              error={error}
+              onRetry={handleRetry}
+              onDismiss={dismissError}
             />
           )}
-        </div>
-      </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {!isLoaded ? (
+              <ClipboardItemSkeletonList />
+            ) : (
+              <ClipboardList
+                items={filteredItems}
+                currentContent={currentContent}
+                onCopy={handleCopy}
+                onDelete={deleteItem}
+                onToggleFavorite={toggleFavorite}
+                onReorder={reorderItems}
+                onSplitEnv={splitEnvItem}
+                isSearching={isSearching}
+                hasMore={hasMore && !isSearching}
+                onLoadMore={loadMore}
+              />
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent
+          value="gif"
+          keepMounted
+          className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
+        >
+          <GifView onSelect={handleGifSelect} />
+        </TabsContent>
+      </Tabs>
     </TooltipProvider>
   );
 }

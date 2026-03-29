@@ -68,7 +68,8 @@ export const ClipboardList = ({
   }, [isSearching]);
 
   // Derive activeIndex from activeId
-  const activeIndex = activeId != null ? items.findIndex((i) => i.id === activeId) : -1;
+  const activeIndex =
+    activeId != null ? items.findIndex((i) => i.id === activeId) : -1;
 
   const setActiveIndex = (index: number) => {
     setActiveId(index >= 0 && index < items.length ? items[index].id : null);
@@ -95,7 +96,8 @@ export const ClipboardList = ({
   const deleteActive = () => {
     if (activeIndex >= 0 && items[activeIndex]) {
       // Move focus to next item (or previous if last)
-      const nextIndex = activeIndex < items.length - 1 ? activeIndex + 1 : activeIndex - 1;
+      const nextIndex =
+        activeIndex < items.length - 1 ? activeIndex + 1 : activeIndex - 1;
       const nextId = nextIndex >= 0 ? items[nextIndex].id : null;
       onDelete(items[activeIndex].id);
       setActiveId(nextId);
@@ -117,11 +119,10 @@ export const ClipboardList = ({
   useHotkey("ArrowDown", moveDown);
   useHotkey("ArrowUp", moveUp);
 
-  // Vim: gg to go to top, G to go to bottom
-  useHotkeySequence(["G", "G"], () => {
+  useHotkeySequence(["T"], () => {
     if (items.length > 0) setActiveIndex(0);
   });
-  useHotkey("Shift+G", () => {
+  useHotkey("B", () => {
     if (items.length > 0) setActiveIndex(items.length - 1);
   });
 

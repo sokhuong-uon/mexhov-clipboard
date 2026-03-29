@@ -1,0 +1,238 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Search } from "lucide-react";
+import { useDebouncedState } from "@tanstack/react-pacer";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { GifGridItem } from "@/components/gif-grid-item";
+import {
+  useKlipyTrending,
+  useKlipySearch,
+  useKlipyCategories,
+  type KlipyItem,
+} from "@/hooks/use-klipy";
+
+const COLUMNS = 3;
+const GAP = 8;
+const OVERSCAN = 400; // px above/below viewport to render
+
+type PositionedCell = {
+  item: KlipyItem;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+function computeLayout(
+  items: KlipyItem[],
+  containerWidth: number,
+): { cells: PositionedCell[]; totalHeight: number } {
+  const colWidth = (containerWidth - GAP * (COLUMNS - 1)) / COLUMNS;
+  const colHeights = new Array(COLUMNS).fill(0);
+  const cells: PositionedCell[] = [];
+
+  for (const item of items) {
+    const variant = item.file.sm ?? item.file.xs ?? item.file.md;
+    const format = variant?.webp ?? variant?.gif;
+    const naturalW = format?.width ?? 200;
+    const naturalH = format?.height ?? 200;
+    const cellHeight = Math.round((naturalH / naturalW) * colWidth);
+
+    const col = colHeights.indexOf(Math.min(...colHeights));
+    const x = col * (colWidth + GAP);
+    const y = colHeights[col];
+
+    cells.push({ item, x, y, width: colWidth, height: cellHeight });
+    colHeights[col] = y + cellHeight + GAP;
+  }
+
+  return { cells, totalHeight: Math.max(...colHeights, 0) };
+}
+
+type GifViewProps = {
+  onSelect: (item: KlipyItem) => void;
+};
+
+export const GifView = ({ onSelect }: GifViewProps) => {
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 300 });
+  const [selectedCategory, setSelectedCategory] = useState<
+    string | undefined
+  >();
+
+  const isSearching = searchQuery.trim().length > 0;
+
+  const { data: categoriesData } = useKlipyCategories();
+  const categories = categoriesData?.data ?? [];
+
+  const trending = useKlipyTrending(selectedCategory);
+  const search = useKlipySearch(searchQuery, selectedCategory);
+
+  const activeQuery = isSearching ? search : trending;
+
+  const items = useMemo(
+    () => activeQuery.data?.pages.flatMap((p) => p.data.data ?? []) ?? [],
+    [activeQuery.data],
+  );
+
+  const isLoading = activeQuery.isLoading;
+  const isError = activeQuery.isError;
+  const hasMore = activeQuery.hasNextPage;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(300);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(600);
+
+  // Track container size
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const rect = entries[0]?.contentRect;
+      if (rect) {
+        setContainerWidth(rect.width - 32); // px-4 padding
+        setViewportHeight(rect.height);
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Track scroll position
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setScrollTop(el.scrollTop);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const { cells, totalHeight } = useMemo(
+    () => computeLayout(items, containerWidth),
+    [items, containerWidth],
+  );
+
+  // Only render cells within viewport ± overscan
+  const visibleCells = useMemo(() => {
+    const top = scrollTop - OVERSCAN;
+    const bottom = scrollTop + viewportHeight + OVERSCAN;
+    return cells.filter(
+      (cell) => cell.y + cell.height >= top && cell.y <= bottom,
+    );
+  }, [cells, scrollTop, viewportHeight]);
+
+  // Infinite scroll: fetch when near bottom
+  const fetchNext = useCallback(() => {
+    if (hasMore && !activeQuery.isFetchingNextPage) {
+      activeQuery.fetchNextPage();
+    }
+  }, [hasMore, activeQuery]);
+
+  useEffect(() => {
+    if (totalHeight === 0) return;
+    if (scrollTop + viewportHeight >= totalHeight - 300) {
+      fetchNext();
+    }
+  }, [scrollTop, viewportHeight, totalHeight, fetchNext]);
+
+  return (
+    <div className="flex flex-1 flex-col min-h-0">
+      {/* Search */}
+      <div className="flex items-center gap-2 p-4 pb-2">
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+          <Input
+            type="search"
+            placeholder="Search KLIPY"
+            aria-label="Search GIFs"
+            value={searchInput}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              setSearchQuery(e.target.value);
+            }}
+            className="pl-8 h-8"
+          />
+        </div>
+      </div>
+
+      {/* Categories */}
+      {categories.length > 0 && (
+        <div className="flex gap-1.5 px-4 pb-2 overflow-x-auto no-scrollbar">
+          <Button
+            variant={selectedCategory === undefined ? "default" : "outline"}
+            size="sm"
+            className="shrink-0 h-7 text-xs rounded-full"
+            onClick={() => setSelectedCategory(undefined)}
+          >
+            Trending
+          </Button>
+          {categories.map((cat) => (
+            <Button
+              key={cat.id}
+              variant={selectedCategory === cat.slug ? "default" : "outline"}
+              size="sm"
+              className="shrink-0 h-7 text-xs rounded-full"
+              onClick={() =>
+                setSelectedCategory(
+                  selectedCategory === cat.slug ? undefined : cat.slug,
+                )
+              }
+            >
+              {cat.name}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {/* Masonry Grid */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0">
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-2 p-4 pt-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-square rounded-lg" />
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+            Failed to load GIFs. Check your API key.
+          </div>
+        ) : items.length === 0 ? (
+          <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+            {isSearching ? "No GIFs found" : "No trending GIFs"}
+          </div>
+        ) : (
+          <div
+            className="relative mx-4 mt-2 mb-4"
+            style={{ height: totalHeight }}
+          >
+            {visibleCells.map((cell) => (
+              <div
+                key={cell.item.slug}
+                className="absolute"
+                style={{
+                  top: cell.y,
+                  left: cell.x,
+                  width: cell.width,
+                  height: cell.height,
+                }}
+              >
+                <GifGridItem item={cell.item} onSelect={onSelect} />
+              </div>
+            ))}
+            {activeQuery.isFetchingNextPage && (
+              <div
+                className="absolute left-0 right-0 flex justify-center py-2 text-sm text-muted-foreground"
+                style={{ top: totalHeight }}
+              >
+                Loading...
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

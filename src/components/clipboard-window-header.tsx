@@ -72,14 +72,7 @@ export const ClipboardHeader = ({
   );
 
   return (
-    <header
-      data-tauri-drag-region
-      className="flex items-center gap-2 p-4 select-none group/header"
-    >
-      <div data-tauri-drag-region className="select-none text-muted">
-        Mexhov
-      </div>
-
+    <header className="flex items-center gap-2 px-4 pb-2 pt-1 group/header">
       <div className="relative flex-1 min-w-0">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
         <Input
