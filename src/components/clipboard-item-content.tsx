@@ -92,9 +92,6 @@ const DraggableMedia = ({ url }: { url: string }) => {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="wrap-break-word text-card-foreground text-sm leading-relaxed truncate">
-        {url}
-      </p>
       <img
         src={url}
         alt="Media preview"
@@ -112,12 +109,6 @@ export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
   if (item.content_type === "image") {
     return (
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Image className="size-4" />
-          <span className="text-sm">
-            Image ({item.image_width}x{item.image_height})
-          </span>
-        </div>
         {item.image_data && (
           <img
             src={`data:image/png;base64,${item.image_data}`}
