@@ -63,6 +63,15 @@ export const ClipboardHeader = ({
     { ignoreInputs: false },
   );
 
+  useHotkey(
+    "I",
+    () => {
+      searchRef.current?.focus();
+      searchRef.current?.select();
+    },
+    { ignoreInputs: false },
+  );
+
   return (
     <header
       data-tauri-drag-region
