@@ -1,3 +1,22 @@
+# [1.2.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.1.0...v1.2.0) (2026-03-29)
+
+
+### Bug Fixes
+
+* remove unused import and deprecated api ([5e0b949](https://github.com/sokhuong-uon/mexhov-clipboard/commit/5e0b9499fa83e40ccaba513b5adf579aff3ca19b))
+* stop propogation when click QR in link preview ([f17e771](https://github.com/sokhuong-uon/mexhov-clipboard/commit/f17e771485750a7eac947066402c9a042f348109))
+
+
+### Features
+
+* also able to drag gif from gif list to other apps ([8ac63c2](https://github.com/sokhuong-uon/mexhov-clipboard/commit/8ac63c2de2b9b7046270790e8b0a0640bd43e146))
+* can drag gif onto other apps ([04abd5e](https://github.com/sokhuong-uon/mexhov-clipboard/commit/04abd5ece5e829d4e2b5f29c7046bf97e35cfec0))
+
+
+### Performance Improvements
+
+* use events instead of polling ([1181c2f](https://github.com/sokhuong-uon/mexhov-clipboard/commit/1181c2f0dbfdd909c506d35892c7345f81510621))
+
 # [1.1.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.0.0...v1.1.0) (2026-03-29)
 
 
