@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useHotkey,
   useHotkeys,
@@ -56,26 +56,49 @@ export const ClipboardList = ({
   hasMore = false,
   onLoadMore,
 }: ClipboardListProps) => {
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const [activeId, setActiveId] = useState<number | null>(null);
 
-  // Reset active index when items change
+  // Reset active item when searching changes results
+  const isSearchingRef = useRef(isSearching);
   useEffect(() => {
-    setActiveIndex(-1);
-  }, [items]);
+    if (isSearching !== isSearchingRef.current) {
+      setActiveId(null);
+      isSearchingRef.current = isSearching;
+    }
+  }, [isSearching]);
+
+  // Derive activeIndex from activeId
+  const activeIndex = activeId != null ? items.findIndex((i) => i.id === activeId) : -1;
+
+  const setActiveIndex = (index: number) => {
+    setActiveId(index >= 0 && index < items.length ? items[index].id : null);
+  };
 
   const moveDown = () => {
     if (items.length === 0) return;
-    setActiveIndex((prev) => Math.min(prev + 1, items.length - 1));
+    const next = Math.min(activeIndex + 1, items.length - 1);
+    setActiveIndex(next);
   };
 
   const moveUp = () => {
     if (items.length === 0) return;
-    setActiveIndex((prev) => Math.max(prev - 1, 0));
+    const next = Math.max(activeIndex - 1, 0);
+    setActiveIndex(next);
   };
 
   const copyActive = () => {
     if (activeIndex >= 0 && items[activeIndex]) {
       onCopy(items[activeIndex]);
+    }
+  };
+
+  const deleteActive = () => {
+    if (activeIndex >= 0 && items[activeIndex]) {
+      // Move focus to next item (or previous if last)
+      const nextIndex = activeIndex < items.length - 1 ? activeIndex + 1 : activeIndex - 1;
+      const nextId = nextIndex >= 0 ? items[nextIndex].id : null;
+      onDelete(items[activeIndex].id);
+      setActiveId(nextId);
     }
   };
 
@@ -86,6 +109,9 @@ export const ClipboardList = ({
     enabled: activeIndex >= 0,
     ignoreInputs: false,
   });
+
+  // d to delete active item
+  useHotkey("D", deleteActive, { enabled: activeIndex >= 0 });
 
   // Arrow keys for when list is focused (after tabbing from search)
   useHotkey("ArrowDown", moveDown);

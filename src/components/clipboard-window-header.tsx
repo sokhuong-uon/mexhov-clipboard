@@ -3,7 +3,6 @@ import {
   CirclePause,
   CirclePlay,
   EllipsisVertical,
-  GripHorizontal,
   Search,
   Trash2,
 } from "lucide-react";
