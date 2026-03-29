@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.0.0...v1.1.0) (2026-03-29)
+
+
+### Features
+
+* render media url inline ([6f25417](https://github.com/sokhuong-uon/mexhov-clipboard/commit/6f254172edd1a774d97fa716050d742426382677))
+
 # 1.0.0 (2026-03-29)
 
 
