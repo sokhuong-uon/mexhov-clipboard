@@ -1,4 +1,4 @@
-# Mexdeclip
+# Mexhov Clipboard
 
 A clipboard manager built with Tauri, React, and TypeScript.
 

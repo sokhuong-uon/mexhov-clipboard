@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Image, ChevronDown, Film } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import { LinkPreview, isUrl } from "@/components/link-preview";
@@ -8,6 +8,8 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/collapsible";
+import { startDrag } from "@crabnebula/tauri-plugin-drag";
+import { invoke } from "@tauri-apps/api/core";
 
 const IMAGE_EXT = /\.(gif|webp|png|jpg|jpeg|svg)(\?.*)?$/i;
 const VIDEO_EXT = /\.(mp4|webm|mov)(\?.*)?$/i;
@@ -56,6 +58,56 @@ const CollapsibleText = ({ text }: { text: string }) => {
   );
 };
 
+const DraggableMedia = ({ url }: { url: string }) => {
+  const cached = useRef<{ filePath: string; iconPath: string } | null>(null);
+
+  const preload = useCallback(async () => {
+    if (cached.current) return;
+    try {
+      const [filePath, iconPath] = await invoke<[string, string]>(
+        "download_media_to_temp",
+        { url },
+      );
+      cached.current = { filePath, iconPath };
+    } catch (err) {}
+  }, [url]);
+
+  const handleDrag = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      try {
+        if (!cached.current) {
+          const [filePath, iconPath] = await invoke<[string, string]>(
+            "download_media_to_temp",
+            { url },
+          );
+          cached.current = { filePath, iconPath };
+        }
+        const { filePath, iconPath } = cached.current;
+        await startDrag({ item: [filePath], icon: iconPath });
+      } catch (err) {}
+    },
+    [url],
+  );
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p className="wrap-break-word text-card-foreground text-sm leading-relaxed truncate">
+        {url}
+      </p>
+      <img
+        src={url}
+        alt="Media preview"
+        loading="lazy"
+        draggable={false}
+        onMouseEnter={preload}
+        onMouseDown={handleDrag}
+        className="max-w-full max-h-40 rounded-md object-contain bg-muted cursor-grab"
+      />
+    </div>
+  );
+};
+
 export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
   if (item.content_type === "image") {
     return (
@@ -86,19 +138,7 @@ export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
     const mediaType = getMediaType(item.text_content!);
 
     if (mediaType === "image") {
-      return (
-        <div className="flex flex-col gap-1.5">
-          <p className="wrap-break-word text-card-foreground text-sm leading-relaxed truncate">
-            {item.text_content}
-          </p>
-          <img
-            src={item.text_content!}
-            alt="Media preview"
-            loading="lazy"
-            className="max-w-full max-h-40 rounded-md object-contain bg-muted"
-          />
-        </div>
-      );
+      return <DraggableMedia url={item.text_content!} />;
     }
 
     if (mediaType === "video") {
