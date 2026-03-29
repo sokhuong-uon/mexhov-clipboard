@@ -298,7 +298,7 @@ pub fn detect_color_content(text: String) -> Result<Option<String>, String> {
         return Ok(None);
     }
     match csscolorparser::parse(text) {
-        Ok(color) => Ok(Some(color.to_hex_string())),
+        Ok(color) => Ok(Some(color.to_css_hex())),
         Err(_) => Ok(None),
     }
 }
@@ -444,10 +444,10 @@ pub async fn download_media_to_temp(url: String) -> Result<(String, String), Str
             let file = std::fs::File::open(&file_path).map_err(|e| e.to_string())?;
             let reader = std::io::BufReader::new(file);
             // Decode only the first frame of the GIF to avoid loading all frames
-            let decoder = image::codecs::gif::GifDecoder::new(reader)
-                .map_err(|e| e.to_string())?;
+            let decoder = image::codecs::gif::GifDecoder::new(reader).map_err(|e| e.to_string())?;
             use image::AnimationDecoder;
-            let first_frame = decoder.into_frames()
+            let first_frame = decoder
+                .into_frames()
                 .next()
                 .ok_or("No frames in GIF")?
                 .map_err(|e| e.to_string())?;

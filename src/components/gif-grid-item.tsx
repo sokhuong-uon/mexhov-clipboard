@@ -13,7 +13,7 @@ function getDragUrl(item: KlipyItem): string | undefined {
   return variant?.gif?.url ?? variant?.webp?.url;
 }
 
-export const GifGridItem = ({ item, onSelect }: GifGridItemProps) => {
+export const GifGridItem = ({ item }: GifGridItemProps) => {
   const variant = item.file.sm ?? item.file.xs ?? item.file.md;
   const src = variant?.webp?.url ?? variant?.gif?.url ?? "";
   const [loaded, setLoaded] = useState(false);

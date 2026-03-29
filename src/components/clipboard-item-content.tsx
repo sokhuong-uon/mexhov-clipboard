@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Image, ChevronDown, Film } from "lucide-react";
+import { ChevronDown, Film } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import { LinkPreview, isUrl } from "@/components/link-preview";
 import { ClipboardItemColor } from "@/components/clipboard-item-color";
