@@ -1,3 +1,44 @@
+# 1.0.0 (2026-03-29)
+
+
+### Bug Fixes
+
+* hide load more button if item is less than page limit ([fb88db4](https://github.com/sokhuong-uon/mexhov-clipboard/commit/fb88db4a513c3fdc829fd1587c37ef468f629f66))
+* make it work even without focus ([b1657a5](https://github.com/sokhuong-uon/mexhov-clipboard/commit/b1657a54fe5f9708f332fa07b067a19771317986))
+* mark 'Nothing is copied' as non-error ([d0254b0](https://github.com/sokhuong-uon/mexhov-clipboard/commit/d0254b039394e639c78a074e6d793be9696f45e5))
+* show no match message if no match on search ([adcae8e](https://github.com/sokhuong-uon/mexhov-clipboard/commit/adcae8e20ca8aa890f72f90ce27480da070432f6))
+
+
+### Features
+
+* add Ctrl+K for search ([d91c0f8](https://github.com/sokhuong-uon/mexhov-clipboard/commit/d91c0f8e759ade8fac18bf9cb7bf361d23a68abd))
+* add drag region ([d17ae1a](https://github.com/sokhuong-uon/mexhov-clipboard/commit/d17ae1ab341cd08aaf095398d0981429a7a8ba0a))
+* add hotkeys for navigating through list ([2ba8ee2](https://github.com/sokhuong-uon/mexhov-clipboard/commit/2ba8ee25545118f41e5bce90311561b96bc901fc))
+* add load more button ([d7b65c7](https://github.com/sokhuong-uon/mexhov-clipboard/commit/d7b65c71151f8438fea29e5c7215e3a7258d15b6))
+* add search ([1baaac8](https://github.com/sokhuong-uon/mexhov-clipboard/commit/1baaac8c3d9438769cf287b00867f30d978c3980))
+* can read image ([c751c30](https://github.com/sokhuong-uon/mexhov-clipboard/commit/c751c30990dc4d972bfd982dae599d0866792248))
+* click link ([0933736](https://github.com/sokhuong-uon/mexhov-clipboard/commit/093373601414816f650904bc5f5eb18a69ce6850))
+* dedup with content hashing ([a7eac7e](https://github.com/sokhuong-uon/mexhov-clipboard/commit/a7eac7e9878f9d2bfc07dd99cf1fc5c9effbb375))
+* delete item with d hotkey ([b4c16d7](https://github.com/sokhuong-uon/mexhov-clipboard/commit/b4c16d750bad0b241fd874d6dd5d056bf9f963b8))
+* display color ([a62dd66](https://github.com/sokhuong-uon/mexhov-clipboard/commit/a62dd66d516f3f6b56a1cfbeca44ff09a9d7e1c2))
+* display content in pre ([5524738](https://github.com/sokhuong-uon/mexhov-clipboard/commit/5524738bc999ad36138b802a982e0e89748e2059))
+* display gif. CLIENT BUNDLE WILL EXPOSE API KEY ([250adb5](https://github.com/sokhuong-uon/mexhov-clipboard/commit/250adb56ef9f5904c173b9b4950d89ab874cff6f))
+* double click to copy ([fbe3983](https://github.com/sokhuong-uon/mexhov-clipboard/commit/fbe39839cb1882f61f470fc077685cbe1bc3911e))
+* generate QR code for link ([81b802f](https://github.com/sokhuong-uon/mexhov-clipboard/commit/81b802ff5af6c4aa4dd9bd25d36b5824f05ae9cb))
+* improve UI ([7d63d9d](https://github.com/sokhuong-uon/mexhov-clipboard/commit/7d63d9d304133a2c612d73fe655fd1a09d0b3d56))
+* persist data and ordering ([a4cf3fc](https://github.com/sokhuong-uon/mexhov-clipboard/commit/a4cf3fc9a72e5c38b1979a8a15473674770f417e))
+* preview link ([ffbf1bd](https://github.com/sokhuong-uon/mexhov-clipboard/commit/ffbf1bdd586996979873c85c485ac9884614bb53))
+* receive system shortcut to toggle window ([f9b889d](https://github.com/sokhuong-uon/mexhov-clipboard/commit/f9b889de3a8f716bed4122bdab1bd5b2c9e94c83))
+* show relative distance for date ([85082e7](https://github.com/sokhuong-uon/mexhov-clipboard/commit/85082e79db823676b3ee58faccd3cc19e56080f4))
+* split key value for key-value content ([3763fa5](https://github.com/sokhuong-uon/mexhov-clipboard/commit/3763fa549fd0a6c7425158c364f6f72ba0d69382))
+* use I hotkey to search as well ([5d9bcb1](https://github.com/sokhuong-uon/mexhov-clipboard/commit/5d9bcb153a62a8fc07bba54d8b1dd3ac862ecb01))
+
+
+### Performance Improvements
+
+* show skeleton before items loaded ([3bb8069](https://github.com/sokhuong-uon/mexhov-clipboard/commit/3bb806927599524c38046753e25ef168dd297987))
+* use debouncer to improve search input ([b27d644](https://github.com/sokhuong-uon/mexhov-clipboard/commit/b27d6447cef62ab0ac5da7f168de2ebed690ddae))
+
 # [1.3.0](https://github.com/mexdehor/mexdeclip/compare/v1.2.0...v1.3.0) (2026-03-28)
 
 
