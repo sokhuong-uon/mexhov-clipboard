@@ -3,6 +3,7 @@ import {
   CirclePause,
   CirclePlay,
   EllipsisVertical,
+  GripHorizontal,
   Search,
   Trash2,
 } from "lucide-react";
@@ -53,13 +54,24 @@ export const ClipboardHeader = ({
 }: ClipboardHeaderProps) => {
   const searchRef = useRef<HTMLInputElement>(null);
 
-  useHotkey("Mod+K", () => {
-    searchRef.current?.focus();
-    searchRef.current?.select();
-  }, { ignoreInputs: false });
+  useHotkey(
+    "Mod+K",
+    () => {
+      searchRef.current?.focus();
+      searchRef.current?.select();
+    },
+    { ignoreInputs: false },
+  );
 
   return (
-    <header className="flex items-center gap-2 p-4">
+    <header
+      data-tauri-drag-region
+      className="flex items-center gap-2 p-4 select-none group/header"
+    >
+      <div data-tauri-drag-region className="select-none text-muted">
+        Mexhov
+      </div>
+
       <div className="relative flex-1 min-w-0">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
         <Input

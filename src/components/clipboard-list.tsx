@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { useHotkey, useHotkeys, useHotkeySequence } from "@tanstack/react-hotkeys";
+import {
+  useHotkey,
+  useHotkeys,
+  useHotkeySequence,
+} from "@tanstack/react-hotkeys";
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable } from "@dnd-kit/react/sortable";
 import { AnimatePresence } from "motion/react";

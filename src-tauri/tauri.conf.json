@@ -17,7 +17,8 @@
         "maxWidth": 1000,
         "height": 600,
         "visible": false,
-        "skipTaskbar": true
+        "skipTaskbar": true,
+        "decorations": false
       }
     ],
     "security": {
