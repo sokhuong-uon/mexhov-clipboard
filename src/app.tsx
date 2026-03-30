@@ -17,6 +17,7 @@ import { useClipboardHistory } from "@/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
 import { ClipboardItem } from "@/types/clipboard";
 import type { KlipyItem } from "@/hooks/use-klipy";
+import { Clipboard } from "lucide-react";
 
 function App() {
   useSystemTheme();
@@ -116,8 +117,15 @@ function App() {
             Mexhov
           </div>
           <TabsList className="ml-auto">
-            <TabsTrigger value="clipboard">Clipboard</TabsTrigger>
-            <TabsTrigger value="gif">GIFs</TabsTrigger>
+            <TabsTrigger value="clipboard" className="rounded-2xl">
+              <Clipboard className="text-neutral-500 dark:text-neutral-400" />
+            </TabsTrigger>
+            <TabsTrigger
+              className="text-neutral-500 dark:text-neutral-400 rounded-2xl"
+              value="gif"
+            >
+              GIF
+            </TabsTrigger>
           </TabsList>
         </div>
 
