@@ -530,9 +530,10 @@ pub fn set_setting(
 pub fn db_get_all_items(
     limit: i64,
     offset: i64,
+    favorites_first: bool,
     database: State<'_, Database>,
 ) -> Result<Vec<ClipboardItemRow>, String> {
-    database.get_all_items(limit, offset)
+    database.get_all_items(limit, offset, favorites_first)
 }
 
 #[tauri::command]

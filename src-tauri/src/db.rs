@@ -144,14 +144,20 @@ impl Database {
         self.inner.lock().map_err(e2s)
     }
 
-    pub fn get_all_items(&self, limit: i64, offset: i64) -> DbResult<Vec<ClipboardItemRow>> {
+    pub fn get_all_items(&self, limit: i64, offset: i64, favorites_first: bool) -> DbResult<Vec<ClipboardItemRow>> {
         let inner = self.lock()?;
         let _ci = &inner.schema.clipboard_items;
+
+        let query = if favorites_first {
+            "SELECT * FROM clipboard_items ORDER BY is_favorite DESC, sort_order ASC LIMIT ?1 OFFSET ?2"
+        } else {
+            "SELECT * FROM clipboard_items ORDER BY sort_order ASC LIMIT ?1 OFFSET ?2"
+        };
 
         let rows: Vec<SelectClipboardItems> = inner
             .db
             .conn()
-            .prepare("SELECT * FROM clipboard_items ORDER BY sort_order ASC LIMIT ?1 OFFSET ?2")
+            .prepare(query)
             .and_then(|mut stmt| {
                 stmt.query_map(rusqlite::params![limit, offset], |row| {
                     Ok(SelectClipboardItems {

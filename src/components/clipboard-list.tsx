@@ -39,6 +39,7 @@ type ClipboardListProps = {
   onToggleFavorite: (id: number) => void;
   onReorder: (activeId: number, overId: number) => void;
   onSplitEnv?: (id: number) => void;
+  onToggleFavoritesFirst?: () => void;
   isSearching?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
@@ -52,6 +53,7 @@ export const ClipboardList = ({
   onToggleFavorite,
   onReorder,
   onSplitEnv,
+  onToggleFavoritesFirst,
   isSearching = false,
   hasMore = false,
   onLoadMore,
@@ -118,6 +120,17 @@ export const ClipboardList = ({
   // d to delete active item
   useHotkey("D", deleteActive, { enabled: activeIndex >= 0 && !colorMenuIsOpen });
 
+  // f to toggle favorite on active item
+  useHotkey(
+    "F",
+    () => {
+      if (activeIndex >= 0 && items[activeIndex]) {
+        onToggleFavorite(items[activeIndex].id);
+      }
+    },
+    { enabled: activeIndex >= 0 && !colorMenuIsOpen },
+  );
+
   // a to open color format menu on active item
   useHotkey(
     "A",
@@ -128,6 +141,9 @@ export const ClipboardList = ({
     },
     { enabled: activeIndex >= 0 && !colorMenuIsOpen },
   );
+
+  // o to toggle favorites-first ordering
+  useHotkey("O", () => onToggleFavoritesFirst?.(), { enabled: !colorMenuIsOpen });
 
   // Arrow keys for when list is focused (after tabbing from search)
   useHotkey("ArrowDown", moveDown);

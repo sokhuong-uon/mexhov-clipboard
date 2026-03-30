@@ -3,6 +3,7 @@ import {
   CirclePause,
   CirclePlay,
   EllipsisVertical,
+  Pin,
   Search,
   Trash2,
 } from "lucide-react";
@@ -25,6 +26,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 const HISTORY_LIMIT_OPTIONS = [25, 50, 100, 200, 500] as const;
 
@@ -38,6 +40,8 @@ type ClipboardHeaderProps = {
   onSearchChange: (query: string) => void;
   historyLimit: number;
   onHistoryLimitChange: (limit: number) => void;
+  favoritesFirst: boolean;
+  onToggleFavoritesFirst: () => void;
 };
 
 export const ClipboardHeader = ({
@@ -50,6 +54,8 @@ export const ClipboardHeader = ({
   onSearchChange,
   historyLimit,
   onHistoryLimitChange,
+  favoritesFirst,
+  onToggleFavoritesFirst,
 }: ClipboardHeaderProps) => {
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -85,6 +91,19 @@ export const ClipboardHeader = ({
           className="pl-8 h-8"
         />
       </div>
+
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className={cn(
+          "shrink-0 text-neutral-400 dark:text-neutral-600",
+          favoritesFirst && "text-amber-500",
+        )}
+        onClick={onToggleFavoritesFirst}
+        aria-label="Toggle pinned view"
+      >
+        <Pin className={cn("size-4", favoritesFirst && "fill-amber-500")} />
+      </Button>
 
       <DropdownMenu>
         <DropdownMenuTrigger

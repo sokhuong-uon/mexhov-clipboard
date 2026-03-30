@@ -5,6 +5,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 type ClipboardItemActionsProps = {
   isCopied: boolean;
@@ -30,11 +31,18 @@ export const ClipboardItemActions = ({
               variant="ghost"
               size="icon-xs"
               onClick={isCopied ? undefined : onCopy}
-              className={isCopied ? "text-green-500" : "text-muted-foreground hover:text-foreground"}
+              className={cn(
+                "text-neutral-400 dark:text-neutral-600 dark:hover:text-foreground hover:text-foreground cursor-pointer",
+                isCopied && "text-green-500",
+              )}
             />
           }
         >
-          {isCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+          {isCopied ? (
+            <Check className="size-3.5" />
+          ) : (
+            <Copy className="size-3.5" />
+          )}
         </TooltipTrigger>
         <TooltipContent className="pointer-events-none">
           {isCopied ? "Currently in clipboard" : "Copy to clipboard"}
@@ -49,7 +57,7 @@ export const ClipboardItemActions = ({
                 variant="ghost"
                 size="icon-xs"
                 onClick={onSplitEnv}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-neutral-400 dark:text-neutral-600 dark:hover:text-foreground hover:text-foreground cursor-pointer"
               />
             }
           >
@@ -68,7 +76,7 @@ export const ClipboardItemActions = ({
               variant="ghost"
               size="icon-xs"
               onClick={onDelete}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-neutral-400 dark:text-neutral-600 dark:hover:text-foreground hover:text-foreground cursor-pointer"
             />
           }
         >

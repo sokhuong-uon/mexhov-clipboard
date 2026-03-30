@@ -25,6 +25,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 150 });
 
   const { historyLimit, setHistoryLimit } = useSettings();
+  const [favoritesFirst, setFavoritesFirst] = useState(false);
 
   const { readContent, write, writeImage, reinitialize, error, dismissError } =
     useClipboard();
@@ -42,7 +43,7 @@ function App() {
     toggleFavorite,
     reorderItems,
     splitEnvItem,
-  } = useClipboardHistory(historyLimit);
+  } = useClipboardHistory(historyLimit, favoritesFirst);
 
   const { systemInfo, previousContentRef } = useClipboardMonitor({
     onClipboardChange: addContentToHistory,
@@ -138,6 +139,8 @@ function App() {
             }}
             historyLimit={historyLimit}
             onHistoryLimitChange={setHistoryLimit}
+            favoritesFirst={favoritesFirst}
+            onToggleFavoritesFirst={() => setFavoritesFirst((v) => !v)}
           />
 
           {error && (
@@ -160,6 +163,7 @@ function App() {
                 onToggleFavorite={toggleFavorite}
                 onReorder={reorderItems}
                 onSplitEnv={splitEnvItem}
+                onToggleFavoritesFirst={() => setFavoritesFirst((v) => !v)}
                 isSearching={isSearching}
                 hasMore={hasMore && !isSearching}
                 onLoadMore={loadMore}

@@ -98,13 +98,18 @@ export const ClipboardItem = ({
             <ClipboardItemMeta item={item} />
           </div>
 
-          <ClipboardItemActions
-            isCopied={isCopied}
-            onCopy={() => onCopy(item)}
-            onDelete={() => onDelete(item.id)}
-            onSplitEnv={onSplitEnv ? () => onSplitEnv(item.id) : undefined}
-            showSplit={!!item.is_env && !item.kv_key}
-          />
+          <div className="flex flex-col items-center shrink-0">
+            {item.is_favorite && (
+              <div className="size-1.5 rounded-full bg-amber-500/70 mb-0.5" />
+            )}
+            <ClipboardItemActions
+              isCopied={isCopied}
+              onCopy={() => onCopy(item)}
+              onDelete={() => onDelete(item.id)}
+              onSplitEnv={onSplitEnv ? () => onSplitEnv(item.id) : undefined}
+              showSplit={!!item.is_env && !item.kv_key}
+            />
+          </div>
         </CardContent>
       </Card>
 

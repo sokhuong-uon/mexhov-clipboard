@@ -9,17 +9,17 @@ import { splitEnvItemInDb } from "@/hooks/clipboard-split-env";
 
 const HISTORY_KEY = "clipboard-history";
 
-export const useClipboardHistory = (maxItems: number) => {
+export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) => {
   const queryClient = useQueryClient();
   const [currentContent, setCurrentContent] = useState<ClipboardContent>({
     type: "empty",
   });
 
   const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
-    queryKey: [HISTORY_KEY, maxItems],
+    queryKey: [HISTORY_KEY, maxItems, favoritesFirst],
     queryFn: async ({ pageParam = 0 }) => {
       const items = await clipboardDb
-        .getAllItems(maxItems, pageParam)
+        .getAllItems(maxItems, pageParam, favoritesFirst)
         .then(enrichAllWithEnvDetection);
       return items;
     },
