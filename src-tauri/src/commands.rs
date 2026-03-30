@@ -311,6 +311,23 @@ pub fn detect_color_content(text: String) -> Result<Option<String>, String> {
     }
 }
 
+/// Converts a CSS color string to the specified format.
+/// Supported formats: "hex", "hex-no-hash", "rgb", "hsl", "hwb", "oklch"
+#[tauri::command]
+pub fn convert_color(text: String, format: String) -> Result<String, String> {
+    let color = csscolorparser::parse(text.trim()).map_err(|e| e.to_string())?;
+    let result = match format.as_str() {
+        "hex" => color.to_css_hex(),
+        "hex-no-hash" => color.to_css_hex().trim_start_matches('#').to_string(),
+        "rgb" => color.to_css_rgb(),
+        "hsl" => color.to_css_hsl(),
+        "hwb" => color.to_css_hwb(),
+        "oklch" => color.to_css_oklch(),
+        _ => return Err(format!("Unknown format: {}", format)),
+    };
+    Ok(result)
+}
+
 #[derive(serde::Serialize)]
 pub struct LinkPreviewData {
     pub title: Option<String>,

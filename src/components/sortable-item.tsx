@@ -14,6 +14,8 @@ export const SortableItem = ({
   onDelete,
   onToggleFavorite,
   onSplitEnv,
+  colorMenuOpen,
+  onColorMenuOpenChange,
 }: {
   item: ClipboardItemType;
   index: number;
@@ -23,12 +25,18 @@ export const SortableItem = ({
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
   onSplitEnv?: (id: number) => void;
+  colorMenuOpen?: boolean;
+  onColorMenuOpenChange?: (open: boolean) => void;
 }) => {
-  const { ref: sortableRef, handleRef, isDragging } = useSortable({
+  const {
+    ref: sortableRef,
+    handleRef,
+    isDragging,
+  } = useSortable({
     id: item.id,
     index,
   });
-  const scrollRef = useRef<HTMLLIElement>(null);
+  const scrollRef = useRef<HTMLLIElement | null>(null);
 
   useEffect(() => {
     if (isActive && scrollRef.current) {
@@ -41,7 +49,7 @@ export const SortableItem = ({
     <motion.li
       ref={(el) => {
         sortableRef(el);
-        (scrollRef as React.MutableRefObject<HTMLLIElement | null>).current = el;
+        scrollRef.current = el;
       }}
       layout
       initial={{ opacity: 0, y: -8 }}
@@ -63,6 +71,8 @@ export const SortableItem = ({
         onDelete={onDelete}
         onToggleFavorite={onToggleFavorite}
         onSplitEnv={onSplitEnv}
+        colorMenuOpen={colorMenuOpen}
+        onColorMenuOpenChange={onColorMenuOpenChange}
       />
     </motion.li>
   );

@@ -57,6 +57,7 @@ export const ClipboardList = ({
   onLoadMore,
 }: ClipboardListProps) => {
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [colorMenuItemId, setColorMenuItemId] = useState<number | null>(null);
 
   // Reset active item when searching changes results
   const isSearchingRef = useRef(isSearching);
@@ -104,16 +105,29 @@ export const ClipboardList = ({
     }
   };
 
+  const colorMenuIsOpen = colorMenuItemId != null;
+
   // j/k navigation (ignored when input focused — default behavior)
-  useHotkey("J", moveDown);
-  useHotkey("K", moveUp);
+  useHotkey("J", moveDown, { enabled: !colorMenuIsOpen });
+  useHotkey("K", moveUp, { enabled: !colorMenuIsOpen });
   useHotkey("Enter", copyActive, {
-    enabled: activeIndex >= 0,
+    enabled: activeIndex >= 0 && !colorMenuIsOpen,
     ignoreInputs: false,
   });
 
   // d to delete active item
-  useHotkey("D", deleteActive, { enabled: activeIndex >= 0 });
+  useHotkey("D", deleteActive, { enabled: activeIndex >= 0 && !colorMenuIsOpen });
+
+  // a to open color format menu on active item
+  useHotkey(
+    "A",
+    () => {
+      if (activeIndex >= 0 && items[activeIndex]?.detected_color) {
+        setColorMenuItemId(items[activeIndex].id);
+      }
+    },
+    { enabled: activeIndex >= 0 && !colorMenuIsOpen },
+  );
 
   // Arrow keys for when list is focused (after tabbing from search)
   useHotkey("ArrowDown", moveDown);
@@ -174,6 +188,10 @@ export const ClipboardList = ({
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}
                 onSplitEnv={onSplitEnv}
+                colorMenuOpen={colorMenuItemId === item.id}
+                onColorMenuOpenChange={(open) =>
+                  setColorMenuItemId(open ? item.id : null)
+                }
               />
             ))}
           </AnimatePresence>
@@ -213,6 +231,10 @@ export const ClipboardList = ({
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}
                 onSplitEnv={onSplitEnv}
+                colorMenuOpen={colorMenuItemId === item.id}
+                onColorMenuOpenChange={(open) =>
+                  setColorMenuItemId(open ? item.id : null)
+                }
               />
             ))}
           </AnimatePresence>

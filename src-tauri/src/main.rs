@@ -16,7 +16,7 @@ use commands::{
 };
 use clipboard_monitor::MonitorState;
 use commands::{
-    detect_color_content, detect_date_content, detect_env_content, download_media_to_temp,
+    convert_color, detect_color_content, detect_date_content, detect_env_content, download_media_to_temp,
     fetch_link_preview, get_file_size, get_setting, get_system_theme, handle_command, hide_window,
     is_cosmic_data_control_enabled, is_wayland_session, parse_command_from_args, parse_env_content,
     read_clipboard, read_clipboard_image, reinitialize_clipboard, set_monitoring, set_setting,
@@ -82,6 +82,7 @@ fn main() {
             detect_env_content,
             parse_env_content,
             detect_date_content,
+            convert_color,
             detect_color_content,
             fetch_link_preview,
             download_media_to_temp,

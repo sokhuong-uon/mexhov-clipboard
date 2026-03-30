@@ -12,6 +12,8 @@ export const SearchResultItem = ({
   onDelete,
   onToggleFavorite,
   onSplitEnv,
+  colorMenuOpen,
+  onColorMenuOpenChange,
 }: {
   item: ClipboardItemType;
   isActive: boolean;
@@ -20,6 +22,8 @@ export const SearchResultItem = ({
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
   onSplitEnv?: (id: number) => void;
+  colorMenuOpen?: boolean;
+  onColorMenuOpenChange?: (open: boolean) => void;
 }) => {
   const ref = useRef<HTMLLIElement>(null);
 
@@ -52,6 +56,8 @@ export const SearchResultItem = ({
         onDelete={onDelete}
         onToggleFavorite={onToggleFavorite}
         onSplitEnv={onSplitEnv}
+        colorMenuOpen={colorMenuOpen}
+        onColorMenuOpenChange={onColorMenuOpenChange}
       />
     </motion.li>
   );
