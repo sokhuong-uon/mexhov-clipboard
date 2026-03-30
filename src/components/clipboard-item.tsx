@@ -59,7 +59,10 @@ export const ClipboardItem = ({
     [item.detected_color, setMenuOpen],
   );
 
-  const getAnchor = (): Element | { getBoundingClientRect: () => DOMRect } | null => {
+  const getAnchor = ():
+    | Element
+    | { getBoundingClientRect: () => DOMRect }
+    | null => {
     const pos = virtualAnchorRef.current;
     if (pos) {
       return { getBoundingClientRect: () => new DOMRect(pos.x, pos.y, 0, 0) };
@@ -131,11 +134,17 @@ export const ClipboardItem = ({
               <MenuPrimitive.Popup
                 className="z-50 min-w-72 origin-(--transform-origin) overflow-hidden rounded-2xl bg-popover p-1 text-popover-foreground shadow-2xl ring-1 ring-foreground/5 dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
                 onKeyDown={(e) => {
-                  const remap: Record<string, string> = { j: "ArrowDown", k: "ArrowUp" };
+                  const remap: Record<string, string> = {
+                    j: "ArrowDown",
+                    k: "ArrowUp",
+                  };
                   if (remap[e.key]) {
                     e.preventDefault();
                     e.currentTarget.dispatchEvent(
-                      new KeyboardEvent("keydown", { key: remap[e.key], bubbles: true }),
+                      new KeyboardEvent("keydown", {
+                        key: remap[e.key],
+                        bubbles: true,
+                      }),
                     );
                   }
                 }}

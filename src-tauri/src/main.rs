@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod caret;
 mod clipboard;
 mod clipboard_monitor;
 mod commands;
@@ -10,17 +11,18 @@ mod tray;
 mod window_state;
 
 use clipboard::ClipboardManager;
+use clipboard_monitor::MonitorState;
+use commands::{
+    convert_color, detect_color_content, detect_date_content, detect_env_content,
+    download_media_to_temp, fetch_link_preview, get_file_size, get_setting, get_system_theme,
+    handle_command, hide_window, is_cosmic_data_control_enabled, is_wayland_session,
+    parse_command_from_args, parse_env_content, paste_item, read_clipboard, read_clipboard_image,
+    reinitialize_clipboard, set_monitoring, set_setting, show_window, show_window_at_cursor,
+    toggle_window, write_clipboard, write_clipboard_image,
+};
 use commands::{
     db_bump_item, db_clear_all, db_dedup_item, db_delete_item, db_get_all_items, db_get_item_count,
     db_insert_item, db_toggle_favorite, db_update_sort_orders,
-};
-use clipboard_monitor::MonitorState;
-use commands::{
-    convert_color, detect_color_content, detect_date_content, detect_env_content, download_media_to_temp,
-    fetch_link_preview, get_file_size, get_setting, get_system_theme, handle_command, hide_window,
-    is_cosmic_data_control_enabled, is_wayland_session, parse_command_from_args, parse_env_content,
-    read_clipboard, read_clipboard_image, reinitialize_clipboard, set_monitoring, set_setting,
-    show_window, show_window_at_cursor, toggle_window, write_clipboard, write_clipboard_image,
 };
 use db::Database;
 use tauri::Manager;
@@ -51,6 +53,7 @@ fn main() {
                 Database::new(db_path.to_str().unwrap()).expect("failed to initialize database");
             app.manage(database);
 
+            caret::init();
             tray::setup(app)?;
             setup_main_window(app, &initial_command);
             clipboard_monitor::start_monitor(app.handle());
@@ -60,6 +63,7 @@ fn main() {
             show_window,
             show_window_at_cursor,
             hide_window,
+            paste_item,
             toggle_window,
             read_clipboard,
             read_clipboard_image,

@@ -1,5 +1,6 @@
 use std::io::Cursor;
 
+use crate::caret;
 use crate::clipboard::ClipboardManager;
 use crate::clipboard_monitor::MonitorState;
 use crate::db::{ClipboardItemRow, Database, InsertClipboardItemParams, UpdateSortOrderParams};
@@ -111,28 +112,35 @@ pub fn show_window_at_cursor(app: AppHandle) {
             .map(|m| m.size().height as f64)
             .unwrap_or(1080.0);
 
-        // Try to get cursor position (may fail or return (0,0) on Wayland)
-        let (x, y) = if let Ok(cursor_pos) = app.cursor_position() {
-            // On Wayland, cursor_position() may return Ok but with (0,0) which is invalid
-            // Treat (0,0) as "unknown" and fall back to centering
+        // Fallback chain: caret position → mouse cursor → screen center
+        let (x, y) = if let Some((cx, cy)) = caret::get_caret_position() {
+            // Position below the text caret, centered horizontally
+            let mut x = cx - (window_width / 2.0);
+            let mut y = cy + 4.0;
+
+            // If window would go off bottom, place it above the caret
+            if y + window_height > screen_height {
+                y = (cy - window_height - 4.0).max(0.0);
+            }
+
+            x = x.max(0.0).min(screen_width - window_width);
+            y = y.max(0.0).min(screen_height - window_height);
+            (x, y)
+        } else if let Ok(cursor_pos) = app.cursor_position() {
             if cursor_pos.x == 0.0 && cursor_pos.y == 0.0 {
+                // Wayland fallback: cursor position unavailable
                 let x = (screen_width - window_width) / 2.0;
                 let y = (screen_height - window_height) / 2.0;
                 (x.max(0.0), y.max(0.0))
             } else {
-                // Position window near cursor (offset slightly to avoid covering it)
-                // Center horizontally on cursor, offset vertically below cursor
                 let mut x = cursor_pos.x - (window_width / 2.0);
-                let mut y = cursor_pos.y + 20.0; // Small offset below cursor
+                let mut y = cursor_pos.y + 20.0;
 
-                // Clamp to ensure window stays on screen
                 x = x.max(0.0).min(screen_width - window_width);
                 y = y.max(0.0).min(screen_height - window_height);
-
                 (x, y)
             }
         } else {
-            // Fallback: center the window on screen
             let x = (screen_width - window_width) / 2.0;
             let y = (screen_height - window_height) / 2.0;
             (x.max(0.0), y.max(0.0))
@@ -158,6 +166,95 @@ pub fn hide_window(app: AppHandle) {
         let _ = window.hide();
         window_set_visible(false);
     }
+}
+
+/// Copies content to clipboard, hides the window, and simulates Ctrl+V.
+/// Runs clipboard write on a blocking thread to avoid tokio runtime deadlocks.
+#[tauri::command]
+pub async fn paste_item(
+    content_type: String,
+    text_content: Option<String>,
+    image_data: Option<String>,
+    app: AppHandle,
+    manager: State<'_, ClipboardManager>,
+) -> Result<(), String> {
+    let is_wayland = manager.is_wayland();
+
+    // Write to clipboard
+    match content_type.as_str() {
+        "text" => {
+            let text = text_content.ok_or("missing text_content")?;
+            manager.write(text).await?;
+        }
+        "image" => {
+            let data = image_data.ok_or("missing image_data")?;
+            // Run image write on a blocking thread to avoid starving the runtime
+            let result = tokio::task::spawn_blocking(move || {
+                use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
+                let png_bytes = BASE64
+                    .decode(&data)
+                    .map_err(|e| format!("Failed to decode base64: {e}"))?;
+
+                if is_wayland {
+                    // Inline the wl-copy call to avoid async issues
+                    use std::io::Write;
+                    use std::process::{Command, Stdio};
+
+                    let mut child = Command::new("wl-copy")
+                        .arg("--type")
+                        .arg("image/png")
+                        .stdin(Stdio::piped())
+                        .stdout(Stdio::null())
+                        .stderr(Stdio::piped())
+                        .spawn()
+                        .map_err(|e| format!("wl-copy spawn failed: {e}"))?;
+
+                    if let Some(mut stdin) = child.stdin.take() {
+                        stdin
+                            .write_all(&png_bytes)
+                            .map_err(|e| format!("wl-copy stdin write failed: {e}"))?;
+                        // Drop stdin to close the pipe so wl-copy can proceed
+                    }
+
+                    // wl-copy stays alive as a daemon serving clipboard data —
+                    // do NOT wait_with_output(), just let it run in the background.
+                    // Give it a moment to register with the compositor.
+                    std::thread::sleep(std::time::Duration::from_millis(100));
+                    Ok::<(), String>(())
+                } else {
+                    Err("non-wayland image paste not implemented in paste_item".to_string())
+                }
+            })
+            .await
+            .map_err(|e| format!("spawn_blocking failed: {e}"))?;
+            result?;
+        }
+        _ => return Err(format!("unknown content_type: {content_type}")),
+    }
+
+    // Hide window
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.hide();
+        window_set_visible(false);
+    }
+
+    // Wait for focus to transfer
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+
+    // Simulate Ctrl+V
+    use enigo::{Direction, Enigo, Key, Keyboard, Settings};
+    let mut enigo = Enigo::new(&Settings::default()).map_err(|e| e.to_string())?;
+    enigo
+        .key(Key::Control, Direction::Press)
+        .map_err(|e| e.to_string())?;
+    enigo
+        .key(Key::Unicode('v'), Direction::Click)
+        .map_err(|e| e.to_string())?;
+    enigo
+        .key(Key::Control, Direction::Release)
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 #[tauri::command]

@@ -35,6 +35,7 @@ type ClipboardListProps = {
   items: ClipboardItemType[];
   currentContent: ClipboardContent;
   onCopy: (item: ClipboardItemType) => void;
+  onPaste?: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
   onReorder: (activeId: number, overId: number) => void;
@@ -49,6 +50,7 @@ export const ClipboardList = ({
   items,
   currentContent,
   onCopy,
+  onPaste,
   onDelete,
   onToggleFavorite,
   onReorder,
@@ -61,7 +63,6 @@ export const ClipboardList = ({
   const [activeId, setActiveId] = useState<number | null>(null);
   const [colorMenuItemId, setColorMenuItemId] = useState<number | null>(null);
 
-  // Reset active item when searching changes results
   const isSearchingRef = useRef(isSearching);
   useEffect(() => {
     if (isSearching !== isSearchingRef.current) {
@@ -70,7 +71,6 @@ export const ClipboardList = ({
     }
   }, [isSearching]);
 
-  // Derive activeIndex from activeId
   const activeIndex =
     activeId != null ? items.findIndex((i) => i.id === activeId) : -1;
 
@@ -107,20 +107,30 @@ export const ClipboardList = ({
     }
   };
 
+  const pasteActive = () => {
+    if (activeIndex >= 0 && items[activeIndex] && onPaste) {
+      onPaste(items[activeIndex]);
+    }
+  };
+
   const colorMenuIsOpen = colorMenuItemId != null;
 
-  // j/k navigation (ignored when input focused — default behavior)
   useHotkey("J", moveDown, { enabled: !colorMenuIsOpen });
   useHotkey("K", moveUp, { enabled: !colorMenuIsOpen });
-  useHotkey("Enter", copyActive, {
+
+  useHotkey("C", copyActive, {
     enabled: activeIndex >= 0 && !colorMenuIsOpen,
     ignoreInputs: false,
   });
 
-  // d to delete active item
-  useHotkey("D", deleteActive, { enabled: activeIndex >= 0 && !colorMenuIsOpen });
+  useHotkey("P", pasteActive, {
+    enabled: activeIndex >= 0 && !colorMenuIsOpen,
+  });
 
-  // f to toggle favorite on active item
+  useHotkey("D", deleteActive, {
+    enabled: activeIndex >= 0 && !colorMenuIsOpen,
+  });
+
   useHotkey(
     "F",
     () => {
@@ -131,7 +141,6 @@ export const ClipboardList = ({
     { enabled: activeIndex >= 0 && !colorMenuIsOpen },
   );
 
-  // a to open color format menu on active item
   useHotkey(
     "A",
     () => {
@@ -142,10 +151,10 @@ export const ClipboardList = ({
     { enabled: activeIndex >= 0 && !colorMenuIsOpen },
   );
 
-  // o to toggle favorites-first ordering
-  useHotkey("O", () => onToggleFavoritesFirst?.(), { enabled: !colorMenuIsOpen });
+  useHotkey("O", () => onToggleFavoritesFirst?.(), {
+    enabled: !colorMenuIsOpen,
+  });
 
-  // Arrow keys for when list is focused (after tabbing from search)
   useHotkey("ArrowDown", moveDown);
   useHotkey("ArrowUp", moveUp);
 

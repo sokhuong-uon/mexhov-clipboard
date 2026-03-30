@@ -117,10 +117,22 @@ pub async fn write_image(png_bytes: Vec<u8>) -> Result<(), String> {
         .wait_with_output()
         .map_err(|e| format!("Failed to wait for wl-copy: {}", e))?;
 
-    if output.status.success() {
-        Ok(())
-    } else {
+    if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(format!("wl-copy failed: {}", stderr))
+        return Err(format!("wl-copy failed: {}", stderr));
     }
+
+    // wl-copy forks a daemon to serve clipboard data. Wait until
+    // the compositor actually sees image/png before returning.
+    for _ in 0..20 {
+        std::thread::sleep(std::time::Duration::from_millis(25));
+        if let Ok(out) = Command::new("wl-paste").arg("--list-types").output() {
+            let types = String::from_utf8_lossy(&out.stdout);
+            if types.contains("image/png") {
+                return Ok(());
+            }
+        }
+    }
+
+    Ok(())
 }
