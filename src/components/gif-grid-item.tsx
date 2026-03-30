@@ -13,7 +13,7 @@ function getDragUrl(item: KlipyItem): string | undefined {
   return variant?.gif?.url ?? variant?.webp?.url;
 }
 
-export const GifGridItem = ({ item }: GifGridItemProps) => {
+export const GifGridItem = ({ item, onSelect }: GifGridItemProps) => {
   const variant = item.file.sm ?? item.file.xs ?? item.file.md;
   const src = variant?.webp?.url ?? variant?.gif?.url ?? "";
   const [loaded, setLoaded] = useState(false);
@@ -55,6 +55,7 @@ export const GifGridItem = ({ item }: GifGridItemProps) => {
       type="button"
       onMouseEnter={preload}
       onMouseDown={handleMouseDown}
+      onDoubleClick={() => onSelect(item)}
       className="w-full h-full overflow-hidden rounded-lg bg-muted cursor-grab hover:ring-2 hover:ring-ring transition-shadow focus-visible:ring-2 focus-visible:ring-ring outline-none"
       title={item.title}
     >
