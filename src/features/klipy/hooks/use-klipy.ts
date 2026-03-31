@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { KlipyResponse } from "../schema/klipy-response";
+import { KlipyResponse } from "@/features/klipy/schema/klipy-response";
 
 const API_KEY = import.meta.env.VITE_KLIPY_API_KEY;
 
@@ -12,7 +12,7 @@ async function get<T>(
     baseURL: `${import.meta.env.VITE_KLIPY_API_BASE_URL}/${API_KEY}`,
     params,
   });
-  console.log(`${path}`, data);
+
   return data;
 }
 
@@ -28,8 +28,12 @@ export function useKlipyTrending(category?: string) {
         ...(category ? { category } : {}),
       }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage, _, lastPageParam) =>
-      lastPage.data.has_next ? lastPageParam + 1 : undefined,
+    getNextPageParam: (lastPage, _, lastPageParam) => {
+      if (!lastPage.result) return;
+      if (!lastPage.data.has_next) return;
+
+      return lastPageParam + 1;
+    },
   });
 }
 
@@ -44,8 +48,13 @@ export function useKlipySearch(query: string, category?: string) {
         ...(category ? { category } : {}),
       }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage, _, lastPageParam) =>
-      lastPage.data.has_next ? lastPageParam + 1 : undefined,
+    getNextPageParam: (lastPage, _, lastPageParam) => {
+      if (!lastPage.result) return;
+      if (!lastPage.data.has_next) return;
+
+      return lastPageParam + 1;
+    },
+
     enabled: query.trim().length > 0,
   });
 }

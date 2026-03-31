@@ -65,10 +65,14 @@ export const GifView = ({ onSelect }: GifViewProps) => {
 
   const activeQuery = isSearching ? search : trending;
 
-  const items = useMemo(
-    () => activeQuery.data?.pages.flatMap((p) => p.data.data ?? []) ?? [],
-    [activeQuery.data],
-  );
+  const items = useMemo(() => {
+    return (
+      activeQuery.data?.pages.flatMap((page) => {
+        if (!page.result) return [];
+        return page.data.data ?? [];
+      }) ?? []
+    );
+  }, [activeQuery.data]);
 
   const isLoading = activeQuery.isLoading;
   const isError = activeQuery.isError;
