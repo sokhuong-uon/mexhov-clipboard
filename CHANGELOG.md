@@ -1,3 +1,18 @@
+# [1.3.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.2.0...v1.3.0) (2026-03-31)
+
+
+### Bug Fixes
+
+* copy gif on double click ([23cd696](https://github.com/sokhuong-uon/mexhov-clipboard/commit/23cd696b0bac960f66bb9b4dfc80398e5ef5be8c))
+* secure messages over websocket ([8bedd1f](https://github.com/sokhuong-uon/mexhov-clipboard/commit/8bedd1f4dcc89a15c7ee66fb24cd71817bcf3dd7))
+
+
+### Features
+
+* broadcast clipboard over LAN ([bc15f41](https://github.com/sokhuong-uon/mexhov-clipboard/commit/bc15f41ab73b65f0aa69a6a9d187ef1aee17f32c))
+* color format conversion ([a063497](https://github.com/sokhuong-uon/mexhov-clipboard/commit/a063497db9fc15278f48b764988f8b4f10745b21))
+* toggle between normal order and pinned ([f51b36e](https://github.com/sokhuong-uon/mexhov-clipboard/commit/f51b36ef3faf1d7fd45c75624670ca94c7d6b874))
+
 # [1.2.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.1.0...v1.2.0) (2026-03-29)
 
 
