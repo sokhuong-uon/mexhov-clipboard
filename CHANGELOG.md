@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.0...v1.3.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* prevent UI from breaking when no gif data ([b1dbe04](https://github.com/sokhuong-uon/mexhov-clipboard/commit/b1dbe04c4348214934b3b9ee8877e7e0f7db2794))
+
 # [1.3.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.2.0...v1.3.0) (2026-03-31)
 
 
