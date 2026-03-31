@@ -17,7 +17,7 @@ import { useSystemTheme } from "@/hooks/use-system-theme";
 import { useClipboardHistory } from "@/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
 import { ClipboardItem } from "@/types/clipboard";
-import type { KlipyItem } from "@/hooks/use-klipy";
+import type { Klipy } from "@/features/klipy/schema/klipy";
 import { Clipboard } from "lucide-react";
 
 function App() {
@@ -106,7 +106,7 @@ function App() {
   const isSearching = searchQuery.trim().length > 0;
 
   const handleGifSelect = useCallback(
-    async (item: KlipyItem) => {
+    async (item: Klipy) => {
       const variant = item.file.hd ?? item.file.md ?? item.file.sm;
       const url = variant?.gif?.url ?? variant?.webp?.url;
       if (url) {

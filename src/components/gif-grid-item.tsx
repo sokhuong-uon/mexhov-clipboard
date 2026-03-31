@@ -1,14 +1,14 @@
 import { useState, useCallback, useRef } from "react";
-import { type KlipyItem } from "@/hooks/use-klipy";
+import { type Klipy } from "@/features/klipy/schema/klipy";
 import { startDrag } from "@crabnebula/tauri-plugin-drag";
 import { invoke } from "@tauri-apps/api/core";
 
 type GifGridItemProps = {
-  item: KlipyItem;
-  onSelect: (item: KlipyItem) => void;
+  item: Klipy;
+  onSelect: (item: Klipy) => void;
 };
 
-function getDragUrl(item: KlipyItem): string | undefined {
+function getDragUrl(item: Klipy): string | undefined {
   const variant = item.file.hd ?? item.file.md ?? item.file.sm;
   return variant?.gif?.url ?? variant?.webp?.url;
 }

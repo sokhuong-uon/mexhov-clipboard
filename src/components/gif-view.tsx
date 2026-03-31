@@ -3,22 +3,20 @@ import { Search } from "lucide-react";
 import { useDebouncedState } from "@tanstack/react-pacer";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GifGridItem } from "@/components/gif-grid-item";
 import {
   useKlipyTrending,
   useKlipySearch,
-  useKlipyCategories,
-  type KlipyItem,
-} from "@/hooks/use-klipy";
+} from "@/features/klipy/hooks/use-klipy";
+import { type Klipy } from "@/features/klipy/schema/klipy";
 
 const COLUMNS = 3;
 const GAP = 8;
 const OVERSCAN = 400; // px above/below viewport to render
 
 type PositionedCell = {
-  item: KlipyItem;
+  item: Klipy;
   x: number;
   y: number;
   width: number;
@@ -26,7 +24,7 @@ type PositionedCell = {
 };
 
 function computeLayout(
-  items: KlipyItem[],
+  items: Klipy[],
   containerWidth: number,
 ): { cells: PositionedCell[]; totalHeight: number } {
   const colWidth = (containerWidth - GAP * (COLUMNS - 1)) / COLUMNS;
@@ -52,20 +50,15 @@ function computeLayout(
 }
 
 type GifViewProps = {
-  onSelect: (item: KlipyItem) => void;
+  onSelect: (item: Klipy) => void;
 };
 
 export const GifView = ({ onSelect }: GifViewProps) => {
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 300 });
-  const [selectedCategory, setSelectedCategory] = useState<
-    string | undefined
-  >();
+  const [selectedCategory] = useState<string | undefined>();
 
   const isSearching = searchQuery.trim().length > 0;
-
-  const { data: categoriesData } = useKlipyCategories();
-  const categories = categoriesData?.data ?? [];
 
   const trending = useKlipyTrending(selectedCategory);
   const search = useKlipySearch(searchQuery, selectedCategory);
@@ -140,7 +133,6 @@ export const GifView = ({ onSelect }: GifViewProps) => {
 
   return (
     <div className="flex flex-1 flex-col min-h-0">
-      {/* Search */}
       <div className="flex items-center gap-2 p-4 pb-2">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
@@ -158,36 +150,6 @@ export const GifView = ({ onSelect }: GifViewProps) => {
         </div>
       </div>
 
-      {/* Categories */}
-      {categories.length > 0 && (
-        <div className="flex gap-1.5 px-4 pb-2 overflow-x-auto no-scrollbar">
-          <Button
-            variant={selectedCategory === undefined ? "default" : "outline"}
-            size="sm"
-            className="shrink-0 h-7 text-xs rounded-full"
-            onClick={() => setSelectedCategory(undefined)}
-          >
-            Trending
-          </Button>
-          {categories.map((cat) => (
-            <Button
-              key={cat.id}
-              variant={selectedCategory === cat.slug ? "default" : "outline"}
-              size="sm"
-              className="shrink-0 h-7 text-xs rounded-full"
-              onClick={() =>
-                setSelectedCategory(
-                  selectedCategory === cat.slug ? undefined : cat.slug,
-                )
-              }
-            >
-              {cat.name}
-            </Button>
-          ))}
-        </div>
-      )}
-
-      {/* Masonry Grid */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0">
         {isLoading ? (
           <div className="grid grid-cols-2 gap-2 p-4 pt-2">
