@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.2...v1.3.3) (2026-03-31)
+
+
+### Bug Fixes
+
+* copy gif with click instead of double click ([bd3accf](https://github.com/sokhuong-uon/mexhov-clipboard/commit/bd3accff7b85d48336f1ce47f447f495ed135ada))
+
 ## [1.3.2](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.1...v1.3.2) (2026-03-31)
 
 
