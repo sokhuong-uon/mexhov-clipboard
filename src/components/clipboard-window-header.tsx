@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { QRCodeSVG } from "qrcode.react";
 import { SystemInfo } from "@/types/clipboard";
 import { Button } from "@/components/ui/button";
@@ -295,7 +296,13 @@ function SyncSection() {
   useEffect(() => {
     refreshStatus();
     const interval = setInterval(refreshStatus, 2000);
-    return () => clearInterval(interval);
+    const unlisten = listen<number>("sync-peer-changed", () => {
+      refreshStatus();
+    });
+    return () => {
+      clearInterval(interval);
+      unlisten.then((fn) => fn());
+    };
   }, [refreshStatus]);
 
   useEffect(() => {

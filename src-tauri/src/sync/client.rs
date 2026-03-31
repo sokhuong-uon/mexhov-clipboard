@@ -1,7 +1,8 @@
 use super::crypto::{self, HandshakeMessage};
-use super::{PeerMap, SyncMessage};
+use super::{PeerMap, SyncMode, SyncMessage};
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
+use tauri::AppHandle;
 use tokio::sync::{broadcast, RwLock};
 use tokio_tungstenite::tungstenite::Message;
 
@@ -15,6 +16,8 @@ pub async fn spawn(
     last_remote_hash: Arc<RwLock<Option<u64>>>,
     peer_counter: Arc<std::sync::atomic::AtomicU64>,
     shutdown_rx: tokio::sync::watch::Receiver<bool>,
+    app: AppHandle,
+    mode: Arc<RwLock<SyncMode>>,
 ) -> Result<(), String> {
     let url = format!("ws://{address}");
     let (mut ws_stream, _) = tokio_tungstenite::connect_async(&url)
@@ -74,6 +77,8 @@ pub async fn spawn(
         incoming_tx,
         last_remote_hash,
         shutdown_rx,
+        app,
+        mode,
     ));
 
     Ok(())

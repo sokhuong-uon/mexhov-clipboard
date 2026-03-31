@@ -6,6 +6,7 @@ mod server;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
+use tauri::AppHandle;
 use tokio::sync::{broadcast, Mutex, RwLock};
 use tokio_tungstenite::tungstenite::Message;
 
@@ -61,7 +62,7 @@ pub struct SyncState {
     peer_counter: Arc<std::sync::atomic::AtomicU64>,
 }
 
-enum SyncMode {
+pub(crate) enum SyncMode {
     Off,
     Server {
         address: String,
@@ -118,7 +119,7 @@ impl SyncState {
         }
     }
 
-    pub async fn start_server(&self, port: u16) -> Result<SyncStartResult, String> {
+    pub async fn start_server(&self, port: u16, app: AppHandle) -> Result<SyncStartResult, String> {
         self.stop().await;
 
         let pairing_code = crypto::generate_pairing_code();
@@ -133,6 +134,8 @@ impl SyncState {
             self.last_remote_hash.clone(),
             self.peer_counter.clone(),
             shutdown_rx,
+            app,
+            self.mode.clone(),
         )
         .await?;
 
@@ -148,7 +151,7 @@ impl SyncState {
         })
     }
 
-    pub async fn connect(&self, address: String, pairing_code: String) -> Result<(), String> {
+    pub async fn connect(&self, address: String, pairing_code: String, app: AppHandle) -> Result<(), String> {
         self.stop().await;
 
         let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
@@ -162,6 +165,8 @@ impl SyncState {
             self.last_remote_hash.clone(),
             self.peer_counter.clone(),
             shutdown_rx,
+            app,
+            self.mode.clone(),
         )
         .await?;
 

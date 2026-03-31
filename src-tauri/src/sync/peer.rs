@@ -1,15 +1,22 @@
 use super::crypto::EncryptedEnvelope;
-use super::{PeerMap, SyncMessage};
+use super::{PeerMap, SyncMessage, SyncMode};
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
+use tauri::{AppHandle, Emitter};
 use tokio::sync::{broadcast, RwLock};
 use tokio_tungstenite::tungstenite::Message;
+
+fn emit_peer_count(app: &AppHandle, count: usize) {
+    if let Err(e) = app.emit("sync-peer-changed", count) {
+        eprintln!("failed to emit peer count: {e}");
+    }
+}
 
 /// Drive a single WebSocket peer: read from remote, forward local changes,
 /// relay messages between peers (server mode), and respect shutdown.
 /// All SyncMessage payloads are encrypted with AES-256-GCM.
-pub async fn run<S>(
-    ws_stream: S,
+pub async fn run<Stream>(
+    ws_stream: Stream,
     peer_id: u64,
     key: [u8; 32],
     peers: PeerMap,
@@ -17,8 +24,10 @@ pub async fn run<S>(
     incoming_tx: tokio::sync::mpsc::UnboundedSender<SyncMessage>,
     last_remote_hash: Arc<RwLock<Option<u64>>>,
     mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
+    app: AppHandle,
+    mode: Arc<RwLock<SyncMode>>,
 ) where
-    S: StreamExt<Item = Result<Message, tokio_tungstenite::tungstenite::Error>>
+    Stream: StreamExt<Item = Result<Message, tokio_tungstenite::tungstenite::Error>>
         + SinkExt<Message>
         + Unpin
         + Send
@@ -26,6 +35,7 @@ pub async fn run<S>(
 {
     let (tx, mut relay_rx) = tokio::sync::mpsc::unbounded_channel::<Message>();
     peers.write().await.insert(peer_id, tx);
+    emit_peer_count(&app, peers.read().await.len());
 
     let (mut sink, mut stream) = ws_stream.split();
     let mut outgoing_rx = outgoing_tx.subscribe();
@@ -89,6 +99,16 @@ pub async fn run<S>(
     }
 
     peers.write().await.remove(&peer_id);
+    let remaining = peers.read().await.len();
+    emit_peer_count(&app, remaining);
+
+    // If this was a client and its only peer (the server) disconnected, reset mode
+    if remaining == 0 {
+        let mut mode_lock = mode.write().await;
+        if matches!(*mode_lock, SyncMode::Client { .. }) {
+            *mode_lock = SyncMode::Off;
+        }
+    }
 }
 
 pub fn content_hash(msg: &SyncMessage) -> u64 {

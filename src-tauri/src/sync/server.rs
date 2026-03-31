@@ -1,7 +1,8 @@
 use super::crypto::{self, HandshakeMessage};
-use super::{PeerMap, SyncMessage};
+use super::{PeerMap, SyncMode, SyncMessage};
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
+use tauri::AppHandle;
 use tokio::net::TcpListener;
 use tokio::sync::{broadcast, RwLock};
 use tokio_tungstenite::tungstenite::Message;
@@ -16,6 +17,8 @@ pub async fn spawn(
     last_remote_hash: Arc<RwLock<Option<u64>>>,
     peer_counter: Arc<std::sync::atomic::AtomicU64>,
     shutdown_rx: tokio::sync::watch::Receiver<bool>,
+    app: AppHandle,
+    mode: Arc<RwLock<SyncMode>>,
 ) -> Result<String, String> {
     let addr = format!("0.0.0.0:{port}");
     let listener = TcpListener::bind(&addr)
@@ -64,6 +67,8 @@ pub async fn spawn(
                                 incoming_tx.clone(),
                                 last_remote_hash.clone(),
                                 shutdown_rx.clone(),
+                                app.clone(),
+                                mode.clone(),
                             ));
                         }
                         Err(_) => break,

@@ -1,5 +1,5 @@
 use crate::sync::{SyncStartResult, SyncState, SyncStatus};
-use tauri::State;
+use tauri::{AppHandle, State};
 
 #[derive(serde::Serialize)]
 pub struct NetworkInterfaceInfo {
@@ -52,18 +52,20 @@ pub fn get_hostname() -> String {
 #[tauri::command]
 pub async fn sync_start_server(
     port: u16,
+    app: AppHandle,
     state: State<'_, SyncState>,
 ) -> Result<SyncStartResult, String> {
-    state.start_server(port).await
+    state.start_server(port, app).await
 }
 
 #[tauri::command]
 pub async fn sync_connect(
     address: String,
     pairing_code: String,
+    app: AppHandle,
     state: State<'_, SyncState>,
 ) -> Result<(), String> {
-    state.connect(address, pairing_code).await
+    state.connect(address, pairing_code, app).await
 }
 
 #[tauri::command]
