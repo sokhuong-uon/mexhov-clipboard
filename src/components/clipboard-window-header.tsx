@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CirclePlay,
+  Cloud,
   Copy,
   ArrowRight,
+  Globe,
   Pin,
   Search,
   Settings2,
   Trash2,
+  Wifi,
 } from "lucide-react";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { invoke } from "@tauri-apps/api/core";
@@ -30,9 +33,10 @@ const HISTORY_LIMIT_OPTIONS = [25, 50, 100, 200, 500] as const;
 const DEFAULT_SYNC_PORT = 9876;
 
 type SyncStatus = {
-  mode: "off" | "server" | "client";
+  mode: "off" | "lan-server" | "lan-client" | "cloud";
   address: string | null;
   pairingCode: string | null;
+  roomId: string | null;
   connectedPeers: number;
 };
 
@@ -144,9 +148,7 @@ export const ClipboardHeader = ({
                 onClick={onToggleMonitoring}
                 className={cn(
                   "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors",
-                  isMonitoring
-                    ? "bg-foreground"
-                    : "bg-input border-border",
+                  isMonitoring ? "bg-foreground" : "bg-input border-border",
                 )}
               >
                 <span
@@ -222,8 +224,7 @@ export const ClipboardHeader = ({
                 <div className="py-2">
                   <Badge variant="outline" className="text-xs">
                     Wayland
-                    {systemInfo.isCosmicDataControlEnabled &&
-                      " • Data Control"}
+                    {systemInfo.isCosmicDataControlEnabled && " • Data Control"}
                   </Badge>
                 </div>
               </>
@@ -249,9 +250,7 @@ function SettingRow({
   return (
     <div className="flex items-center justify-between py-2">
       <div className="flex flex-col">
-        <span className="text-[13px] font-medium text-foreground">
-          {label}
-        </span>
+        <span className="text-[13px] font-medium text-foreground">{label}</span>
         {description && (
           <span className="text-[11px] text-muted-foreground">
             {description}
@@ -275,13 +274,17 @@ function SyncSection() {
     mode: "off",
     address: null,
     pairingCode: null,
+    roomId: null,
     connectedPeers: 0,
   });
+  const [syncTab, setSyncTab] = useState<"lan" | "cloud">("lan");
   const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
   const [selectedIface, setSelectedIface] = useState(0);
   const [hostname, setHostname] = useState("this device");
   const [connectAddress, setConnectAddress] = useState("");
   const [connectCode, setConnectCode] = useState("");
+  const [cloudRelayUrl, setCloudRelayUrl] = useState("");
+  const [cloudAuthToken, setCloudAuthToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -346,16 +349,34 @@ function SyncSection() {
     }
   };
 
+  const handleCloudJoin = async () => {
+    if (!cloudRelayUrl.trim() || !cloudAuthToken.trim()) return;
+    setError(null);
+    setLoading(true);
+    try {
+      await invoke("sync_cloud_join", {
+        relayUrl: cloudRelayUrl.trim(),
+        authToken: cloudAuthToken.trim(),
+      });
+      await refreshStatus();
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleStop = async () => {
     await invoke("sync_stop");
     await refreshStatus();
     setError(null);
   };
 
-  const serverPort = syncStatus.address?.split(":").pop() ?? String(DEFAULT_SYNC_PORT);
+  const serverPort =
+    syncStatus.address?.split(":").pop() ?? String(DEFAULT_SYNC_PORT);
   const currentIface = interfaces[selectedIface];
   const serverAddress =
-    syncStatus.mode === "server" && currentIface
+    syncStatus.mode === "lan-server" && currentIface
       ? `${currentIface.ip}:${serverPort}`
       : null;
 
@@ -365,13 +386,15 @@ function SyncSection() {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const isActive = syncStatus.mode !== "off";
+
   return (
     <div className="py-2">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[13px] font-medium text-foreground">
           Clipboard Sync
         </span>
-        {syncStatus.mode !== "off" && (
+        {isActive && (
           <button
             onClick={handleStop}
             className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
@@ -381,15 +404,15 @@ function SyncSection() {
         )}
       </div>
 
-      {/* ── Active: hosting ── */}
-      {syncStatus.mode === "server" && (
+      {/* ── Active: LAN server ── */}
+      {syncStatus.mode === "lan-server" && (
         <div className="rounded-xl border border-border bg-accent/30 overflow-hidden">
-          {/* Status header */}
           <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60">
             <span className="relative flex size-2">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
+            <Wifi className="size-3.5 text-muted-foreground" />
             <span className="text-xs font-medium text-foreground">
               Sharing from {hostname}
             </span>
@@ -401,7 +424,6 @@ function SyncSection() {
             )}
           </div>
 
-          {/* QR + address */}
           {serverAddress && (
             <div className="flex flex-col items-center gap-3 p-4">
               <div className="rounded-lg bg-white p-2.5">
@@ -422,7 +444,6 @@ function SyncSection() {
                 </code>
                 <Copy className="size-3 text-muted-foreground group-hover:text-foreground transition-colors" />
               </button>
-              {/* Pairing code */}
               {syncStatus.pairingCode && (
                 <div className="flex items-center gap-1.5">
                   <span className="text-[11px] text-muted-foreground">
@@ -441,7 +462,6 @@ function SyncSection() {
             </div>
           )}
 
-          {/* Interface list */}
           {interfaces.length > 1 && (
             <div className="border-t border-border/60 px-3 py-2">
               <span className="text-[11px] text-muted-foreground block mb-1.5">
@@ -469,14 +489,15 @@ function SyncSection() {
         </div>
       )}
 
-      {/* ── Active: connected as client ── */}
-      {syncStatus.mode === "client" && (
+      {/* ── Active: LAN client ── */}
+      {syncStatus.mode === "lan-client" && (
         <div className="rounded-xl border border-border bg-accent/30 overflow-hidden">
           <div className="flex items-center gap-2 px-3 py-2.5">
             <span className="relative flex size-2">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
+            <Wifi className="size-3.5 text-muted-foreground" />
             <span className="text-xs font-medium text-foreground">
               Connected to {syncStatus.address}
             </span>
@@ -484,70 +505,172 @@ function SyncSection() {
         </div>
       )}
 
-      {/* ── Disconnected: show actions ── */}
-      {syncStatus.mode === "off" && (
-        <div className="flex flex-col gap-3">
-          {/* Start sharing — primary action */}
-          <button
-            onClick={handleStartServer}
-            disabled={loading}
-            className={cn(
-              "group flex items-center gap-3 rounded-xl border border-border p-3 transition-all",
-              "hover:border-foreground/20 hover:bg-accent/50",
-              "disabled:opacity-50 disabled:pointer-events-none",
-            )}
-          >
-            <div className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">
-              <CirclePlay className="size-4" />
-            </div>
-            <div className="flex flex-col items-start text-left">
-              <span className="text-[13px] font-medium text-foreground">
-                Start sharing
-              </span>
-              <span className="text-[11px] text-muted-foreground">
-                Share from {hostname}
-              </span>
-            </div>
-            <ArrowRight className="ml-auto size-4 text-muted-foreground opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
-          </button>
-
-          {/* Join — secondary action */}
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] text-muted-foreground pl-0.5">
-              Or join another device
+      {/* ── Active: Cloud ── */}
+      {syncStatus.mode === "cloud" && (
+        <div className="rounded-xl border border-border bg-accent/30 overflow-hidden">
+          <div className="flex items-center gap-2 px-3 py-2.5">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-sky-400 opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-sky-500" />
             </span>
-            <div className="flex flex-col gap-1.5">
-              <Input
-                placeholder="192.168.1.x:9876"
-                value={connectAddress}
-                onChange={(e) => setConnectAddress(e.target.value)}
-                className="h-8 text-xs"
-              />
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Pairing code"
-                  value={connectCode}
-                  onChange={(e) => setConnectCode(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleConnect()}
-                  className="flex-1 h-8 text-xs font-mono tracking-widest"
-                  maxLength={6}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleConnect}
-                  disabled={
-                    loading ||
-                    !connectAddress.trim() ||
-                    !connectCode.trim()
-                  }
-                  className="h-8 px-3"
-                >
-                  Join
-                </Button>
+            <Cloud className="size-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium text-foreground">
+              Cloud sync active
+            </span>
+            {syncStatus.connectedPeers > 0 && (
+              <span className="ml-auto text-[11px] text-muted-foreground">
+                {syncStatus.connectedPeers} peer
+                {syncStatus.connectedPeers !== 1 && "s"}
+              </span>
+            )}
+          </div>
+          {syncStatus.roomId && (
+            <div className="border-t border-border/60 px-3 py-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-muted-foreground">
+                  Room:
+                </span>
+                <code className="text-[11px] text-foreground">
+                  {syncStatus.roomId}
+                </code>
               </div>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Disconnected: LAN / Cloud tabs ── */}
+      {!isActive && (
+        <div className="flex flex-col gap-3">
+          {/* Tab selector */}
+          <div className="flex rounded-lg border border-border overflow-hidden">
+            <button
+              onClick={() => { setSyncTab("lan"); setError(null); }}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium transition-colors",
+                syncTab === "lan"
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+              )}
+            >
+              <Wifi className="size-3.5" />
+              LAN
+            </button>
+            <button
+              onClick={() => { setSyncTab("cloud"); setError(null); }}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium transition-colors border-l border-border",
+                syncTab === "cloud"
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+              )}
+            >
+              <Globe className="size-3.5" />
+              Cloud
+            </button>
           </div>
+
+          {/* LAN tab content */}
+          {syncTab === "lan" && (
+            <>
+              <button
+                onClick={handleStartServer}
+                disabled={loading}
+                className={cn(
+                  "group flex items-center gap-3 rounded-xl border border-border p-3 transition-all",
+                  "hover:border-foreground/20 hover:bg-accent/50",
+                  "disabled:opacity-50 disabled:pointer-events-none",
+                )}
+              >
+                <div className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">
+                  <CirclePlay className="size-4" />
+                </div>
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-[13px] font-medium text-foreground">
+                    Start sharing
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Share from {hostname}
+                  </span>
+                </div>
+                <ArrowRight className="ml-auto size-4 text-muted-foreground opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+              </button>
+
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[11px] text-muted-foreground pl-0.5">
+                  Or join another device
+                </span>
+                <div className="flex flex-col gap-1.5">
+                  <Input
+                    placeholder="192.168.1.x:9876"
+                    value={connectAddress}
+                    onChange={(e) => setConnectAddress(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Pairing code"
+                      value={connectCode}
+                      onChange={(e) => setConnectCode(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleConnect()}
+                      className="flex-1 h-8 text-xs font-mono tracking-widest"
+                      maxLength={6}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleConnect}
+                      disabled={
+                        loading ||
+                        !connectAddress.trim() ||
+                        !connectCode.trim()
+                      }
+                      className="h-8 px-3"
+                    >
+                      Join
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Cloud tab content */}
+          {syncTab === "cloud" && (
+            <div className="flex flex-col gap-2">
+              <Input
+                placeholder="Relay URL (wss://...)"
+                value={cloudRelayUrl}
+                onChange={(e) => setCloudRelayUrl(e.target.value)}
+                className="h-8 text-xs"
+              />
+              <Input
+                type="password"
+                placeholder="Auth token"
+                value={cloudAuthToken}
+                onChange={(e) => setCloudAuthToken(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCloudJoin()}
+                className="h-8 text-xs"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCloudJoin}
+                disabled={
+                  loading ||
+                  !cloudRelayUrl.trim() ||
+                  !cloudAuthToken.trim()
+                }
+                className="h-8"
+              >
+                <Cloud className="size-3.5 mr-1.5" />
+                Connect
+              </Button>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Sync clipboard over the internet via a cloud relay. End-to-end encrypted.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

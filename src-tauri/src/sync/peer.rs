@@ -105,7 +105,7 @@ pub async fn run<Stream>(
     // If this was a client and its only peer (the server) disconnected, reset mode
     if remaining == 0 {
         let mut mode_lock = mode.write().await;
-        if matches!(*mode_lock, SyncMode::Client { .. }) {
+        if matches!(*mode_lock, SyncMode::LanClient { .. }) {
             *mode_lock = SyncMode::Off;
         }
     }

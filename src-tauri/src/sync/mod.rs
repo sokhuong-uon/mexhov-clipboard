@@ -1,4 +1,5 @@
 mod client;
+mod cloud;
 pub(crate) mod crypto;
 mod peer;
 mod server;
@@ -15,10 +16,20 @@ pub use peer::content_hash;
 // ── Wire protocol ──────────────────────────────────────────────────
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "camelCase", rename_all_fields = "camelCase")]
+#[serde(
+    tag = "type",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
 pub enum SyncMessage {
-    Text { text: String },
-    Image { base64_data: String, width: u32, height: u32 },
+    Text {
+        text: String,
+    },
+    Image {
+        base64_data: String,
+        width: u32,
+        height: u32,
+    },
 }
 
 // ── Status reported to the frontend ────────────────────────────────
@@ -26,9 +37,10 @@ pub enum SyncMessage {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncStatus {
-    pub mode: String, // "off" | "server" | "client"
+    pub mode: String, // "off" | "lan-server" | "lan-client" | "cloud"
     pub address: Option<String>,
     pub pairing_code: Option<String>,
+    pub room_id: Option<String>,
     pub connected_peers: usize,
 }
 
@@ -62,15 +74,20 @@ pub struct SyncState {
     peer_counter: Arc<std::sync::atomic::AtomicU64>,
 }
 
+#[allow(dead_code)]
 pub(crate) enum SyncMode {
     Off,
-    Server {
+    LanServer {
         address: String,
         pairing_code: String,
         shutdown: tokio::sync::watch::Sender<bool>,
     },
-    Client {
+    LanClient {
         address: String,
+        shutdown: tokio::sync::watch::Sender<bool>,
+    },
+    Cloud {
+        room_id: String,
         shutdown: tokio::sync::watch::Sender<bool>,
     },
 }
@@ -98,22 +115,32 @@ impl SyncState {
                 mode: "off".into(),
                 address: None,
                 pairing_code: None,
+                room_id: None,
                 connected_peers: peer_count,
             },
-            SyncMode::Server {
+            SyncMode::LanServer {
                 address,
                 pairing_code,
                 ..
             } => SyncStatus {
-                mode: "server".into(),
+                mode: "lan-server".into(),
                 address: Some(address.clone()),
                 pairing_code: Some(pairing_code.clone()),
+                room_id: None,
                 connected_peers: peer_count,
             },
-            SyncMode::Client { address, .. } => SyncStatus {
-                mode: "client".into(),
+            SyncMode::LanClient { address, .. } => SyncStatus {
+                mode: "lan-client".into(),
                 address: Some(address.clone()),
                 pairing_code: None,
+                room_id: None,
+                connected_peers: peer_count,
+            },
+            SyncMode::Cloud { room_id, .. } => SyncStatus {
+                mode: "cloud".into(),
+                address: None,
+                pairing_code: None,
+                room_id: Some(room_id.clone()),
                 connected_peers: peer_count,
             },
         }
@@ -139,7 +166,7 @@ impl SyncState {
         )
         .await?;
 
-        *self.mode.write().await = SyncMode::Server {
+        *self.mode.write().await = SyncMode::LanServer {
             address: local_addr.clone(),
             pairing_code: pairing_code.clone(),
             shutdown: shutdown_tx,
@@ -151,7 +178,12 @@ impl SyncState {
         })
     }
 
-    pub async fn connect(&self, address: String, pairing_code: String, app: AppHandle) -> Result<(), String> {
+    pub async fn connect(
+        &self,
+        address: String,
+        pairing_code: String,
+        app: AppHandle,
+    ) -> Result<(), String> {
         self.stop().await;
 
         let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
@@ -170,16 +202,49 @@ impl SyncState {
         )
         .await?;
 
-        *self.mode.write().await = SyncMode::Client {
+        *self.mode.write().await = SyncMode::LanClient {
             address,
             shutdown: shutdown_tx,
         };
         Ok(())
     }
 
+    pub async fn cloud_join(
+        &self,
+        relay_url: String,
+        auth_token: String,
+        app: AppHandle,
+    ) -> Result<String, String> {
+        self.stop().await;
+
+        let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
+
+        let room_id = cloud::spawn(
+            &relay_url,
+            &auth_token,
+            self.outgoing_tx.clone(),
+            self.incoming_tx.clone(),
+            self.last_remote_hash.clone(),
+            shutdown_rx,
+            app,
+            self.mode.clone(),
+        )
+        .await?;
+
+        *self.mode.write().await = SyncMode::Cloud {
+            room_id: room_id.clone(),
+            shutdown: shutdown_tx,
+        };
+
+        Ok(room_id)
+    }
+
     pub async fn stop(&self) {
         let prev = std::mem::replace(&mut *self.mode.write().await, SyncMode::Off);
-        if let SyncMode::Server { shutdown, .. } | SyncMode::Client { shutdown, .. } = prev {
+        if let SyncMode::LanServer { shutdown, .. }
+        | SyncMode::LanClient { shutdown, .. }
+        | SyncMode::Cloud { shutdown, .. } = prev
+        {
             let _ = shutdown.send(true);
         }
         self.peers.write().await.clear();

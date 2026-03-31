@@ -26,8 +26,8 @@ use commands::{
     db_insert_item, db_toggle_favorite, db_update_sort_orders,
 };
 use commands::{
-    get_hostname, get_local_ip, get_network_interfaces, sync_connect, sync_start_server,
-    sync_status, sync_stop,
+    get_hostname, get_local_ip, get_network_interfaces, sync_cloud_join, sync_connect,
+    sync_start_server, sync_status, sync_stop,
 };
 use db::Database;
 use sync::SyncState;
@@ -105,6 +105,7 @@ fn main() {
             get_network_interfaces,
             sync_start_server,
             sync_connect,
+            sync_cloud_join,
             sync_stop,
             sync_status,
         ])

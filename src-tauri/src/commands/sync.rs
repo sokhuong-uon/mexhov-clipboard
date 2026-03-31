@@ -69,6 +69,16 @@ pub async fn sync_connect(
 }
 
 #[tauri::command]
+pub async fn sync_cloud_join(
+    relay_url: String,
+    auth_token: String,
+    app: AppHandle,
+    state: State<'_, SyncState>,
+) -> Result<String, String> {
+    state.cloud_join(relay_url, auth_token, app).await
+}
+
+#[tauri::command]
 pub async fn sync_stop(state: State<'_, SyncState>) -> Result<(), String> {
     state.stop().await;
     Ok(())
