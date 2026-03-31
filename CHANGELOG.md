@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.3...v1.3.4) (2026-03-31)
+
+
+### Bug Fixes
+
+* **mac:** add Mac specific dep ([449e68b](https://github.com/sokhuong-uon/mexhov-clipboard/commit/449e68b2a7a66afb83811bdada75a83273b6b108))
+
 ## [1.3.3](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.2...v1.3.3) (2026-03-31)
 
 
