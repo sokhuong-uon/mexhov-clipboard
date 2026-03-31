@@ -142,6 +142,65 @@ jobs:
           prerelease: false
           args: "--bundles appimage deb"
 
+  build-windows:
+    name: Build Windows
+    needs: create-release
+    if: needs.create-release.outputs.released == 'true'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.create-release.outputs.tag }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Update version in config files
+        shell: pwsh
+        run: |
+          $VERSION = "${{ needs.create-release.outputs.version }}"
+          Write-Host "Updating version to $VERSION"
+
+          # Update Cargo.toml
+          (Get-Content src-tauri/Cargo.toml) -replace '^version = ".*"', "version = `"$VERSION`"" | Set-Content src-tauri/Cargo.toml
+
+          # Update tauri.conf.json
+          (Get-Content src-tauri/tauri.conf.json) -replace '"version": ".*"', "`"version`": `"$VERSION`"" | Set-Content src-tauri/tauri.conf.json
+
+          # Verify updates
+          Write-Host "Cargo.toml version:"
+          Select-String -Path src-tauri/Cargo.toml -Pattern "^version"
+          Write-Host "tauri.conf.json version:"
+          Select-String -Path src-tauri/tauri.conf.json -Pattern "version"
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: .
+          tagName: ${{ needs.create-release.outputs.tag }}
+          releaseName: "${{ needs.create-release.outputs.tag }}"
+          releaseBody: "See the assets to download and install this version."
+          releaseDraft: false
+          prerelease: false
+          args: "--bundles nsis msi"
+
   build-macos:
     name: Build macOS
     needs: create-release
