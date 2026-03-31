@@ -1,3 +1,4 @@
+use super::crypto::EncryptedEnvelope;
 use super::{PeerMap, SyncMessage};
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
@@ -6,9 +7,11 @@ use tokio_tungstenite::tungstenite::Message;
 
 /// Drive a single WebSocket peer: read from remote, forward local changes,
 /// relay messages between peers (server mode), and respect shutdown.
+/// All SyncMessage payloads are encrypted with AES-256-GCM.
 pub async fn run<S>(
     ws_stream: S,
     peer_id: u64,
+    key: [u8; 32],
     peers: PeerMap,
     outgoing_tx: broadcast::Sender<SyncMessage>,
     incoming_tx: tokio::sync::mpsc::UnboundedSender<SyncMessage>,
@@ -29,15 +32,21 @@ pub async fn run<S>(
 
     loop {
         tokio::select! {
-            // Remote → local
+            // Remote → local (decrypt)
             msg = stream.next() => {
                 match msg {
                     Some(Ok(Message::Text(text))) => {
-                        if let Ok(sync_msg) = serde_json::from_str::<SyncMessage>(&text) {
+                        // Decrypt the envelope
+                        let plaintext = match EncryptedEnvelope::open(&key, &text) {
+                            Ok(p) => p,
+                            Err(_) => continue, // bad decrypt, skip
+                        };
+
+                        if let Ok(sync_msg) = serde_json::from_str::<SyncMessage>(&plaintext) {
                             // Mark hash so the monitor won't re-broadcast this content
                             *last_remote_hash.write().await = Some(content_hash(&sync_msg));
 
-                            // Relay to other peers (server fan-out)
+                            // Relay encrypted ciphertext as-is to other peers (same key)
                             let peers_read = peers.read().await;
                             for (&pid, sender) in peers_read.iter() {
                                 if pid != peer_id {
@@ -52,17 +61,19 @@ pub async fn run<S>(
                     _ => {}
                 }
             }
-            // Local clipboard change → remote
+            // Local clipboard change → remote (encrypt)
             msg = outgoing_rx.recv() => {
                 if let Ok(sync_msg) = msg {
                     if let Ok(json) = serde_json::to_string(&sync_msg) {
-                        if sink.send(Message::Text(json.into())).await.is_err() {
-                            break;
+                        if let Ok(encrypted) = EncryptedEnvelope::seal(&key, &json) {
+                            if sink.send(Message::Text(encrypted.into())).await.is_err() {
+                                break;
+                            }
                         }
                     }
                 }
             }
-            // Relayed message from another peer
+            // Relayed message from another peer (already encrypted)
             msg = relay_rx.recv() => {
                 match msg {
                     Some(m) => { if sink.send(m).await.is_err() { break; } }

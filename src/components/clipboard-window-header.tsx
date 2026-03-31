@@ -31,7 +31,13 @@ const DEFAULT_SYNC_PORT = 9876;
 type SyncStatus = {
   mode: "off" | "server" | "client";
   address: string | null;
+  pairingCode: string | null;
   connectedPeers: number;
+};
+
+type SyncStartResult = {
+  address: string;
+  pairingCode: string;
 };
 
 type ClipboardHeaderProps = {
@@ -267,12 +273,14 @@ function SyncSection() {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({
     mode: "off",
     address: null,
+    pairingCode: null,
     connectedPeers: 0,
   });
   const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
   const [selectedIface, setSelectedIface] = useState(0);
   const [hostname, setHostname] = useState("this device");
   const [connectAddress, setConnectAddress] = useState("");
+  const [connectCode, setConnectCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -303,7 +311,9 @@ function SyncSection() {
     setError(null);
     setLoading(true);
     try {
-      await invoke("sync_start_server", { port: DEFAULT_SYNC_PORT });
+      await invoke<SyncStartResult>("sync_start_server", {
+        port: DEFAULT_SYNC_PORT,
+      });
       await refreshStatus();
     } catch (e) {
       setError(String(e));
@@ -313,11 +323,14 @@ function SyncSection() {
   };
 
   const handleConnect = async () => {
-    if (!connectAddress.trim()) return;
+    if (!connectAddress.trim() || !connectCode.trim()) return;
     setError(null);
     setLoading(true);
     try {
-      await invoke("sync_connect", { address: connectAddress.trim() });
+      await invoke("sync_connect", {
+        address: connectAddress.trim(),
+        pairingCode: connectCode.trim(),
+      });
       await refreshStatus();
     } catch (e) {
       setError(String(e));
@@ -402,10 +415,21 @@ function SyncSection() {
                 </code>
                 <Copy className="size-3 text-muted-foreground group-hover:text-foreground transition-colors" />
               </button>
+              {/* Pairing code */}
+              {syncStatus.pairingCode && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-muted-foreground">
+                    Code:
+                  </span>
+                  <span className="font-mono text-base font-semibold tracking-[0.25em] text-foreground">
+                    {syncStatus.pairingCode}
+                  </span>
+                </div>
+              )}
               <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
                 {copied
                   ? "Copied!"
-                  : "Enter this on the other device, or scan the QR code."}
+                  : "Share the address and pairing code with the other device."}
               </p>
             </div>
           )}
@@ -485,23 +509,36 @@ function SyncSection() {
             <span className="text-[11px] text-muted-foreground pl-0.5">
               Or join another device
             </span>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-1.5">
               <Input
                 placeholder="192.168.1.x:9876"
                 value={connectAddress}
                 onChange={(e) => setConnectAddress(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleConnect()}
-                className="flex-1 h-8 text-xs"
+                className="h-8 text-xs"
               />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleConnect}
-                disabled={loading || !connectAddress.trim()}
-                className="h-8 px-3"
-              >
-                Join
-              </Button>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Pairing code"
+                  value={connectCode}
+                  onChange={(e) => setConnectCode(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleConnect()}
+                  className="flex-1 h-8 text-xs font-mono tracking-widest"
+                  maxLength={6}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleConnect}
+                  disabled={
+                    loading ||
+                    !connectAddress.trim() ||
+                    !connectCode.trim()
+                  }
+                  className="h-8 px-3"
+                >
+                  Join
+                </Button>
+              </div>
             </div>
           </div>
         </div>

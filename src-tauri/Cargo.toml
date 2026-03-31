@@ -42,6 +42,10 @@ image = "0.25.10"
 enigo = { version = "0.6", features = ["wayland", "x11rb"] }
 hostname = "0.4.2"
 network-interface = "2.0.5"
+aes-gcm = "0.10.3"
+rand = "0.10.0"
+argon2 = "0.5.3"
+x25519-dalek = "3.0.0-pre.6"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"

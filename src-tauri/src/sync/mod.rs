@@ -1,4 +1,5 @@
 mod client;
+pub(crate) mod crypto;
 mod peer;
 mod server;
 
@@ -26,7 +27,17 @@ pub enum SyncMessage {
 pub struct SyncStatus {
     pub mode: String, // "off" | "server" | "client"
     pub address: Option<String>,
+    pub pairing_code: Option<String>,
     pub connected_peers: usize,
+}
+
+// ── Server start result ────────────────────────────────────────────
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncStartResult {
+    pub address: String,
+    pub pairing_code: String,
 }
 
 // ── Shared peer bookkeeping ────────────────────────────────────────
@@ -54,6 +65,7 @@ enum SyncMode {
     Off,
     Server {
         address: String,
+        pairing_code: String,
         shutdown: tokio::sync::watch::Sender<bool>,
     },
     Client {
@@ -84,27 +96,37 @@ impl SyncState {
             SyncMode::Off => SyncStatus {
                 mode: "off".into(),
                 address: None,
+                pairing_code: None,
                 connected_peers: peer_count,
             },
-            SyncMode::Server { address, .. } => SyncStatus {
+            SyncMode::Server {
+                address,
+                pairing_code,
+                ..
+            } => SyncStatus {
                 mode: "server".into(),
                 address: Some(address.clone()),
+                pairing_code: Some(pairing_code.clone()),
                 connected_peers: peer_count,
             },
             SyncMode::Client { address, .. } => SyncStatus {
                 mode: "client".into(),
                 address: Some(address.clone()),
+                pairing_code: None,
                 connected_peers: peer_count,
             },
         }
     }
 
-    pub async fn start_server(&self, port: u16) -> Result<String, String> {
+    pub async fn start_server(&self, port: u16) -> Result<SyncStartResult, String> {
         self.stop().await;
+
+        let pairing_code = crypto::generate_pairing_code();
         let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
 
         let local_addr = server::spawn(
             port,
+            &pairing_code,
             self.peers.clone(),
             self.outgoing_tx.clone(),
             self.incoming_tx.clone(),
@@ -116,17 +138,24 @@ impl SyncState {
 
         *self.mode.write().await = SyncMode::Server {
             address: local_addr.clone(),
+            pairing_code: pairing_code.clone(),
             shutdown: shutdown_tx,
         };
-        Ok(local_addr)
+
+        Ok(SyncStartResult {
+            address: local_addr,
+            pairing_code,
+        })
     }
 
-    pub async fn connect(&self, address: String) -> Result<(), String> {
+    pub async fn connect(&self, address: String, pairing_code: String) -> Result<(), String> {
         self.stop().await;
+
         let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
 
         client::spawn(
             &address,
+            &pairing_code,
             self.peers.clone(),
             self.outgoing_tx.clone(),
             self.incoming_tx.clone(),
