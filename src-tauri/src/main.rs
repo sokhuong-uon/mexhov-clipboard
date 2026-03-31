@@ -7,6 +7,7 @@ mod clipboard_monitor;
 mod commands;
 mod db;
 mod schema;
+mod sync;
 mod tray;
 mod window_state;
 
@@ -24,7 +25,12 @@ use commands::{
     db_bump_item, db_clear_all, db_dedup_item, db_delete_item, db_get_all_items, db_get_item_count,
     db_insert_item, db_toggle_favorite, db_update_sort_orders,
 };
+use commands::{
+    get_hostname, get_local_ip, get_network_interfaces, sync_connect, sync_start_server,
+    sync_status, sync_stop,
+};
 use db::Database;
+use sync::SyncState;
 use tauri::Manager;
 use window_state::set_visible as window_set_visible;
 
@@ -41,6 +47,7 @@ fn main() {
         }))
         .manage(ClipboardManager::new())
         .manage(MonitorState::new())
+        .manage(SyncState::new())
         .setup(move |app| {
             // Initialize database in app data directory
             let app_data_dir = app
@@ -93,6 +100,13 @@ fn main() {
             get_file_size,
             get_setting,
             set_setting,
+            get_local_ip,
+            get_hostname,
+            get_network_interfaces,
+            sync_start_server,
+            sync_connect,
+            sync_stop,
+            sync_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

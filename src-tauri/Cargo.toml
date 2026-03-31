@@ -22,7 +22,9 @@ tauri = { version = "2", features = ["tray-icon"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 arboard = "3.3"
-tokio = { version = "1", features = ["time"] }
+tokio = { version = "1", features = ["time", "net", "sync", "macros"] }
+tokio-tungstenite = "0.29"
+futures-util = { version = "0.3", default-features = false, features = ["sink"] }
 png = "0.17"
 base64 = "0.22"
 dotenvy = "0.15"
@@ -38,6 +40,8 @@ rusqlite = { version = "0.37", features = ["bundled"] }
 tauri-plugin-drag = "2.1.0"
 image = "0.25.10"
 enigo = { version = "0.6", features = ["wayland", "x11rb"] }
+hostname = "0.4.2"
+network-interface = "2.0.5"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"
