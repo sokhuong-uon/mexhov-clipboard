@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.1...v1.3.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* refresh client UI when connection droped to 0 ([cdba34b](https://github.com/sokhuong-uon/mexhov-clipboard/commit/cdba34b446d3519bdd6f7d8d6a6a174b6a45167b))
+
 ## [1.3.1](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.0...v1.3.1) (2026-03-31)
 
 
