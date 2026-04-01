@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.5...v1.4.0) (2026-04-01)
+
+
+### Features
+
+* can customize hotkeys ([917fdab](https://github.com/sokhuong-uon/mexhov-clipboard/commit/917fdabf50e19c1b8658c8d56ec1103923d758b9))
+
+
+### Performance Improvements
+
+* memoize components and add is_env in db instead of recalcuate ([63d06eb](https://github.com/sokhuong-uon/mexhov-clipboard/commit/63d06ebc12b0a748500053c6a4845f43ecbc77d3))
+
 ## [1.3.5](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.4...v1.3.5) (2026-04-01)
 
 
