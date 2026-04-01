@@ -15,6 +15,7 @@ import {
   ClipboardItem as ClipboardItemType,
   ClipboardContent,
 } from "@/types/clipboard";
+import type { HotkeyConfig } from "@/hooks/use-hotkeys-config";
 import { SortableItem } from "./sortable-item";
 import { SearchResultItem } from "./search-result-item";
 
@@ -44,6 +45,7 @@ type ClipboardListProps = {
   isSearching?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
+  hotkeys: HotkeyConfig;
 };
 
 export const ClipboardList = ({
@@ -59,6 +61,7 @@ export const ClipboardList = ({
   isSearching = false,
   hasMore = false,
   onLoadMore,
+  hotkeys,
 }: ClipboardListProps) => {
   const [activeId, setActiveId] = useState<number | null>(null);
   const [colorMenuItemId, setColorMenuItemId] = useState<number | null>(null);
@@ -115,24 +118,24 @@ export const ClipboardList = ({
 
   const colorMenuIsOpen = colorMenuItemId != null;
 
-  useHotkey("J", moveDown, { enabled: !colorMenuIsOpen });
-  useHotkey("K", moveUp, { enabled: !colorMenuIsOpen });
+  useHotkey(hotkeys.moveDown, moveDown, { enabled: !colorMenuIsOpen });
+  useHotkey(hotkeys.moveUp, moveUp, { enabled: !colorMenuIsOpen });
 
-  useHotkey("C", copyActive, {
+  useHotkey(hotkeys.copy, copyActive, {
     enabled: activeIndex >= 0 && !colorMenuIsOpen,
     ignoreInputs: false,
   });
 
-  useHotkey("P", pasteActive, {
+  useHotkey(hotkeys.paste, pasteActive, {
     enabled: activeIndex >= 0 && !colorMenuIsOpen,
   });
 
-  useHotkey("D", deleteActive, {
+  useHotkey(hotkeys.delete, deleteActive, {
     enabled: activeIndex >= 0 && !colorMenuIsOpen,
   });
 
   useHotkey(
-    "F",
+    hotkeys.favorite,
     () => {
       if (activeIndex >= 0 && items[activeIndex]) {
         onToggleFavorite(items[activeIndex].id);
@@ -142,7 +145,7 @@ export const ClipboardList = ({
   );
 
   useHotkey(
-    "A",
+    hotkeys.colorMenu,
     () => {
       if (activeIndex >= 0 && items[activeIndex]?.detected_color) {
         setColorMenuItemId(items[activeIndex].id);
@@ -151,17 +154,17 @@ export const ClipboardList = ({
     { enabled: activeIndex >= 0 && !colorMenuIsOpen },
   );
 
-  useHotkey("O", () => onToggleFavoritesFirst?.(), {
+  useHotkey(hotkeys.favoritesFirst, () => onToggleFavoritesFirst?.(), {
     enabled: !colorMenuIsOpen,
   });
 
   useHotkey("ArrowDown", moveDown);
   useHotkey("ArrowUp", moveUp);
 
-  useHotkeySequence(["T"], () => {
+  useHotkeySequence([hotkeys.jumpTop], () => {
     if (items.length > 0) setActiveIndex(0);
   });
-  useHotkey("B", () => {
+  useHotkey(hotkeys.jumpBottom, () => {
     if (items.length > 0) setActiveIndex(items.length - 1);
   });
 

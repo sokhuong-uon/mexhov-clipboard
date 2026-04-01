@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { invoke } from "@tauri-apps/api/core";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { useSettings } from "@/hooks/use-settings";
+import { useHotkeysConfig } from "@/hooks/use-hotkeys-config";
 import { useSystemTheme } from "@/hooks/use-system-theme";
 import { useClipboardHistory } from "@/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
@@ -27,6 +28,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 150 });
 
   const { historyLimit, setHistoryLimit } = useSettings();
+  const { hotkeys, setHotkey, resetHotkey, resetAll: resetAllHotkeys } =
+    useHotkeysConfig();
   const [favoritesFirst, setFavoritesFirst] = useState(false);
 
   const { readContent, write, writeImage, reinitialize, error, dismissError } =
@@ -162,6 +165,10 @@ function App() {
             onHistoryLimitChange={setHistoryLimit}
             favoritesFirst={favoritesFirst}
             onToggleFavoritesFirst={() => setFavoritesFirst((v) => !v)}
+            hotkeys={hotkeys}
+            onSetHotkey={setHotkey}
+            onResetHotkey={resetHotkey}
+            onResetAllHotkeys={resetAllHotkeys}
           />
 
           {error && (
@@ -189,6 +196,7 @@ function App() {
                 isSearching={isSearching}
                 hasMore={hasMore && !isSearching}
                 onLoadMore={loadMore}
+                hotkeys={hotkeys}
               />
             )}
           </div>
