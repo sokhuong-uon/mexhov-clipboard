@@ -32,6 +32,7 @@ pub struct ClipboardItemRow {
     pub kv_key: Option<String>,
     pub detected_date: Option<String>,
     pub detected_color: Option<String>,
+    pub is_env: bool,
     pub content_hash: Option<String>,
     pub created_at: String,
     pub updated_at: String,
@@ -55,6 +56,7 @@ impl From<SelectClipboardItems> for ClipboardItemRow {
             kv_key: row.kv_key,
             detected_date: row.detected_date,
             detected_color: row.detected_color,
+            is_env: row.is_env != 0,
             content_hash: row.content_hash,
             created_at: row.created_at,
             updated_at: row.updated_at,
@@ -62,7 +64,11 @@ impl From<SelectClipboardItems> for ClipboardItemRow {
     }
 }
 
-fn compute_content_hash(content_type: &str, text_content: &Option<String>, image_data: &Option<String>) -> String {
+fn compute_content_hash(
+    content_type: &str,
+    text_content: &Option<String>,
+    image_data: &Option<String>,
+) -> String {
     let mut hasher = Sha256::new();
     hasher.update(content_type.as_bytes());
     hasher.update(b":");
@@ -96,6 +102,7 @@ pub struct InsertClipboardItemParams {
     pub kv_key: Option<String>,
     pub detected_date: Option<String>,
     pub detected_color: Option<String>,
+    pub is_env: bool,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -144,7 +151,12 @@ impl Database {
         self.inner.lock().map_err(e2s)
     }
 
-    pub fn get_all_items(&self, limit: i64, offset: i64, favorites_first: bool) -> DbResult<Vec<ClipboardItemRow>> {
+    pub fn get_all_items(
+        &self,
+        limit: i64,
+        offset: i64,
+        favorites_first: bool,
+    ) -> DbResult<Vec<ClipboardItemRow>> {
         let inner = self.lock()?;
         let _ci = &inner.schema.clipboard_items;
 
@@ -176,6 +188,7 @@ impl Database {
                         kv_key: row.get("kv_key")?,
                         detected_date: row.get("detected_date")?,
                         detected_color: row.get("detected_color")?,
+                        is_env: row.get("is_env")?,
                         content_hash: row.get("content_hash")?,
                         created_at: row.get("created_at")?,
                         updated_at: row.get("updated_at")?,
@@ -192,13 +205,17 @@ impl Database {
         let inner = self.lock()?;
         let ci = &inner.schema.clipboard_items;
 
-        let content_hash = compute_content_hash(&params.content_type, &params.text_content, &params.image_data);
+        let content_hash = compute_content_hash(
+            &params.content_type,
+            &params.text_content,
+            &params.image_data,
+        );
 
         inner
             .db
             .conn()
             .execute(
-                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, detected_color, content_hash, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13, ?14, ?15)",
+                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, detected_color, is_env, content_hash, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
                 rusqlite::params![
                     params.content_type,
                     params.text_content,
@@ -212,6 +229,7 @@ impl Database {
                     params.kv_key,
                     params.detected_date,
                     params.detected_color,
+                    params.is_env as i64,
                     content_hash,
                     params.created_at,
                     params.updated_at,

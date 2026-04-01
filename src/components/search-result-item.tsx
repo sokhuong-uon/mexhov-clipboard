@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 
 import { ClipboardItem } from "@/components/clipboard-item";
 import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
 
-export const SearchResultItem = ({
+export const SearchResultItem = memo(function SearchResultItem({
   item,
   isActive,
   isCopied,
@@ -24,7 +24,7 @@ export const SearchResultItem = ({
   onSplitEnv?: (id: number) => void;
   colorMenuOpen?: boolean;
   onColorMenuOpenChange?: (open: boolean) => void;
-}) => {
+}) {
   const ref = useRef<HTMLLIElement>(null);
 
   useEffect(() => {
@@ -40,7 +40,6 @@ export const SearchResultItem = ({
       role="option"
       aria-selected={isActive}
       tabIndex={isActive ? 0 : -1}
-      layout
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8, transition: { duration: 0.15 } }}
@@ -61,4 +60,4 @@ export const SearchResultItem = ({
       />
     </motion.li>
   );
-};
+});

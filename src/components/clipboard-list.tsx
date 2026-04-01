@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useHotkey,
   useHotkeys,
@@ -65,6 +65,17 @@ export const ClipboardList = ({
 }: ClipboardListProps) => {
   const [activeId, setActiveId] = useState<number | null>(null);
   const [colorMenuItemId, setColorMenuItemId] = useState<number | null>(null);
+
+  // Stable per-item callback cache for onColorMenuOpenChange
+  const colorMenuHandlersRef = useRef(new Map<number, (open: boolean) => void>());
+  const getColorMenuHandler = useCallback((itemId: number) => {
+    let handler = colorMenuHandlersRef.current.get(itemId);
+    if (!handler) {
+      handler = (open: boolean) => setColorMenuItemId(open ? itemId : null);
+      colorMenuHandlersRef.current.set(itemId, handler);
+    }
+    return handler;
+  }, []);
 
   const isSearchingRef = useRef(isSearching);
   useEffect(() => {
@@ -181,6 +192,24 @@ export const ClipboardList = ({
     })),
   );
 
+  const handleDragEnd = useCallback(
+    (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragEnd"]>>[0]) => {
+      const { source } = event.operation;
+      if (!source || !isSortable(source)) return;
+
+      const { index, initialIndex } = source.sortable;
+      if (index === initialIndex) return;
+
+      const sourceId = items[initialIndex]?.id;
+      const overId = items[index]?.id;
+
+      if (sourceId != null && overId != null && sourceId !== overId) {
+        onReorder(sourceId, overId);
+      }
+    },
+    [items, onReorder],
+  );
+
   if (items.length === 0) {
     return <EmptyState isSearching={isSearching} />;
   }
@@ -217,9 +246,7 @@ export const ClipboardList = ({
                 onToggleFavorite={onToggleFavorite}
                 onSplitEnv={onSplitEnv}
                 colorMenuOpen={colorMenuItemId === item.id}
-                onColorMenuOpenChange={(open) =>
-                  setColorMenuItemId(open ? item.id : null)
-                }
+                onColorMenuOpenChange={getColorMenuHandler(item.id)}
               />
             ))}
           </AnimatePresence>
@@ -229,22 +256,7 @@ export const ClipboardList = ({
   }
 
   return (
-    <DragDropProvider
-      onDragEnd={(event) => {
-        const { source } = event.operation;
-        if (!source || !isSortable(source)) return;
-
-        const { index, initialIndex } = source.sortable;
-        if (index === initialIndex) return;
-
-        const sourceId = items[initialIndex]?.id;
-        const overId = items[index]?.id;
-
-        if (sourceId != null && overId != null && sourceId !== overId) {
-          onReorder(sourceId, overId);
-        }
-      }}
-    >
+    <DragDropProvider onDragEnd={handleDragEnd}>
       <ScrollArea className="h-full">
         <ul className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
           <AnimatePresence initial={false}>
@@ -260,9 +272,7 @@ export const ClipboardList = ({
                 onToggleFavorite={onToggleFavorite}
                 onSplitEnv={onSplitEnv}
                 colorMenuOpen={colorMenuItemId === item.id}
-                onColorMenuOpenChange={(open) =>
-                  setColorMenuItemId(open ? item.id : null)
-                }
+                onColorMenuOpenChange={getColorMenuHandler(item.id)}
               />
             ))}
           </AnimatePresence>

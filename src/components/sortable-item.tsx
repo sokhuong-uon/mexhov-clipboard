@@ -1,11 +1,11 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { motion } from "motion/react";
 
 import { ClipboardItem } from "@/components/clipboard-item";
 import { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
 
-export const SortableItem = ({
+export const SortableItem = memo(function SortableItem({
   item,
   index,
   isActive,
@@ -27,7 +27,7 @@ export const SortableItem = ({
   onSplitEnv?: (id: number) => void;
   colorMenuOpen?: boolean;
   onColorMenuOpenChange?: (open: boolean) => void;
-}) => {
+}) {
   const {
     ref: sortableRef,
     handleRef,
@@ -51,7 +51,6 @@ export const SortableItem = ({
         sortableRef(el);
         scrollRef.current = el;
       }}
-      layout
       initial={{ opacity: 0, y: -8 }}
       animate={{
         opacity: isDragging ? 0.5 : 1,
@@ -76,4 +75,4 @@ export const SortableItem = ({
       />
     </motion.li>
   );
-};
+});

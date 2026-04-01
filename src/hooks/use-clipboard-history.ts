@@ -4,7 +4,6 @@ import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { generateKeyBetween } from "jittered-fractional-indexing";
 import { ClipboardContent } from "@/types/clipboard";
 import { clipboardDb } from "@/hooks/use-clipboard-db";
-import { enrichAllWithEnvDetection } from "@/hooks/clipboard-enrichment";
 import { splitEnvItemInDb } from "@/hooks/clipboard-split-env";
 
 const HISTORY_KEY = "clipboard-history";
@@ -18,10 +17,7 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
   const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
     queryKey: [HISTORY_KEY, maxItems, favoritesFirst],
     queryFn: async ({ pageParam = 0 }) => {
-      const items = await clipboardDb
-        .getAllItems(maxItems, pageParam, favoritesFirst)
-        .then(enrichAllWithEnvDetection);
-      return items;
+      return clipboardDb.getAllItems(maxItems, pageParam, favoritesFirst);
     },
     initialPageParam: 0,
     getNextPageParam: (_lastPage, allPages) => {
@@ -53,9 +49,10 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
       const now = Date.now().toString();
 
       try {
-        const [detectedDate, detectedColor] = await Promise.all([
+        const [detectedDate, detectedColor, isEnv] = await Promise.all([
           invoke<string | null>("detect_date_content", { text }),
           invoke<string | null>("detect_color_content", { text }),
+          invoke<boolean>("detect_env_content", { text }),
         ]);
         const rawItem = await clipboardDb.insertItem({
           content_type: "text",
@@ -70,6 +67,7 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
           kv_key: null,
           detected_date: detectedDate,
           detected_color: detectedColor,
+          is_env: isEnv,
           created_at: now,
           updated_at: now,
         });
@@ -104,6 +102,7 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
           kv_key: null,
           detected_date: null,
           detected_color: null,
+          is_env: false,
           created_at: now,
           updated_at: now,
         });

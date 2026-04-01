@@ -19,7 +19,7 @@ export type ClipboardItem = {
   content_hash: string | null;
   created_at: string;
   updated_at: string;
-  is_env?: boolean;
+  is_env: boolean;
 };
 
 export type ClipboardError = {

@@ -41,6 +41,7 @@ export async function splitEnvItemInDb(
         kv_key: null,
         detected_date: null,
         detected_color: null,
+        is_env: false,
         created_at: now,
         updated_at: now,
       });
@@ -63,6 +64,7 @@ export async function splitEnvItemInDb(
         kv_key: key,
         detected_date: null,
         detected_color: null,
+        is_env: false,
         created_at: now,
         updated_at: now,
       });
