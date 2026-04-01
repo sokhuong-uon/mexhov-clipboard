@@ -1,68 +1,12 @@
-use std::sync::Mutex;
-
 use drizzle::core::expr::*;
 use drizzle::sqlite::prelude::*;
-use drizzle::sqlite::rusqlite::Drizzle;
-use rusqlite::Connection;
-use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::schema::*;
 
-type DbResult<T> = Result<T, String>;
-
-fn e2s<E: std::fmt::Display>(e: E) -> String {
-    e.to_string()
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ClipboardItemRow {
-    pub id: i64,
-    pub content_type: String,
-    pub text_content: Option<String>,
-    pub image_data: Option<String>,
-    pub image_width: Option<i64>,
-    pub image_height: Option<i64>,
-    pub char_count: Option<i64>,
-    pub line_count: Option<i64>,
-    pub source_app: Option<String>,
-    pub is_favorite: bool,
-    pub sort_order: String,
-    pub copy_count: i64,
-    pub kv_key: Option<String>,
-    pub detected_date: Option<String>,
-    pub detected_color: Option<String>,
-    pub is_env: bool,
-    pub content_hash: Option<String>,
-    pub created_at: String,
-    pub updated_at: String,
-}
-
-impl From<SelectClipboardItems> for ClipboardItemRow {
-    fn from(row: SelectClipboardItems) -> Self {
-        Self {
-            id: row.id,
-            content_type: row.content_type,
-            text_content: row.text_content,
-            image_data: row.image_data,
-            image_width: row.image_width,
-            image_height: row.image_height,
-            char_count: row.char_count,
-            line_count: row.line_count,
-            source_app: row.source_app,
-            is_favorite: row.is_favorite != 0,
-            sort_order: row.sort_order,
-            copy_count: row.copy_count,
-            kv_key: row.kv_key,
-            detected_date: row.detected_date,
-            detected_color: row.detected_color,
-            is_env: row.is_env != 0,
-            content_hash: row.content_hash,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-        }
-    }
-}
+use super::schema::*;
+use super::utils::*;
+use super::Database;
 
 fn compute_content_hash(
     content_type: &str,
@@ -88,69 +32,7 @@ fn compute_content_hash(
     format!("{:x}", hasher.finalize())
 }
 
-#[derive(Debug, Deserialize)]
-pub struct InsertClipboardItemParams {
-    pub content_type: String,
-    pub text_content: Option<String>,
-    pub image_data: Option<String>,
-    pub image_width: Option<i64>,
-    pub image_height: Option<i64>,
-    pub char_count: Option<i64>,
-    pub line_count: Option<i64>,
-    pub source_app: Option<String>,
-    pub sort_order: String,
-    pub kv_key: Option<String>,
-    pub detected_date: Option<String>,
-    pub detected_color: Option<String>,
-    pub is_env: bool,
-    pub created_at: String,
-    pub updated_at: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct UpdateSortOrderParams {
-    pub id: i64,
-    pub sort_order: String,
-}
-
-pub struct Database {
-    inner: Mutex<DatabaseInner>,
-}
-
-struct DatabaseInner {
-    db: Drizzle,
-    schema: Schema,
-}
-
 impl Database {
-    pub fn new(db_path: &str) -> DbResult<Self> {
-        let conn = Connection::open(db_path).map_err(e2s)?;
-
-        conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;")
-            .map_err(e2s)?;
-
-        // Use push to create/migrate tables
-        let (db, _) = Drizzle::new(conn, ());
-        let schema = Schema::new();
-        db.push(&schema).map_err(e2s)?;
-
-        // Create index on content_hash for fast deduplication
-        db.conn().execute(
-            "CREATE INDEX IF NOT EXISTS idx_clipboard_items_content_hash ON clipboard_items(content_hash)",
-            [],
-        ).map_err(e2s)?;
-
-        let schema = Schema::new();
-        let inner = DatabaseInner { db, schema };
-        Ok(Self {
-            inner: Mutex::new(inner),
-        })
-    }
-
-    fn lock(&self) -> DbResult<std::sync::MutexGuard<'_, DatabaseInner>> {
-        self.inner.lock().map_err(e2s)
-    }
-
     pub fn get_all_items(
         &self,
         limit: i64,
@@ -158,7 +40,6 @@ impl Database {
         favorites_first: bool,
     ) -> DbResult<Vec<ClipboardItemRow>> {
         let inner = self.lock()?;
-        let _ci = &inner.schema.clipboard_items;
 
         let query = if favorites_first {
             "SELECT * FROM clipboard_items ORDER BY is_favorite DESC, sort_order ASC LIMIT ?1 OFFSET ?2"
@@ -196,7 +77,7 @@ impl Database {
                 })
                 .and_then(|rows| rows.collect::<Result<Vec<_>, _>>())
             })
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         Ok(rows.into_iter().map(ClipboardItemRow::from).collect())
     }
@@ -235,7 +116,7 @@ impl Database {
                     params.updated_at,
                 ],
             )
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         let row: SelectClipboardItems = inner
             .db
@@ -244,25 +125,23 @@ impl Database {
             .order_by(desc(ci.id))
             .limit(1)
             .get()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         Ok(ClipboardItemRow::from(row))
     }
 
     /// Delete all duplicates of an item by content_hash, keeping only the given ID.
-    /// Returns the number of deleted rows.
     pub fn delete_duplicates(&self, id: i64) -> DbResult<i64> {
         let inner = self.lock()?;
         let ci = &inner.schema.clipboard_items;
 
-        // Get the item's content_hash
         let item: SelectClipboardItems = inner
             .db
             .select(())
             .from(*ci)
             .r#where(eq(ci.id, id))
             .get()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         let Some(hash) = item.content_hash else {
             return Ok(0);
@@ -275,7 +154,7 @@ impl Database {
                 "DELETE FROM clipboard_items WHERE content_hash = ?1 AND id != ?2",
                 rusqlite::params![hash, id],
             )
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         Ok(deleted as i64)
     }
@@ -283,7 +162,6 @@ impl Database {
     pub fn bump_item(&self, id: i64, sort_order: &str) -> DbResult<ClipboardItemRow> {
         let inner = self.lock()?;
         let ci = &inner.schema.clipboard_items;
-
         let now = timestamp_now();
 
         inner
@@ -296,7 +174,7 @@ impl Database {
             )
             .r#where(eq(ci.id, id))
             .execute()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         inner
             .db
@@ -305,7 +183,7 @@ impl Database {
                 "UPDATE clipboard_items SET copy_count = copy_count + 1 WHERE id = ?1",
                 rusqlite::params![id],
             )
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         let row: SelectClipboardItems = inner
             .db
@@ -313,7 +191,7 @@ impl Database {
             .from(*ci)
             .r#where(eq(ci.id, id))
             .get()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         Ok(ClipboardItemRow::from(row))
     }
@@ -328,7 +206,7 @@ impl Database {
             .set(UpdateClipboardItems::default().with_sort_order(sort_order))
             .r#where(eq(ci.id, id))
             .execute()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         Ok(())
     }
@@ -350,7 +228,7 @@ impl Database {
             .from(*ci)
             .r#where(eq(ci.id, id))
             .get()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         let new_fav = if current.is_favorite != 0 { 0i64 } else { 1i64 };
 
@@ -360,7 +238,7 @@ impl Database {
             .set(UpdateClipboardItems::default().with_is_favorite(new_fav))
             .r#where(eq(ci.id, id))
             .execute()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         let row: SelectClipboardItems = inner
             .db
@@ -368,7 +246,7 @@ impl Database {
             .from(*ci)
             .r#where(eq(ci.id, id))
             .get()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         Ok(ClipboardItemRow::from(row))
     }
@@ -382,7 +260,7 @@ impl Database {
             .delete(*ci)
             .r#where(eq(ci.id, id))
             .execute()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         Ok(())
     }
@@ -391,7 +269,7 @@ impl Database {
         let inner = self.lock()?;
         let ci = &inner.schema.clipboard_items;
 
-        inner.db.delete(*ci).execute().map_err(e2s)?;
+        inner.db.delete(*ci).execute().map_err(error_to_string)?;
 
         Ok(())
     }
@@ -405,47 +283,8 @@ impl Database {
             .select((count(ci.id),))
             .from(*ci)
             .get()
-            .map_err(e2s)?;
+            .map_err(error_to_string)?;
 
         Ok(result.0)
     }
-
-    pub fn get_setting(&self, key: &str) -> DbResult<Option<String>> {
-        let inner = self.lock()?;
-        let s = &inner.schema.settings;
-
-        let rows: Vec<SelectSettings> = inner
-            .db
-            .select(())
-            .from(*s)
-            .r#where(eq(s.key, key))
-            .limit(1)
-            .all()
-            .map_err(e2s)?;
-
-        Ok(rows.into_iter().next().map(|r| r.value))
-    }
-
-    pub fn set_setting(&self, key: &str, value: &str) -> DbResult<()> {
-        let inner = self.lock()?;
-
-        // Upsert via raw SQL since drizzle may not support ON CONFLICT
-        inner
-            .db
-            .conn()
-            .execute(
-                "INSERT INTO settings (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = ?2",
-                rusqlite::params![key, value],
-            )
-            .map_err(e2s)?;
-
-        Ok(())
-    }
-}
-
-fn timestamp_now() -> String {
-    let duration = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default();
-    format!("{}", duration.as_millis())
 }
