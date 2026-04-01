@@ -2,11 +2,11 @@ use arboard::{Clipboard, ImageData};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-pub struct X11Clipboard {
+pub struct ArBoardClipboard {
     clipboard: Arc<Mutex<Option<Clipboard>>>,
 }
 
-impl X11Clipboard {
+impl ArBoardClipboard {
     pub fn new() -> Self {
         Self {
             clipboard: Arc::new(Mutex::new(None)),

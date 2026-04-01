@@ -1,5 +1,5 @@
+use super::arboard::ArBoardClipboard;
 use super::wayland;
-use super::x11::X11Clipboard;
 use crate::commands::is_cosmic_data_control_enabled;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use std::collections::hash_map::DefaultHasher;
@@ -25,7 +25,7 @@ fn hash_bytes(bytes: &[u8]) -> u64 {
 }
 
 pub struct ClipboardManager {
-    x11_clipboard: Option<X11Clipboard>,
+    x11_clipboard: Option<ArBoardClipboard>,
     is_wayland: bool,
     _is_cosmic_data_control_enabled: bool,
     image_cache: Mutex<Option<ImageCache>>,
@@ -40,7 +40,7 @@ impl ClipboardManager {
             x11_clipboard: if is_wayland {
                 None
             } else {
-                Some(X11Clipboard::new())
+                Some(ArBoardClipboard::new())
             },
             is_wayland,
             _is_cosmic_data_control_enabled: is_cosmic_data_control_enabled,
@@ -81,32 +81,33 @@ impl ClipboardManager {
             }
         } else {
             match &self.x11_clipboard {
-                Some(clipboard) => {
-                    match clipboard.read_image().await? {
-                        Some((rgba_bytes, width, height)) => {
-                            let hash = hash_bytes(&rgba_bytes);
-                            if let Some(cached) = self.get_cached_image(hash) {
-                                return Ok(Some(cached));
-                            }
+                Some(clipboard) => match clipboard.read_image().await? {
+                    Some((rgba_bytes, width, height)) => {
+                        let hash = hash_bytes(&rgba_bytes);
+                        if let Some(cached) = self.get_cached_image(hash) {
+                            return Ok(Some(cached));
+                        }
 
-                            let png_bytes = encode_rgba_to_png(&rgba_bytes, width, height)
-                                .map_err(|e| format!("Failed to encode image as PNG: {}", e))?;
-                            let base64_data = BASE64.encode(&png_bytes);
-                            self.set_image_cache(hash, base64_data.clone(), width, height);
-                            Ok(Some((base64_data, width, height)))
-                        }
-                        None => {
-                            self.clear_image_cache();
-                            Ok(None)
-                        }
+                        let png_bytes = encode_rgba_to_png(&rgba_bytes, width, height)
+                            .map_err(|e| format!("Failed to encode image as PNG: {}", e))?;
+                        let base64_data = BASE64.encode(&png_bytes);
+                        self.set_image_cache(hash, base64_data.clone(), width, height);
+                        Ok(Some((base64_data, width, height)))
                     }
-                }
+                    None => {
+                        self.clear_image_cache();
+                        Ok(None)
+                    }
+                },
                 None => Err("X11 clipboard not initialized".to_string()),
             }
         }
     }
 
-    fn process_image_bytes_png(&self, png_bytes: Vec<u8>) -> Result<Option<(String, u32, u32)>, String> {
+    fn process_image_bytes_png(
+        &self,
+        png_bytes: Vec<u8>,
+    ) -> Result<Option<(String, u32, u32)>, String> {
         let hash = hash_bytes(&png_bytes);
         if let Some(cached) = self.get_cached_image(hash) {
             return Ok(Some(cached));

@@ -52,8 +52,6 @@ pub async fn paste_item(
     app: AppHandle,
     manager: State<'_, ClipboardManager>,
 ) -> Result<(), String> {
-    let is_wayland = manager.is_wayland();
-
     match content_type.as_str() {
         "text" => {
             let text = text_content.ok_or("missing text_content")?;
@@ -61,40 +59,7 @@ pub async fn paste_item(
         }
         "image" => {
             let data = image_data.ok_or("missing image_data")?;
-            let result = tokio::task::spawn_blocking(move || {
-                use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
-                let png_bytes = BASE64
-                    .decode(&data)
-                    .map_err(|e| format!("Failed to decode base64: {e}"))?;
-
-                if is_wayland {
-                    use std::io::Write;
-                    use std::process::{Command, Stdio};
-
-                    let mut child = Command::new("wl-copy")
-                        .arg("--type")
-                        .arg("image/png")
-                        .stdin(Stdio::piped())
-                        .stdout(Stdio::null())
-                        .stderr(Stdio::piped())
-                        .spawn()
-                        .map_err(|e| format!("wl-copy spawn failed: {e}"))?;
-
-                    if let Some(mut stdin) = child.stdin.take() {
-                        stdin
-                            .write_all(&png_bytes)
-                            .map_err(|e| format!("wl-copy stdin write failed: {e}"))?;
-                    }
-
-                    std::thread::sleep(std::time::Duration::from_millis(100));
-                    Ok::<(), String>(())
-                } else {
-                    Err("non-wayland image paste not implemented in paste_item".to_string())
-                }
-            })
-            .await
-            .map_err(|e| format!("spawn_blocking failed: {e}"))?;
-            result?;
+            manager.write_image(data).await?;
         }
         _ => return Err(format!("unknown content_type: {content_type}")),
     }
