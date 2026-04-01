@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.4...v1.3.5) (2026-04-01)
+
+
+### Bug Fixes
+
+* can paste image into other apps on Windows ([d47562b](https://github.com/sokhuong-uon/mexhov-clipboard/commit/d47562b82bbd3728800e2ddafbe1ecd37fd39db0))
+
 ## [1.3.4](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.3...v1.3.4) (2026-03-31)
 
 
