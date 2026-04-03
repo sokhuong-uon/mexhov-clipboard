@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 use tokio::sync::Mutex;
 
-const SERVICE_TYPE: &str = "_mexhov_clipboard._tcp.local.";
+const SERVICE_TYPE: &str = "_mexhovcp._tcp.local.";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
