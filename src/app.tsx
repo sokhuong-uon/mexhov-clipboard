@@ -68,12 +68,14 @@ function App() {
   );
 
   const handlePaste = useCallback(async (item: ClipboardItem) => {
+    console.log("[handlePaste] called", { content_type: item.content_type, has_text: !!item.text_content, has_image: !!item.image_data });
     try {
       await invoke("paste_item", {
         contentType: item.content_type,
         textContent: item.text_content ?? null,
         imageData: item.image_data ?? null,
       });
+      console.log("[handlePaste] success");
     } catch (e) {
       console.error("[handlePaste] paste_item failed:", e);
     }

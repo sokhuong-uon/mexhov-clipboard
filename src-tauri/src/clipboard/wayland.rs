@@ -1,7 +1,7 @@
-use std::process::Command;
+use tokio::process::Command;
 
 pub async fn read() -> Result<String, String> {
-    match Command::new("wl-paste").arg("--no-newline").output() {
+    match Command::new("wl-paste").arg("--no-newline").output().await {
         Ok(output) => {
             if output.status.success() {
                 String::from_utf8(output.stdout)
@@ -28,7 +28,10 @@ pub async fn read() -> Result<String, String> {
 
 pub async fn read_image() -> Result<Option<Vec<u8>>, String> {
     // First check if there's an image in the clipboard by listing MIME types
-    let list_output = Command::new("wl-paste").arg("--list-types").output();
+    let list_output = Command::new("wl-paste")
+        .arg("--list-types")
+        .output()
+        .await;
 
     let has_image = match list_output {
         Ok(output) => {
@@ -48,6 +51,7 @@ pub async fn read_image() -> Result<Option<Vec<u8>>, String> {
         .arg("--type")
         .arg("image/png")
         .output()
+        .await
     {
         Ok(output) => {
             if output.status.success() && !output.stdout.is_empty() {
@@ -73,32 +77,34 @@ pub async fn read_image() -> Result<Option<Vec<u8>>, String> {
 }
 
 pub async fn write(text: String) -> Result<(), String> {
-    match Command::new("wl-copy").arg("--").arg(&text).output() {
-        Ok(output) => {
-            if output.status.success() {
-                Ok(())
-            } else {
-                let stderr = String::from_utf8_lossy(&output.stderr);
-                Err(format!("wl-copy failed: {}", stderr))
-            }
-        }
-        Err(e) => Err(format!(
-            "Failed to execute wl-copy (is wl-clipboard installed?): {}",
-            e
-        )),
-    }
+    Command::new("wl-copy")
+        .arg("--")
+        .arg(&text)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .map_err(|e| {
+            format!(
+                "Failed to execute wl-copy (is wl-clipboard installed?): {}",
+                e
+            )
+        })?;
+
+    // Give wl-copy a moment to set the selection
+    tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+    Ok(())
 }
 
 pub async fn write_image(png_bytes: Vec<u8>) -> Result<(), String> {
-    use std::io::Write;
-    use std::process::Stdio;
+    use tokio::io::AsyncWriteExt;
 
-    let mut child = Command::new("wl-copy")
+    let mut child: tokio::process::Child = Command::new("wl-copy")
         .arg("--type")
         .arg("image/png")
-        .stdin(Stdio::piped())
-        .stdout(Stdio::null())
-        .stderr(Stdio::piped())
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
         .spawn()
         .map_err(|e| {
             format!(
@@ -108,31 +114,13 @@ pub async fn write_image(png_bytes: Vec<u8>) -> Result<(), String> {
         })?;
 
     if let Some(mut stdin) = child.stdin.take() {
-        stdin
-            .write_all(&png_bytes)
+        AsyncWriteExt::write_all(&mut stdin, &png_bytes)
+            .await
             .map_err(|e| format!("Failed to write to wl-copy stdin: {}", e))?;
+        // stdin is dropped here, sending EOF to wl-copy
     }
 
-    let output = child
-        .wait_with_output()
-        .map_err(|e| format!("Failed to wait for wl-copy: {}", e))?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("wl-copy failed: {}", stderr));
-    }
-
-    // wl-copy forks a daemon to serve clipboard data. Wait until
-    // the compositor actually sees image/png before returning.
-    for _ in 0..20 {
-        std::thread::sleep(std::time::Duration::from_millis(25));
-        if let Ok(out) = Command::new("wl-paste").arg("--list-types").output() {
-            let types = String::from_utf8_lossy(&out.stdout);
-            if types.contains("image/png") {
-                return Ok(());
-            }
-        }
-    }
-
+    // Give wl-copy a moment to set the selection
+    tokio::time::sleep(std::time::Duration::from_millis(50)).await;
     Ok(())
 }

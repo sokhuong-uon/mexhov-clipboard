@@ -1,6 +1,7 @@
 use crate::clipboard::ClipboardManager;
 use crate::clipboard_monitor::MonitorState;
 use crate::window_state::set_visible as window_set_visible;
+use std::sync::atomic::Ordering;
 use tauri::{AppHandle, Manager, State};
 
 #[tauri::command]
@@ -51,18 +52,29 @@ pub async fn paste_item(
     image_data: Option<String>,
     app: AppHandle,
     manager: State<'_, ClipboardManager>,
+    monitor: State<'_, MonitorState>,
 ) -> Result<(), String> {
-    match content_type.as_str() {
+    // Pause clipboard monitor to avoid wl-paste/wl-copy conflicts on Wayland
+    let was_monitoring = monitor.is_monitoring.swap(false, Ordering::Relaxed);
+
+    let write_result = match content_type.as_str() {
         "text" => {
             let text = text_content.ok_or("missing text_content")?;
-            manager.write(text).await?;
+            manager.write(text).await
         }
         "image" => {
             let data = image_data.ok_or("missing image_data")?;
-            manager.write_image(data).await?;
+            manager.write_image(data).await
         }
         _ => return Err(format!("unknown content_type: {content_type}")),
+    };
+
+    // Re-enable monitoring
+    if was_monitoring {
+        monitor.is_monitoring.store(true, Ordering::Relaxed);
     }
+
+    write_result?;
 
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.hide();
