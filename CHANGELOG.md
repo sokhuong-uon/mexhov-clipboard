@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.4.0...v1.4.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* paste onto other app works on first attempt ([f9066be](https://github.com/sokhuong-uon/mexhov-clipboard/commit/f9066beff774e8b6f785e0442dd099890567047a))
+
 # [1.4.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.3.5...v1.4.0) (2026-04-01)
 
 

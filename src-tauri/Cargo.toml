@@ -1,6 +1,6 @@
 [package]
 name = "mexc"
-version = "1.4.0"
+version = "1.4.1"
 description = "Mexhov Clipboard"
 authors = ["Sokhuong of Mexdehor"]
 edition = "2021"
