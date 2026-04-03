@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.4.1...v1.4.2) (2026-04-03)
+
+
+### Bug Fixes
+
+* no special chars in service domain ([3fe73d8](https://github.com/sokhuong-uon/mexhov-clipboard/commit/3fe73d8c7a86f8a14966114c1507274b19c4edc6))
+
 ## [1.4.1](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.4.0...v1.4.1) (2026-04-03)
 
 
