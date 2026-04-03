@@ -1,12 +1,14 @@
-import { useState } from "react";
-import { CirclePlay, ArrowRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { CirclePlay, ArrowRight, Monitor, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import type { DiscoveredDevice } from "./use-discovered-devices";
 
 type SyncLanConnectProps = {
   hostname: string;
   loading: boolean;
+  discoveredDevices: DiscoveredDevice[];
   onStartServer: () => void;
   onConnect: (address: string, pairingCode: string) => void;
 };
@@ -14,16 +16,23 @@ type SyncLanConnectProps = {
 export function SyncLanConnect({
   hostname,
   loading,
+  discoveredDevices,
   onStartServer,
   onConnect,
 }: SyncLanConnectProps) {
   const [address, setAddress] = useState("");
   const [code, setCode] = useState("");
+  const codeInputRef = useRef<HTMLInputElement>(null);
 
   const handleConnect = () => {
     if (address.trim() && code.trim()) {
       onConnect(address.trim(), code.trim());
     }
+  };
+
+  const handleSelectDevice = (deviceAddress: string) => {
+    setAddress(deviceAddress);
+    setTimeout(() => codeInputRef.current?.focus(), 0);
   };
 
   return (
@@ -51,9 +60,54 @@ export function SyncLanConnect({
         <ArrowRight className="ml-auto size-4 text-muted-foreground opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
       </button>
 
+      {/* Discovered devices */}
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-1.5 pl-0.5">
+          <span className="text-[11px] text-muted-foreground">
+            Devices on your network
+          </span>
+          {discoveredDevices.length === 0 && (
+            <Loader2 className="size-3 text-muted-foreground animate-spin" />
+          )}
+        </div>
+
+        {discoveredDevices.length > 0 ? (
+          <div className="flex flex-col gap-0.5">
+            {discoveredDevices.map((device) => (
+              <button
+                key={device.address}
+                onClick={() => handleSelectDevice(device.address)}
+                className={cn(
+                  "group flex items-center gap-2.5 rounded-lg border px-3 py-2 transition-all",
+                  address === device.address
+                    ? "border-foreground/20 bg-accent"
+                    : "border-border hover:border-foreground/20 hover:bg-accent/50",
+                )}
+              >
+                <Monitor className="size-4 text-muted-foreground" />
+                <div className="flex flex-col items-start text-left min-w-0">
+                  <span className="text-[12px] font-medium text-foreground truncate w-full">
+                    {device.hostname}
+                  </span>
+                  <code className="text-[10px] text-muted-foreground">
+                    {device.address}
+                  </code>
+                </div>
+                <ArrowRight className="ml-auto size-3.5 text-muted-foreground opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[11px] text-muted-foreground/60 pl-0.5">
+            Scanning for nearby devices…
+          </p>
+        )}
+      </div>
+
+      {/* Manual entry */}
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] text-muted-foreground pl-0.5">
-          Or join another device
+          Or enter address manually
         </span>
         <div className="flex flex-col gap-1.5">
           <Input
@@ -64,6 +118,7 @@ export function SyncLanConnect({
           />
           <div className="flex gap-2">
             <Input
+              ref={codeInputRef}
               placeholder="Pairing code"
               value={code}
               onChange={(e) => setCode(e.target.value)}

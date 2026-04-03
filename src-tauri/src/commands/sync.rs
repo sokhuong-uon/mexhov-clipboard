@@ -88,3 +88,17 @@ pub async fn sync_stop(state: State<'_, SyncState>) -> Result<(), String> {
 pub async fn sync_status(state: State<'_, SyncState>) -> Result<SyncStatus, String> {
     Ok(state.status().await)
 }
+
+#[tauri::command]
+pub async fn mdns_start_discovery(
+    app: AppHandle,
+    state: State<'_, SyncState>,
+) -> Result<(), String> {
+    state.mdns.lock().await.start_browsing(app)
+}
+
+#[tauri::command]
+pub async fn mdns_stop_discovery(state: State<'_, SyncState>) -> Result<(), String> {
+    state.mdns.lock().await.stop_browsing();
+    Ok(())
+}

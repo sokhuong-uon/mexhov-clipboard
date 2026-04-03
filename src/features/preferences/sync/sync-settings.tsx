@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Cloud, Globe, Wifi } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSync } from "./use-sync";
+import { useDiscoveredDevices } from "./use-discovered-devices";
 import { SyncStatusIndicator } from "./sync-status-indicator";
 import { SyncLanServerCard } from "./sync-lan-server-card";
 import { SyncLanConnect } from "./sync-lan-connect";
@@ -10,6 +11,9 @@ import { SyncCloudConnect } from "./sync-cloud-connect";
 export function SyncSettings() {
   const sync = useSync();
   const [tab, setTab] = useState<"lan" | "cloud">("lan");
+  const discoveredDevices = useDiscoveredDevices(
+    tab === "lan" && sync.status.mode === "off",
+  );
 
   const isActive = sync.status.mode !== "off";
 
@@ -111,6 +115,7 @@ export function SyncSettings() {
             <SyncLanConnect
               hostname={sync.hostname}
               loading={sync.loading}
+              discoveredDevices={discoveredDevices}
               onStartServer={sync.startServer}
               onConnect={sync.connectLan}
             />

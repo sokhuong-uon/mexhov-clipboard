@@ -26,8 +26,8 @@ use commands::{
     db_insert_item, db_toggle_favorite, db_update_sort_orders,
 };
 use commands::{
-    get_hostname, get_local_ip, get_network_interfaces, sync_cloud_join, sync_connect,
-    sync_start_server, sync_status, sync_stop,
+    get_hostname, get_local_ip, get_network_interfaces, mdns_start_discovery, mdns_stop_discovery,
+    sync_cloud_join, sync_connect, sync_start_server, sync_status, sync_stop,
 };
 use db::Database;
 use sync::SyncState;
@@ -108,6 +108,8 @@ fn main() {
             sync_cloud_join,
             sync_stop,
             sync_status,
+            mdns_start_discovery,
+            mdns_stop_discovery,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,6 +1,7 @@
 mod client;
 mod cloud;
 pub(crate) mod crypto;
+pub(crate) mod mdns;
 mod peer;
 mod server;
 
@@ -72,6 +73,7 @@ pub struct SyncState {
     mode: Arc<RwLock<SyncMode>>,
     peers: PeerMap,
     peer_counter: Arc<std::sync::atomic::AtomicU64>,
+    pub mdns: Arc<tokio::sync::Mutex<mdns::MdnsState>>,
 }
 
 #[allow(dead_code)]
@@ -96,6 +98,7 @@ impl SyncState {
     pub fn new() -> Self {
         let (outgoing_tx, _) = broadcast::channel(64);
         let (incoming_tx, incoming_rx) = tokio::sync::mpsc::unbounded_channel();
+        let mdns = mdns::MdnsState::new().expect("failed to initialize mDNS daemon");
         Self {
             outgoing_tx,
             incoming_tx,
@@ -104,6 +107,7 @@ impl SyncState {
             mode: Arc::new(RwLock::new(SyncMode::Off)),
             peers: Arc::new(RwLock::new(HashMap::new())),
             peer_counter: Arc::new(std::sync::atomic::AtomicU64::new(0)),
+            mdns: Arc::new(tokio::sync::Mutex::new(mdns)),
         }
     }
 
@@ -165,6 +169,15 @@ impl SyncState {
             self.mode.clone(),
         )
         .await?;
+
+        // Advertise via mDNS so other devices can discover us
+        let hostname = hostname::get()
+            .ok()
+            .and_then(|h| h.into_string().ok())
+            .unwrap_or_else(|| "unknown".to_string());
+        if let Err(e) = self.mdns.lock().await.register(&hostname, port) {
+            eprintln!("mDNS registration failed (non-fatal): {e}");
+        }
 
         *self.mode.write().await = SyncMode::LanServer {
             address: local_addr.clone(),
@@ -240,6 +253,8 @@ impl SyncState {
     }
 
     pub async fn stop(&self) {
+        self.mdns.lock().await.unregister();
+
         let prev = std::mem::replace(&mut *self.mode.write().await, SyncMode::Off);
         if let SyncMode::LanServer { shutdown, .. }
         | SyncMode::LanClient { shutdown, .. }
