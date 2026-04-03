@@ -5,7 +5,7 @@ use aes_gcm::{
 use serde::{Deserialize, Serialize};
 use x25519_dalek::{EphemeralSecret, PublicKey};
 
-const SALT: &[u8] = b"ohcp-clipboard-sync-v1";
+const SALT: &[u8] = b"omg-clipboard-sync-static-salt";
 
 // ── Pairing code ───────────────────────────────────────────────────
 

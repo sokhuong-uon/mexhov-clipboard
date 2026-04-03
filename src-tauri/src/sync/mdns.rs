@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 use tokio::sync::Mutex;
 
-const SERVICE_TYPE: &str = "_ohcp._tcp.local.";
+const SERVICE_TYPE: &str = "_mexhov_clipboard._tcp.local.";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -63,7 +63,11 @@ impl MdnsState {
             SERVICE_TYPE,
             &host_label,
             &host_fqdn,
-            my_addrs.iter().map(|s| s.as_str()).collect::<Vec<_>>().as_slice(),
+            my_addrs
+                .iter()
+                .map(|s| s.as_str())
+                .collect::<Vec<_>>()
+                .as_slice(),
             port,
             [("hostname", hostname)].as_ref(),
         )
@@ -139,11 +143,7 @@ impl MdnsState {
 
                         let port = info.get_port();
                         // Pick first IPv4 address
-                        let ip = info
-                            .get_addresses_v4()
-                            .iter()
-                            .next()
-                            .map(|a| a.to_string());
+                        let ip = info.get_addresses_v4().iter().next().map(|a| a.to_string());
 
                         if let Some(ip) = ip {
                             let device = DiscoveredDevice {
