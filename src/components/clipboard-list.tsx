@@ -122,7 +122,6 @@ export const ClipboardList = ({
   };
 
   const pasteActive = () => {
-    console.log("[pasteActive]", { activeIndex, item: items[activeIndex], onPaste: !!onPaste });
     if (activeIndex >= 0 && items[activeIndex] && onPaste) {
       onPaste(items[activeIndex]);
     }

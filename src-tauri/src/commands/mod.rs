@@ -1,6 +1,6 @@
 mod clipboard;
 mod db;
-mod detection;
+pub mod detection;
 mod media;
 mod settings;
 mod sync;

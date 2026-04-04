@@ -20,6 +20,7 @@ export type ClipboardItem = {
   created_at: string;
   updated_at: string;
   is_env: boolean;
+  is_secret: boolean;
 };
 
 export type ClipboardError = {

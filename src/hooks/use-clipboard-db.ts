@@ -12,9 +12,6 @@ type InsertParams = {
   source_app: string | null;
   sort_order: string;
   kv_key: string | null;
-  detected_date: string | null;
-  detected_color: string | null;
-  is_env: boolean;
   created_at: string;
   updated_at: string;
 };

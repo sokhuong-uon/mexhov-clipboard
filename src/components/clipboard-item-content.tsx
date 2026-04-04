@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { ChevronDown, Film } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import { LinkPreview, isUrl } from "@/components/link-preview";
@@ -105,6 +105,34 @@ const DraggableMedia = ({ url }: { url: string }) => {
   );
 };
 
+function maskSecret(text: string): string {
+  const reveal = text.length <= 10 ? 4 : 6;
+  const visible = text.slice(0, reveal);
+  const masked = "•".repeat(Math.max(text.length - reveal, 4));
+  return visible + masked;
+}
+
+const SecretContent = ({ text }: { text: string }) => {
+  const [revealed, setRevealed] = useState(false);
+  const masked = useMemo(() => maskSecret(text), [text]);
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center">
+        <button
+          onClick={() => setRevealed((v) => !v)}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer ml-auto"
+        >
+          {revealed ? "Hide" : "Reveal"}
+        </button>
+      </div>
+      <pre className="whitespace-pre-wrap wrap-break-word text-card-foreground text-sm leading-relaxed font-[inherit] select-text">
+        {revealed ? text : masked}
+      </pre>
+    </div>
+  );
+};
+
 export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
   if (item.content_type === "image") {
     return (
@@ -119,6 +147,10 @@ export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
         )}
       </div>
     );
+  }
+
+  if (item.is_secret && item.text_content) {
+    return <SecretContent text={item.text_content} />;
   }
 
   if (item.detected_color) {

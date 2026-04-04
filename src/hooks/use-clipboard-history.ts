@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { generateKeyBetween } from "jittered-fractional-indexing";
 import { ClipboardContent } from "@/types/clipboard";
@@ -49,11 +48,6 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
       const now = Date.now().toString();
 
       try {
-        const [detectedDate, detectedColor, isEnv] = await Promise.all([
-          invoke<string | null>("detect_date_content", { text }),
-          invoke<string | null>("detect_color_content", { text }),
-          invoke<boolean>("detect_env_content", { text }),
-        ]);
         const rawItem = await clipboardDb.insertItem({
           content_type: "text",
           text_content: text,
@@ -65,9 +59,6 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
           source_app: null,
           sort_order: sortOrder,
           kv_key: null,
-          detected_date: detectedDate,
-          detected_color: detectedColor,
-          is_env: isEnv,
           created_at: now,
           updated_at: now,
         });
@@ -100,9 +91,6 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
           source_app: null,
           sort_order: sortOrder,
           kv_key: null,
-          detected_date: null,
-          detected_color: null,
-          is_env: false,
           created_at: now,
           updated_at: now,
         });

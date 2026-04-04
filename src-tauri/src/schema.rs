@@ -25,6 +25,8 @@ pub struct ClipboardItems {
     pub detected_color: Option<String>,
     /// Whether text content looks like .env key-value pairs
     pub is_env: i64,
+    /// Whether text content contains a detected secret (API key, token, etc.)
+    pub is_secret: i64,
     /// SHA-256 hash of content for fast deduplication
     pub content_hash: Option<String>,
     pub created_at: String,
