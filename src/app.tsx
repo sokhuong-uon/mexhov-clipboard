@@ -31,6 +31,7 @@ function App() {
   const { hotkeys, setHotkey, resetHotkey, resetAll: resetAllHotkeys } =
     useHotkeysConfig();
   const [favoritesFirst, setFavoritesFirst] = useState(false);
+  const [isEditingNote, setIsEditingNote] = useState(false);
 
   const { readContent, write, writeImage, reinitialize, error, dismissError } =
     useClipboard();
@@ -48,6 +49,7 @@ function App() {
     toggleFavorite,
     reorderItems,
     splitEnvItem,
+    updateNote,
   } = useClipboardHistory(historyLimit, favoritesFirst);
 
   const { systemInfo, previousContentRef } = useClipboardMonitor({
@@ -169,6 +171,7 @@ function App() {
             onSetHotkey={setHotkey}
             onResetHotkey={resetHotkey}
             onResetAllHotkeys={resetAllHotkeys}
+            isEditingNote={isEditingNote}
           />
 
           {error && (
@@ -192,7 +195,10 @@ function App() {
                 onToggleFavorite={toggleFavorite}
                 onReorder={reorderItems}
                 onSplitEnv={splitEnvItem}
+                onUpdateNote={updateNote}
                 onToggleFavoritesFirst={() => setFavoritesFirst((v) => !v)}
+                onEditingNoteChange={setIsEditingNote}
+                isEditingNote={isEditingNote}
                 isSearching={isSearching}
                 hasMore={hasMore && !isSearching}
                 onLoadMore={loadMore}

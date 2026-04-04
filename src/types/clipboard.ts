@@ -21,6 +21,7 @@ export type ClipboardItem = {
   updated_at: string;
   is_env: boolean;
   is_secret: boolean;
+  note: string | null;
 };
 
 export type ClipboardError = {

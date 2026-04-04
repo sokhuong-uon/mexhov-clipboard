@@ -27,6 +27,8 @@ pub struct ClipboardItems {
     pub is_env: i64,
     /// Whether text content contains a detected secret (API key, token, etc.)
     pub is_secret: i64,
+    /// User-provided annotation for the clipboard item
+    pub note: Option<String>,
     /// SHA-256 hash of content for fast deduplication
     pub content_hash: Option<String>,
     pub created_at: String,

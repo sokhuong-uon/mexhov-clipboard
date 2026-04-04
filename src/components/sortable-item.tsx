@@ -14,8 +14,10 @@ export const SortableItem = memo(function SortableItem({
   onDelete,
   onToggleFavorite,
   onSplitEnv,
+  onUpdateNote,
   colorMenuOpen,
   onColorMenuOpenChange,
+  onEditingNoteChange,
 }: {
   item: ClipboardItemType;
   index: number;
@@ -25,8 +27,10 @@ export const SortableItem = memo(function SortableItem({
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
   onSplitEnv?: (id: number) => void;
+  onUpdateNote?: (id: number, note: string | null) => void;
   colorMenuOpen?: boolean;
   onColorMenuOpenChange?: (open: boolean) => void;
+  onEditingNoteChange?: (editing: boolean) => void;
 }) {
   const {
     ref: sortableRef,
@@ -70,8 +74,10 @@ export const SortableItem = memo(function SortableItem({
         onDelete={onDelete}
         onToggleFavorite={onToggleFavorite}
         onSplitEnv={onSplitEnv}
+        onUpdateNote={onUpdateNote}
         colorMenuOpen={colorMenuOpen}
         onColorMenuOpenChange={onColorMenuOpenChange}
+        onEditingNoteChange={onEditingNoteChange}
       />
     </motion.li>
   );

@@ -41,7 +41,10 @@ type ClipboardListProps = {
   onToggleFavorite: (id: number) => void;
   onReorder: (activeId: number, overId: number) => void;
   onSplitEnv?: (id: number) => void;
+  onUpdateNote?: (id: number, note: string | null) => void;
   onToggleFavoritesFirst?: () => void;
+  onEditingNoteChange?: (editing: boolean) => void;
+  isEditingNote?: boolean;
   isSearching?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
@@ -57,7 +60,10 @@ export const ClipboardList = ({
   onToggleFavorite,
   onReorder,
   onSplitEnv,
+  onUpdateNote,
   onToggleFavoritesFirst,
+  onEditingNoteChange,
+  isEditingNote = false,
   isSearching = false,
   hasMore = false,
   onLoadMore,
@@ -65,6 +71,7 @@ export const ClipboardList = ({
 }: ClipboardListProps) => {
   const [activeId, setActiveId] = useState<number | null>(null);
   const [colorMenuItemId, setColorMenuItemId] = useState<number | null>(null);
+  const setIsEditingNote = onEditingNoteChange ?? (() => {});
 
   // Stable per-item callback cache for onColorMenuOpenChange
   const colorMenuHandlersRef = useRef(new Map<number, (open: boolean) => void>());
@@ -128,21 +135,22 @@ export const ClipboardList = ({
   };
 
   const colorMenuIsOpen = colorMenuItemId != null;
+  const hotkeysDisabled = colorMenuIsOpen || isEditingNote;
 
-  useHotkey(hotkeys.moveDown, moveDown, { enabled: !colorMenuIsOpen });
-  useHotkey(hotkeys.moveUp, moveUp, { enabled: !colorMenuIsOpen });
+  useHotkey(hotkeys.moveDown, moveDown, { enabled: !hotkeysDisabled });
+  useHotkey(hotkeys.moveUp, moveUp, { enabled: !hotkeysDisabled });
 
   useHotkey(hotkeys.copy, copyActive, {
-    enabled: activeIndex >= 0 && !colorMenuIsOpen,
+    enabled: activeIndex >= 0 && !hotkeysDisabled,
     ignoreInputs: false,
   });
 
   useHotkey(hotkeys.paste, pasteActive, {
-    enabled: activeIndex >= 0 && !colorMenuIsOpen,
+    enabled: activeIndex >= 0 && !hotkeysDisabled,
   });
 
   useHotkey(hotkeys.delete, deleteActive, {
-    enabled: activeIndex >= 0 && !colorMenuIsOpen,
+    enabled: activeIndex >= 0 && !hotkeysDisabled,
   });
 
   useHotkey(
@@ -152,7 +160,7 @@ export const ClipboardList = ({
         onToggleFavorite(items[activeIndex].id);
       }
     },
-    { enabled: activeIndex >= 0 && !colorMenuIsOpen },
+    { enabled: activeIndex >= 0 && !hotkeysDisabled },
   );
 
   useHotkey(
@@ -162,22 +170,22 @@ export const ClipboardList = ({
         setColorMenuItemId(items[activeIndex].id);
       }
     },
-    { enabled: activeIndex >= 0 && !colorMenuIsOpen },
+    { enabled: activeIndex >= 0 && !hotkeysDisabled },
   );
 
   useHotkey(hotkeys.favoritesFirst, () => onToggleFavoritesFirst?.(), {
-    enabled: !colorMenuIsOpen,
+    enabled: !hotkeysDisabled,
   });
 
   useHotkey("ArrowDown", moveDown);
   useHotkey("ArrowUp", moveUp);
 
   useHotkeySequence([hotkeys.jumpTop], () => {
-    if (items.length > 0) setActiveIndex(0);
+    if (!hotkeysDisabled && items.length > 0) setActiveIndex(0);
   });
   useHotkey(hotkeys.jumpBottom, () => {
     if (items.length > 0) setActiveIndex(items.length - 1);
-  });
+  }, { enabled: !hotkeysDisabled });
 
   // Ctrl+1–9 to select search result by index (works even with input focused)
   useHotkeys(
@@ -245,8 +253,10 @@ export const ClipboardList = ({
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}
                 onSplitEnv={onSplitEnv}
+                onUpdateNote={onUpdateNote}
                 colorMenuOpen={colorMenuItemId === item.id}
                 onColorMenuOpenChange={getColorMenuHandler(item.id)}
+                onEditingNoteChange={setIsEditingNote}
               />
             ))}
           </AnimatePresence>
@@ -271,8 +281,10 @@ export const ClipboardList = ({
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}
                 onSplitEnv={onSplitEnv}
+                onUpdateNote={onUpdateNote}
                 colorMenuOpen={colorMenuItemId === item.id}
                 onColorMenuOpenChange={getColorMenuHandler(item.id)}
+                onEditingNoteChange={setIsEditingNote}
               />
             ))}
           </AnimatePresence>

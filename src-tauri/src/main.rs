@@ -23,7 +23,7 @@ use commands::{
 };
 use commands::{
     db_bump_item, db_clear_all, db_dedup_item, db_delete_item, db_get_all_items, db_get_item_count,
-    db_insert_item, db_toggle_favorite, db_update_sort_orders,
+    db_insert_item, db_toggle_favorite, db_update_note, db_update_sort_orders,
 };
 use commands::{
     get_hostname, get_local_ip, get_network_interfaces, mdns_start_discovery, mdns_stop_discovery,
@@ -90,6 +90,7 @@ fn main() {
             db_update_sort_orders,
             db_get_item_count,
             db_dedup_item,
+            db_update_note,
             detect_env_content,
             parse_env_content,
             detect_date_content,

@@ -25,6 +25,7 @@ type ClipboardHeaderProps = {
   onSetHotkey: (action: HotkeyAction, hotkey: Hotkey) => void;
   onResetHotkey: (action: HotkeyAction) => void;
   onResetAllHotkeys: () => void;
+  isEditingNote?: boolean;
 };
 
 export const ClipboardHeader = ({
@@ -43,6 +44,7 @@ export const ClipboardHeader = ({
   onSetHotkey,
   onResetHotkey,
   onResetAllHotkeys,
+  isEditingNote = false,
 }: ClipboardHeaderProps) => {
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -51,8 +53,8 @@ export const ClipboardHeader = ({
     searchRef.current?.select();
   };
 
-  useHotkey(hotkeys.search, focusSearch, { ignoreInputs: false });
-  useHotkey(hotkeys.searchAlt, focusSearch, { ignoreInputs: false });
+  useHotkey(hotkeys.search, focusSearch, { enabled: !isEditingNote, ignoreInputs: false });
+  useHotkey(hotkeys.searchAlt, focusSearch, { enabled: !isEditingNote, ignoreInputs: false });
 
   return (
     <header className="flex items-center gap-2 px-4 pb-2 pt-1 group/header">

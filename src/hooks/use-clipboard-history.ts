@@ -152,6 +152,18 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
     [invalidate],
   );
 
+  const updateNote = useCallback(
+    async (id: number, note: string | null) => {
+      try {
+        await clipboardDb.updateNote(id, note);
+        invalidate();
+      } catch (err) {
+        console.error("Failed to update note:", err);
+      }
+    },
+    [invalidate],
+  );
+
   const reorderItems = useCallback(
     async (activeId: number, overId: number) => {
       const items = historyRef.current;
@@ -228,5 +240,6 @@ export const useClipboardHistory = (maxItems: number, favoritesFirst: boolean) =
     toggleFavorite,
     reorderItems,
     splitEnvItem,
+    updateNote,
   };
 };
