@@ -1,7 +1,4 @@
 use drizzle::core::expr::*;
-use drizzle::sqlite::prelude::*;
-
-use crate::schema::*;
 
 use super::super::schema::*;
 use super::super::utils::*;

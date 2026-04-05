@@ -1,13 +1,12 @@
 import { useRef } from "react";
-import { Pin, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useHotkey } from "@tanstack/react-hotkeys";
 import type { Hotkey } from "@tanstack/react-hotkeys";
-import { SystemInfo } from "@/types/clipboard";
-import { Button } from "@/components/ui/button";
+import { SystemInfo, ClipboardFilters } from "@/types/clipboard";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import type { HotkeyAction, HotkeyConfig } from "@/hooks/use-hotkeys-config";
 import { SettingsSheet } from "@/features/preferences/settings-sheet";
+import { ClipboardFilterMenu } from "@/components/clipboard-filter-menu";
 
 type ClipboardHeaderProps = {
   isMonitoring: boolean;
@@ -19,8 +18,8 @@ type ClipboardHeaderProps = {
   onSearchChange: (query: string) => void;
   historyLimit: number;
   onHistoryLimitChange: (limit: number) => void;
-  favoritesFirst: boolean;
-  onToggleFavoritesFirst: () => void;
+  filters: ClipboardFilters;
+  onFiltersChange: (filters: ClipboardFilters) => void;
   hotkeys: HotkeyConfig;
   onSetHotkey: (action: HotkeyAction, hotkey: Hotkey) => void;
   onResetHotkey: (action: HotkeyAction) => void;
@@ -38,8 +37,8 @@ export const ClipboardHeader = ({
   onSearchChange,
   historyLimit,
   onHistoryLimitChange,
-  favoritesFirst,
-  onToggleFavoritesFirst,
+  filters,
+  onFiltersChange,
   hotkeys,
   onSetHotkey,
   onResetHotkey,
@@ -53,8 +52,14 @@ export const ClipboardHeader = ({
     searchRef.current?.select();
   };
 
-  useHotkey(hotkeys.search, focusSearch, { enabled: !isEditingNote, ignoreInputs: false });
-  useHotkey(hotkeys.searchAlt, focusSearch, { enabled: !isEditingNote, ignoreInputs: false });
+  useHotkey(hotkeys.search, focusSearch, {
+    enabled: !isEditingNote,
+    ignoreInputs: false,
+  });
+  useHotkey(hotkeys.searchAlt, focusSearch, {
+    enabled: !isEditingNote,
+    ignoreInputs: false,
+  });
 
   return (
     <header className="flex items-center gap-2 px-4 pb-2 pt-1 group/header">
@@ -71,18 +76,10 @@ export const ClipboardHeader = ({
         />
       </div>
 
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        className={cn(
-          "shrink-0 text-neutral-400 dark:text-neutral-600",
-          favoritesFirst && "text-amber-500",
-        )}
-        onClick={onToggleFavoritesFirst}
-        aria-label="Toggle pinned view"
-      >
-        <Pin className={cn("size-4", favoritesFirst && "fill-amber-500")} />
-      </Button>
+      <ClipboardFilterMenu
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+      />
 
       <SettingsSheet
         isMonitoring={isMonitoring}

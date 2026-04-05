@@ -1,5 +1,5 @@
 import "@/main.css";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDebouncedState } from "@tanstack/react-pacer";
 
 import { ErrorBanner } from "@/components/clipboard-error-banner";
@@ -17,6 +17,7 @@ import { useHotkeysConfig } from "@/hooks/use-hotkeys-config";
 import { useSystemTheme } from "@/hooks/use-system-theme";
 import { useClipboardHistory } from "@/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
+import { useClipboardFilters } from "@/hooks/use-clipboard-filters";
 import { ClipboardItem } from "@/types/clipboard";
 import type { Klipy } from "@/features/klipy/schema/klipy";
 import { Clipboard } from "lucide-react";
@@ -28,9 +29,12 @@ function App() {
   const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 150 });
 
   const { historyLimit, setHistoryLimit } = useSettings();
-  const { hotkeys, setHotkey, resetHotkey, resetAll: resetAllHotkeys } =
-    useHotkeysConfig();
-  const [favoritesFirst, setFavoritesFirst] = useState(false);
+  const {
+    hotkeys,
+    setHotkey,
+    resetHotkey,
+    resetAll: resetAllHotkeys,
+  } = useHotkeysConfig();
   const [isEditingNote, setIsEditingNote] = useState(false);
 
   const { readContent, write, writeImage, reinitialize, error, dismissError } =
@@ -50,7 +54,7 @@ function App() {
     reorderItems,
     splitEnvItem,
     updateNote,
-  } = useClipboardHistory(historyLimit, favoritesFirst);
+  } = useClipboardHistory(historyLimit, false);
 
   const { systemInfo, previousContentRef } = useClipboardMonitor({
     onClipboardChange: addContentToHistory,
@@ -94,19 +98,8 @@ function App() {
     }
   }, [reinitialize, readContent, previousContentRef, setCurrentContent]);
 
-  const filteredItems = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return history;
-    return history.filter((item) => {
-      if (item.content_type === "text" && item.text_content) {
-        return item.text_content.toLowerCase().includes(q);
-      }
-      if (item.content_type === "image") {
-        return "image".includes(q);
-      }
-      return false;
-    });
-  }, [history, searchQuery]);
+  const { filters, setFilters, filteredItems, toggleFavoriteFilter } =
+    useClipboardFilters(history, searchQuery);
 
   const isSearching = searchQuery.trim().length > 0;
 
@@ -165,8 +158,8 @@ function App() {
             }}
             historyLimit={historyLimit}
             onHistoryLimitChange={setHistoryLimit}
-            favoritesFirst={favoritesFirst}
-            onToggleFavoritesFirst={() => setFavoritesFirst((v) => !v)}
+            filters={filters}
+            onFiltersChange={setFilters}
             hotkeys={hotkeys}
             onSetHotkey={setHotkey}
             onResetHotkey={resetHotkey}
@@ -196,7 +189,7 @@ function App() {
                 onReorder={reorderItems}
                 onSplitEnv={splitEnvItem}
                 onUpdateNote={updateNote}
-                onToggleFavoritesFirst={() => setFavoritesFirst((v) => !v)}
+                onToggleFavoriteFilter={toggleFavoriteFilter}
                 onEditingNoteChange={setIsEditingNote}
                 isEditingNote={isEditingNote}
                 isSearching={isSearching}

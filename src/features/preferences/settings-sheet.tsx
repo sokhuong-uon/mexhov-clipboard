@@ -49,11 +49,12 @@ export function SettingsSheet({
       <Button
         variant="ghost"
         size="icon-sm"
-        className="shrink-0"
+        className="text-neutral-400 dark:text-neutral-600"
         onClick={() => setOpen(true)}
       >
-        <Settings2 className="size-5 text-muted-foreground" />
+        <Settings2 className="size-5" />
       </Button>
+
       <SheetContent side="right" className="w-full overflow-y-auto">
         <SheetHeader className="pb-0">
           <SheetTitle>Settings</SheetTitle>

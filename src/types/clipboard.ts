@@ -24,6 +24,39 @@ export type ClipboardItem = {
   note: string | null;
 };
 
+export type ContentFilter =
+  | "image"
+  | "secret"
+  | "env"
+  | "url"
+  | "color"
+  | "date"
+  | "note";
+
+export type DateRange = "all" | "today" | "week" | "month";
+
+export type ClipboardFilters = {
+  favorite: boolean;
+  contentTypes: Set<ContentFilter>;
+  dateRange: DateRange;
+};
+
+export const EMPTY_FILTERS: ClipboardFilters = {
+  favorite: false,
+  contentTypes: new Set(),
+  dateRange: "all",
+};
+
+export const CONTENT_FILTER_LABELS: Record<ContentFilter, string> = {
+  image: "Images",
+  secret: "Secrets",
+  env: "Key-Value",
+  url: "URLs",
+  color: "Colors",
+  date: "Dates",
+  note: "Has Note",
+};
+
 export type ClipboardError = {
   id: string;
   message: string;

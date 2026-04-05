@@ -42,7 +42,7 @@ type ClipboardListProps = {
   onReorder: (activeId: number, overId: number) => void;
   onSplitEnv?: (id: number) => void;
   onUpdateNote?: (id: number, note: string | null) => void;
-  onToggleFavoritesFirst?: () => void;
+  onToggleFavoriteFilter?: () => void;
   onEditingNoteChange?: (editing: boolean) => void;
   isEditingNote?: boolean;
   isSearching?: boolean;
@@ -61,7 +61,7 @@ export const ClipboardList = ({
   onReorder,
   onSplitEnv,
   onUpdateNote,
-  onToggleFavoritesFirst,
+  onToggleFavoriteFilter,
   onEditingNoteChange,
   isEditingNote = false,
   isSearching = false,
@@ -173,7 +173,7 @@ export const ClipboardList = ({
     { enabled: activeIndex >= 0 && !hotkeysDisabled },
   );
 
-  useHotkey(hotkeys.favoritesFirst, () => onToggleFavoritesFirst?.(), {
+  useHotkey(hotkeys.favoritesFirst, () => onToggleFavoriteFilter?.(), {
     enabled: !hotkeysDisabled,
   });
 
