@@ -2,9 +2,8 @@
 
 A clipboard manager built with Tauri, React, and TypeScript.
 
-For Pop!_OS on COSMIC, please make sure you set `COSMIC_DATA_CONTROL_ENABLED` to `1`.
-
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/3876fa7a-6eed-4d40-84d2-cb6dbe7b6f3d" />
+<img width="401" height="676" alt="image" src="https://github.com/user-attachments/assets/c0f51f52-9548-4ecf-848d-33519d34017d" />
+<img width="401" height="676" alt="image" src="https://github.com/user-attachments/assets/7d7f643d-9741-448c-911f-e61d523efacb" />
 
 
 ## Features
@@ -26,7 +25,6 @@ For Pop!_OS on COSMIC, please make sure you set `COSMIC_DATA_CONTROL_ENABLED` to
 This application automatically detects and supports both **Wayland** and **X11** environments:
 
 - **Wayland**: Uses `wl-clipboard` commands (`wl-paste`, `wl-copy`)
-- **X11**: Uses the `arboard` crate for clipboard access
 
 ### Wayland Environment
 
@@ -51,10 +49,6 @@ For proper clipboard functionality on Wayland (e.g., Pop OS 24.04, GNOME Wayland
    # Arch Linux
    sudo pacman -S wl-clipboard
    ```
-
-4. **COSMIC Data Control**: For background clipboard access on COSMIC desktop without window focus:
-   - Set `COSMIC_DATA_CONTROL_ENABLED=1` in `/etc/environment.d/clipboard.conf`
-   - Without this, clipboard access requires the application window to be focused
 
 ### X11 Environment
 
