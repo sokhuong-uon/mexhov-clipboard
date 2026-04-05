@@ -1,3 +1,17 @@
+# [1.5.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.4.2...v1.5.0) (2026-04-05)
+
+
+### Bug Fixes
+
+* use correct service type for talking with Android ([9d0cd0d](https://github.com/sokhuong-uon/mexhov-clipboard/commit/9d0cd0d2b3c66e4d5e33d496957313e3a4c6545e))
+
+
+### Features
+
+* add note ([689505a](https://github.com/sokhuong-uon/mexhov-clipboard/commit/689505ab52ec7745ac5e8c850143e87d9dfaa7ca))
+* detect secrets ([fdb966d](https://github.com/sokhuong-uon/mexhov-clipboard/commit/fdb966decf82fa70d5c1c6f9da1a1b26781eb501))
+* filter by content type and date ([1ff1e51](https://github.com/sokhuong-uon/mexhov-clipboard/commit/1ff1e51af060823c0042995d08d0af0f07feeb9b))
+
 ## [1.4.2](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.4.1...v1.4.2) (2026-04-03)
 
 
