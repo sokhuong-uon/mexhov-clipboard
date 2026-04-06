@@ -35,7 +35,7 @@ pub enum SyncMessage {
 
 // ── Status reported to the frontend ────────────────────────────────
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncStatus {
     pub mode: String, // "off" | "lan-server" | "lan-client" | "cloud"
@@ -47,7 +47,7 @@ pub struct SyncStatus {
 
 // ── Server start result ────────────────────────────────────────────
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncStartResult {
     pub address: String,
@@ -60,7 +60,6 @@ pub(crate) type PeerTx = tokio::sync::mpsc::UnboundedSender<Message>;
 pub(crate) type PeerMap = Arc<RwLock<HashMap<u64, PeerTx>>>;
 
 // ── Top-level managed state ────────────────────────────────────────
-
 pub struct SyncState {
     /// Local clipboard changes are broadcast here → sent to all peers.
     pub outgoing_tx: broadcast::Sender<SyncMessage>,

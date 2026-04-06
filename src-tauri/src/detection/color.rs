@@ -1,4 +1,4 @@
-pub fn detect_color(text: &str) -> Option<String> {
+pub fn detect(text: &str) -> Option<String> {
     let text = text.trim();
     if text.len() > 100 || text.contains('\n') {
         return None;
@@ -6,6 +6,8 @@ pub fn detect_color(text: &str) -> Option<String> {
     csscolorparser::parse(text).ok().map(|c| c.to_css_hex())
 }
 
+#[tauri::command]
+#[specta::specta]
 pub fn convert_color(text: &str, format: &str) -> Result<String, String> {
     let color = csscolorparser::parse(text.trim()).map_err(|e| e.to_string())?;
     match format {

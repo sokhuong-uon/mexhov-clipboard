@@ -2,11 +2,13 @@ use crate::clipboard::ClipboardManager;
 use tauri::State;
 
 #[tauri::command]
+#[specta::specta]
 pub fn is_wayland_session(manager: State<'_, ClipboardManager>) -> bool {
     manager.is_wayland()
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn is_cosmic_data_control_enabled() -> bool {
     std::env::var("COSMIC_DATA_CONTROL_ENABLED")
         .map(|v| v == "1")
@@ -14,6 +16,7 @@ pub fn is_cosmic_data_control_enabled() -> bool {
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn get_system_theme() -> String {
     if let Ok(output) = std::process::Command::new("gsettings")
         .args(["get", "org.gnome.desktop.interface", "color-scheme"])

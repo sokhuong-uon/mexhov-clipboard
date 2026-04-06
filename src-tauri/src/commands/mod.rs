@@ -1,6 +1,5 @@
 mod clipboard;
 mod db;
-pub mod detection;
 mod media;
 mod settings;
 mod sync;
@@ -9,7 +8,6 @@ mod window;
 
 pub use clipboard::*;
 pub use db::*;
-pub use detection::*;
 pub use media::*;
 pub use settings::*;
 pub use sync::*;

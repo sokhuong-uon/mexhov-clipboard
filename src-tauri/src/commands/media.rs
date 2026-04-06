@@ -1,6 +1,6 @@
 use scraper::{Html, Selector};
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, specta::Type)]
 pub struct LinkPreviewData {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -10,6 +10,7 @@ pub struct LinkPreviewData {
 }
 
 #[tauri::command]
+#[specta::specta]
 pub async fn fetch_link_preview(url: String) -> Result<LinkPreviewData, String> {
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(5))
@@ -68,6 +69,7 @@ pub async fn fetch_link_preview(url: String) -> Result<LinkPreviewData, String> 
 /// Downloads a media URL to a temporary file and returns the file path
 /// along with a small PNG icon for the drag preview.
 #[tauri::command]
+#[specta::specta]
 pub async fn download_media_to_temp(url: String) -> Result<(String, String), String> {
     let extension = url::Url::parse(&url)
         .ok()
@@ -98,8 +100,7 @@ pub async fn download_media_to_temp(url: String) -> Result<(String, String), Str
         let icon_created: Result<(), String> = (|| {
             let file = std::fs::File::open(&file_path).map_err(|e| e.to_string())?;
             let reader = std::io::BufReader::new(file);
-            let decoder =
-                image::codecs::gif::GifDecoder::new(reader).map_err(|e| e.to_string())?;
+            let decoder = image::codecs::gif::GifDecoder::new(reader).map_err(|e| e.to_string())?;
             use image::AnimationDecoder;
             let first_frame = decoder
                 .into_frames()
@@ -131,6 +132,7 @@ pub async fn download_media_to_temp(url: String) -> Result<(String, String), Str
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn get_file_size(path: String) -> Result<u64, String> {
     std::fs::metadata(&path)
         .map(|m| m.len())

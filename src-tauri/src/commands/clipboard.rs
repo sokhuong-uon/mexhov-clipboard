@@ -5,11 +5,13 @@ use std::sync::atomic::Ordering;
 use tauri::{AppHandle, Manager, State};
 
 #[tauri::command]
+#[specta::specta]
 pub async fn read_clipboard(manager: State<'_, ClipboardManager>) -> Result<String, String> {
     manager.read().await
 }
 
 #[tauri::command]
+#[specta::specta]
 pub async fn read_clipboard_image(
     manager: State<'_, ClipboardManager>,
 ) -> Result<Option<(String, u32, u32)>, String> {
@@ -17,6 +19,7 @@ pub async fn read_clipboard_image(
 }
 
 #[tauri::command]
+#[specta::specta]
 pub async fn write_clipboard(
     text: String,
     manager: State<'_, ClipboardManager>,
@@ -25,6 +28,7 @@ pub async fn write_clipboard(
 }
 
 #[tauri::command]
+#[specta::specta]
 pub async fn write_clipboard_image(
     base64_data: String,
     manager: State<'_, ClipboardManager>,
@@ -33,11 +37,13 @@ pub async fn write_clipboard_image(
 }
 
 #[tauri::command]
+#[specta::specta]
 pub async fn reinitialize_clipboard(manager: State<'_, ClipboardManager>) -> Result<(), String> {
     manager.reinitialize()
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn set_monitoring(enabled: bool, state: State<'_, MonitorState>) {
     state
         .is_monitoring
@@ -46,6 +52,7 @@ pub fn set_monitoring(enabled: bool, state: State<'_, MonitorState>) {
 
 /// Copies content to clipboard, hides the window, and simulates Ctrl+V.
 #[tauri::command]
+#[specta::specta]
 pub async fn paste_item(
     content_type: String,
     text_content: Option<String>,

@@ -2,6 +2,7 @@ use crate::db::{ClipboardItemRow, Database, InsertClipboardItemParams, UpdateSor
 use tauri::State;
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_get_all_items(
     limit: i64,
     offset: i64,
@@ -12,6 +13,7 @@ pub fn db_get_all_items(
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_insert_item(
     params: InsertClipboardItemParams,
     database: State<'_, Database>,
@@ -20,6 +22,7 @@ pub fn db_insert_item(
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_bump_item(
     id: i64,
     sort_order: String,
@@ -29,16 +32,19 @@ pub fn db_bump_item(
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_delete_item(id: i64, database: State<'_, Database>) -> Result<(), String> {
     database.delete_item(id)
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_clear_all(database: State<'_, Database>) -> Result<(), String> {
     database.clear_all()
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_toggle_favorite(
     id: i64,
     database: State<'_, Database>,
@@ -47,6 +53,7 @@ pub fn db_toggle_favorite(
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_update_sort_orders(
     items: Vec<UpdateSortOrderParams>,
     database: State<'_, Database>,
@@ -55,16 +62,19 @@ pub fn db_update_sort_orders(
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_get_item_count(database: State<'_, Database>) -> Result<i64, String> {
     database.get_item_count()
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_dedup_item(id: i64, database: State<'_, Database>) -> Result<i64, String> {
     database.delete_duplicates(id)
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn db_update_note(
     id: i64,
     note: Option<String>,

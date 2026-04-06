@@ -1,7 +1,7 @@
 use drizzle::core::expr::*;
 use drizzle::sqlite::prelude::*;
 
-use crate::commands::detection::{color, date, env, secret};
+use crate::detection::{color, date, env, secret};
 use crate::schema::*;
 
 use super::super::schema::*;
@@ -25,7 +25,7 @@ impl Database {
             if let Some(text) = &params.text_content {
                 (
                     date::detect_date(text),
-                    color::detect_color(text),
+                    color::detect(text),
                     env::detect_env(text),
                     secret::detect_secret(text),
                 )

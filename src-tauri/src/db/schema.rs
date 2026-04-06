@@ -4,7 +4,7 @@ use crate::schema::SelectClipboardItems;
 
 pub type DbResult<T> = Result<T, String>;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, specta::Type)]
 pub struct ClipboardItemRow {
     pub id: i64,
     pub content_type: String,
@@ -57,7 +57,7 @@ impl From<SelectClipboardItems> for ClipboardItemRow {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, specta::Type)]
 pub struct InsertClipboardItemParams {
     pub content_type: String,
     pub text_content: Option<String>,
@@ -73,7 +73,7 @@ pub struct InsertClipboardItemParams {
     pub updated_at: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, specta::Type)]
 pub struct UpdateSortOrderParams {
     pub id: i64,
     pub sort_order: String,
