@@ -9,7 +9,7 @@ mod db;
 mod schema;
 mod sync;
 mod tray;
-mod window_state;
+mod window;
 
 use clipboard::ClipboardManager;
 use clipboard_monitor::MonitorState;
@@ -32,7 +32,7 @@ use commands::{
 use db::Database;
 use sync::SyncState;
 use tauri::Manager;
-use window_state::set_visible as window_set_visible;
+use window::main_window;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -62,8 +62,10 @@ fn main() {
 
             caret::init();
             tray::setup(app)?;
-            setup_main_window(app, &initial_command);
+            main_window::setup(app, &initial_command);
+
             clipboard_monitor::start_monitor(app.handle());
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -114,25 +116,4 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-fn setup_main_window(app: &tauri::App, initial_command: &str) {
-    if let Some(window) = app.get_webview_window("main") {
-        handle_command(app.handle(), initial_command);
-
-        let window_clone = window.clone();
-        window.on_window_event(move |event| match event {
-            tauri::WindowEvent::CloseRequested { api, .. } => {
-                api.prevent_close();
-                let _ = window_clone.hide();
-                window_set_visible(false);
-            }
-            tauri::WindowEvent::Focused(focused) => {
-                if *focused {
-                    window_set_visible(true);
-                }
-            }
-            _ => {}
-        });
-    }
 }

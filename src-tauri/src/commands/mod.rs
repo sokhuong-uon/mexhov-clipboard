@@ -16,7 +16,7 @@ pub use sync::*;
 pub use system::*;
 pub use window::*;
 
-use crate::window_state::{is_visible as window_is_visible, set_visible as window_set_visible};
+use crate::main_window;
 use tauri::{AppHandle, Manager};
 
 pub fn handle_command(app: &AppHandle, command: &str) {
@@ -27,14 +27,14 @@ pub fn handle_command(app: &AppHandle, command: &str) {
         "hide" => {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.hide();
-                window_set_visible(false);
+                main_window::set_visible(false);
             }
         }
         "toggle" => {
-            if window_is_visible() {
+            if main_window::is_visible() {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.hide();
-                    window_set_visible(false);
+                    main_window::set_visible(false);
                 }
             } else {
                 show_window_at_cursor(app.clone());

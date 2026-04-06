@@ -1,4 +1,4 @@
-use crate::window_state::set_visible as window_set_visible;
+use crate::main_window;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
@@ -18,13 +18,13 @@ pub fn setup(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.show();
                     let _ = window.set_focus();
-                    window_set_visible(true);
+                    main_window::set_visible(true);
                 }
             }
             "hide" => {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.hide();
-                    window_set_visible(false);
+                    main_window::set_visible(false);
                 }
             }
             "quit" => {
