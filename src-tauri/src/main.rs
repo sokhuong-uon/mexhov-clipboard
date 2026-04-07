@@ -14,78 +14,20 @@ mod window;
 
 use clipboard::ClipboardManager;
 use clipboard_monitor::MonitorState;
-use commands::{
-    db_bump_item, db_clear_all, db_dedup_item, db_delete_item, db_get_all_items, db_get_item_count,
-    db_insert_item, db_toggle_favorite, db_update_note, db_update_sort_orders,
-};
-use commands::{
-    download_media_to_temp, fetch_link_preview, get_file_size, get_setting, get_system_theme,
-    handle_command, hide_window, is_cosmic_data_control_enabled, is_wayland_session,
-    parse_command_from_args, paste_item, read_clipboard, read_clipboard_image,
-    reinitialize_clipboard, set_monitoring, set_setting, show_window, show_window_at_cursor,
-    toggle_window, write_clipboard, write_clipboard_image,
-};
-use commands::{
-    get_hostname, get_local_ip, get_network_interfaces, mdns_start_discovery, mdns_stop_discovery,
-    sync_cloud_join, sync_connect, sync_start_server, sync_status, sync_stop,
-};
+use commands::{create_command_builder, handle_command, parse_command_from_args};
 use db::Database;
-use detection::color;
 use sync::SyncState;
 use tauri::Manager;
-use tauri_specta::{collect_commands, Builder};
 use window::main_window;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let initial_command = parse_command_from_args(&args).to_string();
 
-    let builder = Builder::new().commands(collect_commands![
-        show_window,
-        show_window_at_cursor,
-        hide_window,
-        paste_item,
-        toggle_window,
-        read_clipboard,
-        read_clipboard_image,
-        write_clipboard,
-        write_clipboard_image,
-        reinitialize_clipboard,
-        set_monitoring,
-        is_wayland_session,
-        is_cosmic_data_control_enabled,
-        get_system_theme,
-        db_get_all_items,
-        db_insert_item,
-        db_bump_item,
-        db_delete_item,
-        db_clear_all,
-        db_toggle_favorite,
-        db_update_sort_orders,
-        db_get_item_count,
-        db_dedup_item,
-        db_update_note,
-        fetch_link_preview,
-        download_media_to_temp,
-        get_file_size,
-        get_setting,
-        set_setting,
-        get_local_ip,
-        get_hostname,
-        get_network_interfaces,
-        sync_start_server,
-        sync_connect,
-        sync_cloud_join,
-        sync_stop,
-        sync_status,
-        mdns_start_discovery,
-        mdns_stop_discovery,
-        // detection
-        color::convert_color
-    ]);
+    let command_builder = create_command_builder();
 
     #[cfg(debug_assertions)]
-    builder
+    command_builder
         .export(
             specta_typescript::Typescript::default(),
             "../src/bindings.ts",
@@ -122,7 +64,7 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(builder.invoke_handler())
+        .invoke_handler(command_builder.invoke_handler())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
