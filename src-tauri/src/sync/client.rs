@@ -1,5 +1,5 @@
 use super::crypto::{self, HandshakeMessage};
-use super::{PeerMap, SyncMode, SyncMessage};
+use super::{PeerMap, SyncMessage, SyncMode};
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
 use tauri::AppHandle;

@@ -1,9 +1,9 @@
 #[cfg(target_os = "linux")]
 mod linux;
-#[cfg(target_os = "windows")]
-mod windows;
 #[cfg(target_os = "macos")]
 mod macos;
+#[cfg(target_os = "windows")]
+mod windows;
 
 /// Initialize the caret position tracker (call once at app startup).
 /// On Linux this starts a background thread to monitor AT-SPI focus events.

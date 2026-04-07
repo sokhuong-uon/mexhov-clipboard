@@ -6,10 +6,20 @@ use tauri::{AppHandle, Emitter, Manager};
 use tokio::time::{interval, Duration};
 
 #[derive(Clone, Serialize)]
-#[serde(tag = "type", rename_all = "camelCase", rename_all_fields = "camelCase")]
+#[serde(
+    tag = "type",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
 pub enum ClipboardChangeEvent {
-    Text { text: String },
-    Image { base64_data: String, width: u32, height: u32 },
+    Text {
+        text: String,
+    },
+    Image {
+        base64_data: String,
+        width: u32,
+        height: u32,
+    },
 }
 
 pub struct MonitorState {
@@ -56,16 +66,30 @@ pub fn start_monitor(app: &AppHandle) {
                     if changed {
                         prev_image_hash = Some(hash);
                         prev_text = None;
-                        let _ = handle.emit("clipboard-changed", ClipboardChangeEvent::Image {
-                            base64_data: base64_data.clone(),
-                            width,
-                            height,
-                        });
+                        let _ = handle.emit(
+                            "clipboard-changed",
+                            ClipboardChangeEvent::Image {
+                                base64_data: base64_data.clone(),
+                                width,
+                                height,
+                            },
+                        );
                         // Broadcast to sync peers if this wasn't from remote
-                        if !is_from_remote(&sync_state, &SyncMessage::Image {
-                            base64_data: base64_data.clone(), width, height,
-                        }).await {
-                            sync_state.broadcast(SyncMessage::Image { base64_data, width, height });
+                        if !is_from_remote(
+                            &sync_state,
+                            &SyncMessage::Image {
+                                base64_data: base64_data.clone(),
+                                width,
+                                height,
+                            },
+                        )
+                        .await
+                        {
+                            sync_state.broadcast(SyncMessage::Image {
+                                base64_data,
+                                width,
+                                height,
+                            });
                         }
                     }
                     emitted = true;
@@ -84,9 +108,17 @@ pub fn start_monitor(app: &AppHandle) {
                         let changed = prev_text.as_ref().map_or(true, |t| t != &text);
                         if changed {
                             prev_text = Some(text.clone());
-                            let _ = handle.emit("clipboard-changed", ClipboardChangeEvent::Text { text: text.clone() });
+                            let _ = handle.emit(
+                                "clipboard-changed",
+                                ClipboardChangeEvent::Text { text: text.clone() },
+                            );
                             // Broadcast to sync peers if this wasn't from remote
-                            if !is_from_remote(&sync_state, &SyncMessage::Text { text: text.clone() }).await {
+                            if !is_from_remote(
+                                &sync_state,
+                                &SyncMessage::Text { text: text.clone() },
+                            )
+                            .await
+                            {
                                 sync_state.broadcast(SyncMessage::Text { text });
                             }
                         }
@@ -108,17 +140,25 @@ pub fn start_monitor(app: &AppHandle) {
             match &msg {
                 SyncMessage::Text { text } => {
                     let _ = manager.write(text.clone()).await;
-                    let _ = handle.emit("clipboard-changed", ClipboardChangeEvent::Text {
-                        text: text.clone(),
-                    });
+                    let _ = handle.emit(
+                        "clipboard-changed",
+                        ClipboardChangeEvent::Text { text: text.clone() },
+                    );
                 }
-                SyncMessage::Image { base64_data, width, height } => {
+                SyncMessage::Image {
+                    base64_data,
+                    width,
+                    height,
+                } => {
                     let _ = manager.write_image(base64_data.clone()).await;
-                    let _ = handle.emit("clipboard-changed", ClipboardChangeEvent::Image {
-                        base64_data: base64_data.clone(),
-                        width: *width,
-                        height: *height,
-                    });
+                    let _ = handle.emit(
+                        "clipboard-changed",
+                        ClipboardChangeEvent::Image {
+                            base64_data: base64_data.clone(),
+                            width: *width,
+                            height: *height,
+                        },
+                    );
                 }
             }
         }

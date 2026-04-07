@@ -67,12 +67,9 @@ pub async fn spawn(
         .map_err(|e| format!("Failed to connect to cloud relay: {e}"))?;
 
     // Wait for Welcome message from relay
-    let welcome = tokio::time::timeout(
-        std::time::Duration::from_secs(10),
-        ws_stream.next(),
-    )
-    .await
-    .map_err(|_| "Cloud relay handshake timed out".to_string())?;
+    let welcome = tokio::time::timeout(std::time::Duration::from_secs(10), ws_stream.next())
+        .await
+        .map_err(|_| "Cloud relay handshake timed out".to_string())?;
 
     let (my_peer_id, room_id) = match welcome {
         Some(Ok(Message::Text(text))) => {
@@ -94,8 +91,7 @@ pub async fn spawn(
     let mut outgoing_rx = outgoing_tx.subscribe();
 
     // Per-peer keys: peer_id -> AES key (established via ECDH)
-    let peer_keys: Arc<RwLock<HashMap<String, PeerKey>>> =
-        Arc::new(RwLock::new(HashMap::new()));
+    let peer_keys: Arc<RwLock<HashMap<String, PeerKey>>> = Arc::new(RwLock::new(HashMap::new()));
     // Pending key exchanges: we initiated ECDH but haven't received ack yet
     // Store our secret so we can compute shared secret on ack
     // Since EphemeralSecret is consumed on diffie_hellman, we store a fresh one per peer

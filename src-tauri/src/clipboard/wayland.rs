@@ -28,10 +28,7 @@ pub async fn read() -> Result<String, String> {
 
 pub async fn read_image() -> Result<Option<Vec<u8>>, String> {
     // First check if there's an image in the clipboard by listing MIME types
-    let list_output = Command::new("wl-paste")
-        .arg("--list-types")
-        .output()
-        .await;
+    let list_output = Command::new("wl-paste").arg("--list-types").output().await;
 
     let has_image = match list_output {
         Ok(output) => {

@@ -15,7 +15,8 @@ export type HotkeyAction =
   | "jumpTop"
   | "jumpBottom"
   | "search"
-  | "searchAlt";
+  | "searchAlt"
+  | "toggleWindowVisibility";
 
 export const HOTKEY_META: Record<
   HotkeyAction,
@@ -33,6 +34,7 @@ export const HOTKEY_META: Record<
   jumpBottom: { label: "Jump to bottom", defaultKey: "B" },
   search: { label: "Focus search", defaultKey: "Mod+K" },
   searchAlt: { label: "Focus search (alt)", defaultKey: "I" },
+  toggleWindowVisibility: { label: "Toggle window visibility", defaultKey: "Meta+V" },
 };
 
 export const HOTKEY_ACTIONS = Object.keys(HOTKEY_META) as HotkeyAction[];

@@ -35,14 +35,12 @@ fn looks_like_secret(text: &str) -> bool {
     }
 
     // Check if it looks like base64 (alphanumeric + /+=)
-    let is_base64_like = text
-        .bytes()
-        .all(|b| b.is_ascii_alphanumeric() || b == b'+' || b == b'/' || b == b'=' || b == b'-' || b == b'_');
+    let is_base64_like = text.bytes().all(|b| {
+        b.is_ascii_alphanumeric() || b == b'+' || b == b'/' || b == b'=' || b == b'-' || b == b'_'
+    });
 
     // Check if it looks like hex (even length, all hex chars)
-    let is_hex_like = len % 2 == 0
-        && len >= 32
-        && text.bytes().all(|b| b.is_ascii_hexdigit());
+    let is_hex_like = len % 2 == 0 && len >= 32 && text.bytes().all(|b| b.is_ascii_hexdigit());
 
     if !is_base64_like && !is_hex_like {
         return false;
