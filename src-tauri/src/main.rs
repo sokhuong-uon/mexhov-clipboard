@@ -15,7 +15,6 @@ mod window;
 use clipboard::ClipboardManager;
 use clipboard_monitor::MonitorState;
 use commands::{create_command_builder, handle_command, parse_command_from_args};
-use db::Database;
 use sync::SyncState;
 use tauri::Manager;
 use window::main_window;
@@ -46,15 +45,7 @@ fn main() {
         .manage(MonitorState::new())
         .manage(SyncState::new())
         .setup(move |app| {
-            // Initialize database in app data directory
-            let app_data_dir = app
-                .path()
-                .app_data_dir()
-                .expect("failed to resolve app data dir");
-            std::fs::create_dir_all(&app_data_dir).expect("failed to create app data dir");
-            let db_path = app_data_dir.join("clipboard.db");
-            let database =
-                Database::new(db_path.to_str().unwrap()).expect("failed to initialize database");
+            let database = db::initialization::init(app);
             app.manage(database);
 
             caret::init();
