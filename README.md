@@ -1,6 +1,6 @@
 # Mexboard: Clipboard Manager from Mexhov
 
-Works on Linux, Windows, and probably MacOS tool 🤔
+Works on Linux, Windows, and probably MacOS too 🤔
 
 <img width="401" height="676" alt="image" src="https://github.com/user-attachments/assets/c0f51f52-9548-4ecf-848d-33519d34017d" />
 <img width="401" height="676" alt="image" src="https://github.com/user-attachments/assets/7d7f643d-9741-448c-911f-e61d523efacb" />
