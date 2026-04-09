@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Mexhov Clipboard",
+  "productName": "Mexboard",
   "version": "1.5.0",
-  "identifier": "com.mexhov.clipboard",
+  "identifier": "com.mexhov.mexboard",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Mexhov Clipboard",
+        "title": "Mexboard",
         "width": 400,
         "maxWidth": 1000,
         "height": 600,

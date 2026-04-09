@@ -3186,7 +3186,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mexc"
+name = "mexboard"
 version = "1.5.0"
 dependencies = [
  "aes-gcm",
