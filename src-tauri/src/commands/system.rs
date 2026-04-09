@@ -1,10 +1,7 @@
-use crate::clipboard::ClipboardManager;
-use tauri::State;
-
 #[tauri::command]
 #[specta::specta]
-pub fn is_wayland_session(manager: State<'_, ClipboardManager>) -> bool {
-    manager.is_wayland()
+pub fn is_wayland_session() -> bool {
+    std::env::var("WAYLAND_DISPLAY").is_ok()
 }
 
 #[tauri::command]

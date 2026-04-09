@@ -42,10 +42,7 @@ pub fn start_monitor(app: &AppHandle) {
         let manager = handle.state::<ClipboardManager>();
         let monitor_state = handle.state::<MonitorState>();
         let sync_state = handle.state::<SyncState>();
-        let is_wayland = manager.is_wayland();
-        let poll_ms = if is_wayland { 500 } else { 750 };
-
-        let mut ticker = interval(Duration::from_millis(poll_ms));
+        let mut ticker = interval(Duration::from_millis(500));
         let mut prev_text: Option<String> = None;
         let mut prev_image_hash: Option<u64> = None;
 

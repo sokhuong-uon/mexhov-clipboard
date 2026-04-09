@@ -1,5 +1,5 @@
 mod arboard;
+mod image;
 mod manager;
-mod wayland;
 
 pub use manager::ClipboardManager;
