@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 
 const DEFAULTS = {
   history_limit: 50,
@@ -14,24 +14,27 @@ export const useSettings = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    invoke<string | null>("get_setting", { key: "history_limit" })
-      .then((value) => {
-        if (value) {
-          const parsed = parseInt(value, 10);
+    (async () => {
+      try {
+        const result = await commands.getSetting("history_limit");
+        if (result.status === "ok" && result.data) {
+          const parsed = parseInt(result.data, 10);
           if (!isNaN(parsed) && parsed > 0) {
             setHistoryLimitState(parsed);
           }
         }
-      })
-      .finally(() => setIsLoaded(true));
+      } finally {
+        setIsLoaded(true);
+      }
+    })();
   }, []);
 
   const setHistoryLimit = useCallback(async (limit: number) => {
     setHistoryLimitState(limit);
-    await invoke("set_setting", {
-      key: "history_limit" satisfies SettingsKey,
-      value: String(limit),
-    });
+    await commands.setSetting(
+      "history_limit" satisfies SettingsKey,
+      String(limit),
+    );
   }, []);
 
   return {

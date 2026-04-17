@@ -10,7 +10,7 @@ import { GifView } from "@/components/gif-view";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { useSettings } from "@/hooks/use-settings";
 import { useHotkeysConfig } from "@/hooks/use-hotkeys-config";
@@ -74,14 +74,13 @@ function App() {
   );
 
   const handlePaste = useCallback(async (item: ClipboardItem) => {
-    try {
-      await invoke("paste_item", {
-        contentType: item.content_type,
-        textContent: item.text_content ?? null,
-        imageData: item.image_data ?? null,
-      });
-    } catch (e) {
-      console.error("[handlePaste] paste_item failed:", e);
+    const result = await commands.pasteItem(
+      item.content_type,
+      item.text_content ?? null,
+      item.image_data ?? null,
+    );
+    if (result.status === "error") {
+      console.error("[handlePaste] paste_item failed:", result.error);
     }
   }, []);
 

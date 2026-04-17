@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { type Klipy } from "@/features/klipy/schema/klipy";
 import { startDrag } from "@crabnebula/tauri-plugin-drag";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 
 type GifGridItemProps = {
   item: Klipy;
@@ -22,30 +22,25 @@ export const GifGridItem = ({ item, onSelect }: GifGridItemProps) => {
 
   const preload = useCallback(async () => {
     if (cached.current || !dragUrl) return;
-    try {
-      const [filePath, iconPath] = await invoke<[string, string]>(
-        "download_media_to_temp",
-        { url: dragUrl },
-      );
+    const result = await commands.downloadMediaToTemp(dragUrl);
+    if (result.status === "ok") {
+      const [filePath, iconPath] = result.data;
       cached.current = { filePath, iconPath };
-    } catch {}
+    }
   }, [dragUrl]);
 
   const handleMouseDown = useCallback(
     async (e: React.MouseEvent) => {
       if (!dragUrl) return;
       e.preventDefault();
-      try {
-        if (!cached.current) {
-          const [filePath, iconPath] = await invoke<[string, string]>(
-            "download_media_to_temp",
-            { url: dragUrl },
-          );
-          cached.current = { filePath, iconPath };
-        }
-        const { filePath, iconPath } = cached.current;
-        await startDrag({ item: [filePath], icon: iconPath });
-      } catch {}
+      if (!cached.current) {
+        const result = await commands.downloadMediaToTemp(dragUrl);
+        if (result.status === "error") return;
+        const [filePath, iconPath] = result.data;
+        cached.current = { filePath, iconPath };
+      }
+      const { filePath, iconPath } = cached.current;
+      await startDrag({ item: [filePath], icon: iconPath });
     },
     [dragUrl],
   );

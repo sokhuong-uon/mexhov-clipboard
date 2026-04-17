@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { commands, LinkPreviewData } from "@/bindings";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Check, Copy, ExternalLink, Globe, QrCode, X } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
@@ -9,14 +9,6 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-
-type LinkPreviewData = {
-  title: string | null;
-  description: string | null;
-  image: string | null;
-  favicon: string | null;
-  site_name: string | null;
-};
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
@@ -40,7 +32,7 @@ export function LinkPreview({ url }: { url: string }) {
     if (!canvas) return;
     const dataUrl = canvas.toDataURL("image/png");
     const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
-    await invoke("write_clipboard_image", { base64Data: base64 });
+    await commands.writeClipboardImage(base64);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }, []);
@@ -56,21 +48,17 @@ export function LinkPreview({ url }: { url: string }) {
     setLoading(true);
     setError(false);
 
-    invoke<LinkPreviewData>("fetch_link_preview", { url })
-      .then((result) => {
-        previewCache.set(url, result);
-        if (!cancelled) {
-          setData(result);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
+    commands.fetchLinkPreview(url).then((result) => {
+      if (cancelled) return;
+      if (result.status === "ok") {
+        previewCache.set(url, result.data);
+        setData(result.data);
+      } else {
         previewCache.set(url, null);
-        if (!cancelled) {
-          setError(true);
-          setLoading(false);
-        }
-      });
+        setError(true);
+      }
+      setLoading(false);
+    });
 
     return () => {
       cancelled = true;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 import { listen } from "@tauri-apps/api/event";
 
 export type DiscoveredDevice = {
@@ -17,7 +17,7 @@ export function useDiscoveredDevices(active: boolean) {
       return;
     }
 
-    invoke("mdns_start_discovery").catch(console.error);
+    commands.mdnsStartDiscovery().catch(console.error);
 
     const unlistenFound = listen<DiscoveredDevice>("mdns-device-found", (e) => {
       setDevices((prev) => {
@@ -33,7 +33,7 @@ export function useDiscoveredDevices(active: boolean) {
     });
 
     return () => {
-      invoke("mdns_stop_discovery").catch(console.error);
+      commands.mdnsStopDiscovery().catch(console.error);
       unlistenFound.then((fn) => fn());
       unlistenLost.then((fn) => fn());
     };

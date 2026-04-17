@@ -9,7 +9,7 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 import { startDrag } from "@crabnebula/tauri-plugin-drag";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 
 const IMAGE_EXT = /\.(gif|webp|png|jpg|jpeg|svg)(\?.*)?$/i;
 const VIDEO_EXT = /\.(mp4|webm|mov)(\?.*)?$/i;
@@ -63,29 +63,24 @@ const DraggableMedia = ({ url }: { url: string }) => {
 
   const preload = useCallback(async () => {
     if (cached.current) return;
-    try {
-      const [filePath, iconPath] = await invoke<[string, string]>(
-        "download_media_to_temp",
-        { url },
-      );
+    const result = await commands.downloadMediaToTemp(url);
+    if (result.status === "ok") {
+      const [filePath, iconPath] = result.data;
       cached.current = { filePath, iconPath };
-    } catch (err) {}
+    }
   }, [url]);
 
   const handleDrag = useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
-      try {
-        if (!cached.current) {
-          const [filePath, iconPath] = await invoke<[string, string]>(
-            "download_media_to_temp",
-            { url },
-          );
-          cached.current = { filePath, iconPath };
-        }
-        const { filePath, iconPath } = cached.current;
-        await startDrag({ item: [filePath], icon: iconPath });
-      } catch (err) {}
+      if (!cached.current) {
+        const result = await commands.downloadMediaToTemp(url);
+        if (result.status === "error") return;
+        const [filePath, iconPath] = result.data;
+        cached.current = { filePath, iconPath };
+      }
+      const { filePath, iconPath } = cached.current;
+      await startDrag({ item: [filePath], icon: iconPath });
     },
     [url],
   );

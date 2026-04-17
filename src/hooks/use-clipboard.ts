@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 import { ClipboardError, ClipboardContent } from "@/types/clipboard";
 
 export const useClipboard = () => {
@@ -13,26 +13,26 @@ export const useClipboard = () => {
   }, []);
 
   const read = useCallback(async (): Promise<string> => {
-    try {
-      const text = await invoke<string>("read_clipboard");
-      return text || "";
-    } catch (error) {
-      const errorMessage = logError("Failed to read clipboard", error);
-
-      // Only show error for persistent failures
-      if (
-        !errorMessage.includes("No selection") &&
-        !errorMessage.includes("Nothing is copied")
-      ) {
-        setError({
-          id: Date.now().toString(),
-          message: `Clipboard read failed: ${errorMessage}`,
-          timestamp: new Date(),
-          retryable: true,
-        });
-      }
-      return "";
+    const result = await commands.readClipboard();
+    if (result.status === "ok") {
+      return result.data || "";
     }
+
+    const errorMessage = logError("Failed to read clipboard", result.error);
+
+    // Only show error for persistent failures
+    if (
+      !errorMessage.includes("No selection") &&
+      !errorMessage.includes("Nothing is copied")
+    ) {
+      setError({
+        id: Date.now().toString(),
+        message: `Clipboard read failed: ${errorMessage}`,
+        timestamp: new Date(),
+        retryable: true,
+      });
+    }
+    return "";
   }, [logError]);
 
   const readImage = useCallback(async (): Promise<{
@@ -40,32 +40,30 @@ export const useClipboard = () => {
     width: number;
     height: number;
   } | null> => {
-    try {
-      const result = await invoke<[string, number, number] | null>(
-        "read_clipboard_image",
-      );
-      if (result) {
-        const [base64Data, width, height] = result;
+    const result = await commands.readClipboardImage();
+    if (result.status === "ok") {
+      if (result.data) {
+        const [base64Data, width, height] = result.data;
         return { base64Data, width, height };
       }
       return null;
-    } catch (error) {
-      const errorMessage = logError("Failed to read clipboard image", error);
-      // Don't show error for no image available
-      if (
-        !errorMessage.includes("No selection") &&
-        !errorMessage.includes("ContentNotAvailable") &&
-        !errorMessage.includes("Nothing is copied")
-      ) {
-        setError({
-          id: Date.now().toString(),
-          message: `Clipboard image read failed: ${errorMessage}`,
-          timestamp: new Date(),
-          retryable: true,
-        });
-      }
-      return null;
     }
+
+    const errorMessage = logError("Failed to read clipboard image", result.error);
+    // Don't show error for no image available
+    if (
+      !errorMessage.includes("No selection") &&
+      !errorMessage.includes("ContentNotAvailable") &&
+      !errorMessage.includes("Nothing is copied")
+    ) {
+      setError({
+        id: Date.now().toString(),
+        message: `Clipboard image read failed: ${errorMessage}`,
+        timestamp: new Date(),
+        retryable: true,
+      });
+    }
+    return null;
   }, [logError]);
 
   // Read clipboard content (text or image)
@@ -106,59 +104,62 @@ export const useClipboard = () => {
         logError("Browser clipboard API failed", error);
       }
 
-      try {
-        await invoke("write_clipboard", { text });
+      const result = await commands.writeClipboard(text);
+      if (result.status === "ok") {
         setError(null);
-      } catch (rustError) {
-        const errorMessage = logError("Rust clipboard write failed", rustError);
-        setError({
-          id: Date.now().toString(),
-          message: `Failed to write to clipboard: ${errorMessage}`,
-          timestamp: new Date(),
-          retryable: true,
-        });
-        throw rustError;
+        return;
       }
+
+      const errorMessage = logError("Rust clipboard write failed", result.error);
+      setError({
+        id: Date.now().toString(),
+        message: `Failed to write to clipboard: ${errorMessage}`,
+        timestamp: new Date(),
+        retryable: true,
+      });
+      throw result.error;
     },
     [logError],
   );
 
   const writeImage = useCallback(
     async (base64Data: string): Promise<void> => {
-      try {
-        await invoke("write_clipboard_image", { base64Data });
+      const result = await commands.writeClipboardImage(base64Data);
+      if (result.status === "ok") {
         setError(null);
-      } catch (error) {
-        const errorMessage = logError(
-          "Failed to write image to clipboard",
-          error,
-        );
-        setError({
-          id: Date.now().toString(),
-          message: `Failed to write image to clipboard: ${errorMessage}`,
-          timestamp: new Date(),
-          retryable: true,
-        });
-        throw error;
+        return;
       }
+
+      const errorMessage = logError(
+        "Failed to write image to clipboard",
+        result.error,
+      );
+      setError({
+        id: Date.now().toString(),
+        message: `Failed to write image to clipboard: ${errorMessage}`,
+        timestamp: new Date(),
+        retryable: true,
+      });
+      throw result.error;
     },
     [logError],
   );
 
   const reinitialize = useCallback(async (): Promise<void> => {
-    try {
-      await invoke("reinitialize_clipboard");
+    const result = await commands.reinitializeClipboard();
+    if (result.status === "ok") {
       setError(null);
-    } catch (error) {
-      const errorMessage = logError("Failed to reinitialize clipboard", error);
-      setError({
-        id: Date.now().toString(),
-        message: `Failed to reinitialize: ${errorMessage}`,
-        timestamp: new Date(),
-        retryable: true,
-      });
-      throw error;
+      return;
     }
+
+    const errorMessage = logError("Failed to reinitialize clipboard", result.error);
+    setError({
+      id: Date.now().toString(),
+      message: `Failed to reinitialize: ${errorMessage}`,
+      timestamp: new Date(),
+      retryable: true,
+    });
+    throw result.error;
   }, [logError]);
 
   const dismissError = useCallback(() => {

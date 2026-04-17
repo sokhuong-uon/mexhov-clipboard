@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 
 export function ColorPreview({
   text,
@@ -13,7 +13,9 @@ export function ColorPreview({
 
   if (!fetched.current) {
     fetched.current = true;
-    invoke<string>("convert_color", { text, format }).then(setPreview);
+    commands.convertColor(text, format).then((result) => {
+      if (result.status === "ok") setPreview(result.data);
+    });
   }
 
   return preview ? (

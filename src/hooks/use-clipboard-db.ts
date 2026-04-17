@@ -1,50 +1,40 @@
-import { invoke } from "@tauri-apps/api/core";
+import { commands, InsertClipboardItemParams, UpdateSortOrderParams } from "@/bindings";
 import { ClipboardItem } from "@/types/clipboard";
 
-type InsertParams = {
-  content_type: string;
-  text_content: string | null;
-  image_data: string | null;
-  image_width: number | null;
-  image_height: number | null;
-  char_count: number | null;
-  line_count: number | null;
-  source_app: string | null;
-  sort_order: string;
-  kv_key: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-type UpdateSortOrderParams = {
-  id: number;
-  sort_order: string;
-};
+async function unwrap<T>(
+  p: Promise<{ status: "ok"; data: T } | { status: "error"; error: string }>,
+): Promise<T> {
+  const r = await p;
+  if (r.status === "error") throw r.error;
+  return r.data;
+}
 
 export const clipboardDb = {
   getAllItems: (limit: number, offset = 0, favoritesFirst = false) =>
-    invoke<ClipboardItem[]>("db_get_all_items", { limit, offset, favoritesFirst }),
+    unwrap(commands.dbGetAllItems(limit, offset, favoritesFirst)) as Promise<
+      ClipboardItem[]
+    >,
 
-  getItemCount: () => invoke<number>("db_get_item_count"),
+  getItemCount: () => unwrap(commands.dbGetItemCount()),
 
-  insertItem: (params: InsertParams) =>
-    invoke<ClipboardItem>("db_insert_item", { params }),
+  insertItem: (params: InsertClipboardItemParams) =>
+    unwrap(commands.dbInsertItem(params)) as Promise<ClipboardItem>,
 
   bumpItem: (id: number, sortOrder: string) =>
-    invoke<ClipboardItem>("db_bump_item", { id, sort_order: sortOrder }),
+    unwrap(commands.dbBumpItem(id, sortOrder)) as Promise<ClipboardItem>,
 
-  deleteItem: (id: number) => invoke<void>("db_delete_item", { id }),
+  deleteItem: (id: number) => unwrap(commands.dbDeleteItem(id)),
 
-  clearAll: () => invoke<void>("db_clear_all"),
+  clearAll: () => unwrap(commands.dbClearAll()),
 
   toggleFavorite: (id: number) =>
-    invoke<ClipboardItem>("db_toggle_favorite", { id }),
+    unwrap(commands.dbToggleFavorite(id)) as Promise<ClipboardItem>,
 
   updateSortOrders: (items: UpdateSortOrderParams[]) =>
-    invoke<void>("db_update_sort_orders", { items }),
+    unwrap(commands.dbUpdateSortOrders(items)),
 
-  dedupItem: (id: number) => invoke<number>("db_dedup_item", { id }),
+  dedupItem: (id: number) => unwrap(commands.dbDedupItem(id)),
 
   updateNote: (id: number, note: string | null) =>
-    invoke<ClipboardItem>("db_update_note", { id, note }),
+    unwrap(commands.dbUpdateNote(id, note)) as Promise<ClipboardItem>,
 };

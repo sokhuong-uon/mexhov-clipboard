@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 import { formatForDisplay } from "@tanstack/react-hotkeys";
 import type { Hotkey } from "@tanstack/react-hotkeys";
 
@@ -54,25 +54,25 @@ export function useHotkeysConfig() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    invoke<string | null>("get_setting", { key: SETTINGS_KEY })
-      .then((value) => {
-        if (value) {
+    (async () => {
+      try {
+        const result = await commands.getSetting(SETTINGS_KEY);
+        if (result.status === "ok" && result.data) {
           try {
-            const parsed = JSON.parse(value) as Partial<HotkeyConfig>;
+            const parsed = JSON.parse(result.data) as Partial<HotkeyConfig>;
             setHotkeysState((prev) => ({ ...prev, ...parsed }));
           } catch {
             // invalid JSON — keep defaults
           }
         }
-      })
-      .finally(() => setIsLoaded(true));
+      } finally {
+        setIsLoaded(true);
+      }
+    })();
   }, []);
 
   const persist = useCallback((next: HotkeyConfig) => {
-    invoke("set_setting", {
-      key: SETTINGS_KEY,
-      value: JSON.stringify(next),
-    });
+    commands.setSetting(SETTINGS_KEY, JSON.stringify(next));
   }, []);
 
   const setHotkey = useCallback(

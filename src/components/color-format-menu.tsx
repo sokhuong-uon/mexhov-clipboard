@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 import { cn } from "@/lib/utils";
 import { ColorPreview } from "@/components/color-preview";
 
@@ -28,11 +28,9 @@ export function ColorFormatMenu({
 }: ColorFormatMenuProps) {
   const handleCopyAs = useCallback(
     async (format: string) => {
-      const converted = await invoke<string>("convert_color", {
-        text: colorText,
-        format,
-      });
-      await invoke("write_clipboard", { text: converted });
+      const converted = await commands.convertColor(colorText, format);
+      if (converted.status === "error") return;
+      await commands.writeClipboard(converted.data);
       onOpenChange(false);
     },
     [colorText, onOpenChange],

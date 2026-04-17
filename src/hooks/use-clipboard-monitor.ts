@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 import { listen } from "@tauri-apps/api/event";
 import { SystemInfo, ClipboardContent } from "@/types/clipboard";
 
@@ -27,8 +27,8 @@ export const useClipboardMonitor = ({
   // Detect system capabilities
   useEffect(() => {
     Promise.all([
-      invoke<boolean>("is_wayland_session"),
-      invoke<boolean>("is_cosmic_data_control_enabled"),
+      commands.isWaylandSession(),
+      commands.isCosmicDataControlEnabled(),
     ])
       .then(([isWayland, isCosmicDataControlEnabled]) => {
         setSystemInfo({ isWayland, isCosmicDataControlEnabled });
@@ -40,7 +40,7 @@ export const useClipboardMonitor = ({
 
   // Tell backend whether to monitor
   useEffect(() => {
-    invoke("set_monitoring", { enabled: isMonitoring }).catch(console.error);
+    commands.setMonitoring(isMonitoring).catch(console.error);
   }, [isMonitoring]);
 
   // Stable refs for callbacks to avoid re-subscribing on every render

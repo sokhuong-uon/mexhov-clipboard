@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@/bindings";
 import { listen } from "@tauri-apps/api/event";
 
 const DEFAULT_SYNC_PORT = 9876;
@@ -19,11 +19,6 @@ export type NetworkInterface = {
   ip: string;
 };
 
-type SyncStartResult = {
-  address: string;
-  pairingCode: string;
-};
-
 export function useSync() {
   const [status, setStatus] = useState<SyncStatus>({
     mode: "off",
@@ -38,10 +33,10 @@ export function useSync() {
   const [loading, setLoading] = useState(false);
 
   const refreshStatus = useCallback(async () => {
-    try {
-      const s = await invoke<SyncStatus>("sync_status");
-      setStatus(s);
-    } catch {}
+    const result = await commands.syncStatus();
+    if (result.status === "ok") {
+      setStatus(result.data as SyncStatus);
+    }
   }, []);
 
   useEffect(() => {
@@ -57,57 +52,48 @@ export function useSync() {
   }, [refreshStatus]);
 
   useEffect(() => {
-    invoke<NetworkInterface[]>("get_network_interfaces")
-      .then(setInterfaces)
-      .catch(() => {});
-    invoke<string>("get_hostname")
-      .then(setHostname)
-      .catch(() => {});
+    commands.getNetworkInterfaces().then(setInterfaces).catch(() => {});
+    commands.getHostname().then(setHostname).catch(() => {});
   }, []);
 
   const startServer = async () => {
     setError(null);
     setLoading(true);
-    try {
-      await invoke<SyncStartResult>("sync_start_server", {
-        port: DEFAULT_SYNC_PORT,
-      });
+    const result = await commands.syncStartServer(DEFAULT_SYNC_PORT);
+    if (result.status === "error") {
+      setError(String(result.error));
+    } else {
       await refreshStatus();
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const connectLan = async (address: string, pairingCode: string) => {
     setError(null);
     setLoading(true);
-    try {
-      await invoke("sync_connect", { address, pairingCode });
+    const result = await commands.syncConnect(address, pairingCode);
+    if (result.status === "error") {
+      setError(String(result.error));
+    } else {
       await refreshStatus();
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const connectCloud = async (relayUrl: string, authToken: string) => {
     setError(null);
     setLoading(true);
-    try {
-      await invoke("sync_cloud_join", { relayUrl, authToken });
+    const result = await commands.syncCloudJoin(relayUrl, authToken);
+    if (result.status === "error") {
+      setError(String(result.error));
+    } else {
       await refreshStatus();
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const disconnect = async () => {
-    await invoke("sync_stop");
+    await commands.syncStop();
     await refreshStatus();
     setError(null);
   };
