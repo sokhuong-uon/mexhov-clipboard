@@ -21,6 +21,7 @@ use tauri_specta::{collect_commands, Builder};
 pub fn create_command_builder() -> Builder<tauri::Wry> {
     Builder::new().commands(collect_commands![
         paste_item,
+        paste_file_uri,
         read_clipboard,
         read_clipboard_image,
         write_clipboard,

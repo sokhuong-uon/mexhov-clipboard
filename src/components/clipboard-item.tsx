@@ -6,10 +6,8 @@ import { ClipboardItemContent } from "@/components/clipboard-item-content";
 import { ClipboardItemMeta } from "@/components/clipboard-item-meta";
 import { ClipboardItemActions } from "@/components/clipboard-item-actions";
 import { ColorFormatMenu } from "@/components/color-format-menu";
-import {
-  QUICK_PASTE_MODIFIER,
-  QUICK_PASTE_MODIFIER_SYMBOL,
-} from "@/hooks/use-modifier-held";
+import { QuickPasteBadge } from "@/components/quick-paste-badge";
+import { QUICK_PASTE_MODIFIER } from "@/hooks/use-modifier-held";
 
 type ClipboardItemProps = {
   item: ClipboardItemType;
@@ -127,15 +125,7 @@ export const ClipboardItem = memo(function ClipboardItem({
         }
       >
         {quickIndex != null && (
-          <kbd
-            aria-hidden
-            className="absolute top-1.5 left-1.5 z-10 inline-flex items-center gap-0.5 rounded-md border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] font-medium text-foreground shadow-sm ring-1 ring-black/5 pointer-events-none animate-in fade-in-0 zoom-in-95 duration-150"
-          >
-            <span className="text-muted-foreground">
-              {QUICK_PASTE_MODIFIER_SYMBOL}
-            </span>
-            <span>{quickIndex}</span>
-          </kbd>
+          <QuickPasteBadge index={quickIndex} className="top-1.5 left-1.5" />
         )}
         <CardContent className="flex items-start gap-2 px-1 relative">
           <div

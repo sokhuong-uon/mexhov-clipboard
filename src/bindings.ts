@@ -6,6 +6,11 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 export const commands = {
 	// Copies content to clipboard, hides the window, and simulates Ctrl+V.
 	pasteItem: (contentType: string, textContent: string | null, imageData: string | null) => typedError<null, string>(__TAURI_INVOKE("paste_item", { contentType, textContent, imageData })),
+	/**
+	 *  Writes a file:// URI to the clipboard as text/uri-list, hides the window,
+	 *  and simulates Ctrl+V. Wayland-only for now (shells out to wl-copy).
+	 */
+	pasteFileUri: (path: string) => typedError<null, string>(__TAURI_INVOKE("paste_file_uri", { path })),
 	readClipboard: () => typedError<string, string>(__TAURI_INVOKE("read_clipboard")),
 	readClipboardImage: () => typedError<[string, number, number] | null, string>(__TAURI_INVOKE("read_clipboard_image")),
 	writeClipboard: (text: string) => typedError<null, string>(__TAURI_INVOKE("write_clipboard", { text })),

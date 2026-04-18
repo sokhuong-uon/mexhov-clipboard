@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useHotkeys } from "@tanstack/react-hotkeys";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -6,6 +7,13 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { QuickPasteBadge } from "@/components/quick-paste-badge";
+import {
+  QUICK_PASTE_MODIFIER,
+  useModifierHeld,
+} from "@/hooks/use-modifier-held";
+
+const QUICK_PASTE_LIMIT = 9;
 
 type Symbol = {
   char: string;
@@ -256,9 +264,15 @@ const SYMBOL_DATA: SymbolCategory[] = [
 
 type SymbolsViewProps = {
   onSelect: (char: string) => void;
+  onPaste?: (char: string) => void;
+  isActive?: boolean;
 };
 
-export const SymbolsView = ({ onSelect }: SymbolsViewProps) => {
+export const SymbolsView = ({
+  onSelect,
+  onPaste,
+  isActive = true,
+}: SymbolsViewProps) => {
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
@@ -272,6 +286,35 @@ export const SymbolsView = ({ onSelect }: SymbolsViewProps) => {
       ),
     })).filter((cat) => cat.symbols.length > 0);
   }, [search]);
+
+  // Flat ordering across categories so quick-paste numbering matches reading order
+  const flatSymbols = useMemo(
+    () => filtered.flatMap((cat) => cat.symbols),
+    [filtered],
+  );
+
+  const quickIndexByChar = useMemo(() => {
+    const map = new Map<string, number>();
+    for (let i = 0; i < Math.min(flatSymbols.length, QUICK_PASTE_LIMIT); i++) {
+      map.set(flatSymbols[i].char, i + 1);
+    }
+    return map;
+  }, [flatSymbols]);
+
+  const modifierHeld = useModifierHeld();
+
+  useHotkeys(
+    Array.from({ length: QUICK_PASTE_LIMIT }, (_, i) => ({
+      hotkey: `Mod+${(i + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}` as const,
+      callback: () => {
+        const target = flatSymbols[i];
+        if (!target) return;
+        if (onPaste) onPaste(target.char);
+        else onSelect(target.char);
+      },
+      options: { enabled: isActive && flatSymbols.length > i },
+    })),
+  );
 
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -314,27 +357,45 @@ export const SymbolsView = ({ onSelect }: SymbolsViewProps) => {
                 {cat.label}
               </h3>
               <div className="grid grid-cols-8 gap-0.5">
-                {cat.symbols.map((s) => (
-                  <Tooltip key={s.char + s.name}>
-                    <TooltipTrigger
-                      render={
-                        <button
-                          type="button"
-                          aria-label={s.name}
-                          onClick={() => handleClick(s.char)}
-                          className={`flex items-center justify-center rounded-lg aspect-square font-normal transition-all cursor-pointer select-none hover:bg-accent hover:text-accent-foreground active:scale-90 ${
-                            copied === s.char
-                              ? "bg-green-500/15 text-green-600 dark:text-green-400"
-                              : ""
-                          }`}
+                {cat.symbols.map((s) => {
+                  const quickIndex = quickIndexByChar.get(s.char);
+                  return (
+                    <div key={s.char + s.name} className="relative">
+                      {isActive && modifierHeld && quickIndex != null && (
+                        <QuickPasteBadge
+                          index={quickIndex}
+                          className="-top-1 -left-1"
                         />
-                      }
-                    >
-                      <span className="text-base leading-none">{s.char}</span>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">{s.name}</TooltipContent>
-                  </Tooltip>
-                ))}
+                      )}
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <button
+                              type="button"
+                              aria-label={s.name}
+                              aria-keyshortcuts={
+                                quickIndex != null
+                                  ? `${QUICK_PASTE_MODIFIER}+${quickIndex}`
+                                  : undefined
+                              }
+                              onClick={() => handleClick(s.char)}
+                              className={`flex w-full items-center justify-center rounded-lg aspect-square font-normal transition-all cursor-pointer select-none hover:bg-accent hover:text-accent-foreground active:scale-90 ${
+                                copied === s.char
+                                  ? "bg-green-500/15 text-green-600 dark:text-green-400"
+                                  : ""
+                              }`}
+                            />
+                          }
+                        >
+                          <span className="text-base leading-none">
+                            {s.char}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">{s.name}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))

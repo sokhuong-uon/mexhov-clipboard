@@ -26,6 +26,9 @@ import { Clipboard, TypeOutline } from "lucide-react";
 function App() {
   useSystemTheme();
   const [isMonitoring, setIsMonitoring] = useState(true);
+  const [activeTab, setActiveTab] = useState<"clipboard" | "gif" | "symbols">(
+    "clipboard",
+  );
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 150 });
 
@@ -114,6 +117,24 @@ function App() {
     [write],
   );
 
+  const handleGifPaste = useCallback(async (item: Klipy) => {
+    const variant = item.file.hd ?? item.file.md ?? item.file.sm;
+    const url = variant?.gif?.url ?? variant?.webp?.url;
+    if (!url) return;
+
+    const downloaded = await commands.downloadMediaToTemp(url);
+    if (downloaded.status === "error") {
+      console.error("[handleGifPaste] download failed:", downloaded.error);
+      return;
+    }
+    const [filePath] = downloaded.data;
+
+    const pasted = await commands.pasteFileUri(filePath);
+    if (pasted.status === "error") {
+      console.error("[handleGifPaste] paste_file_uri failed:", pasted.error);
+    }
+  }, []);
+
   const handleSymbolSelect = useCallback(
     async (char: string) => {
       await write(char);
@@ -121,10 +142,20 @@ function App() {
     [write],
   );
 
+  const handleSymbolPaste = useCallback(async (char: string) => {
+    const result = await commands.pasteItem("text", char, null);
+    if (result.status === "error") {
+      console.error("[handleSymbolPaste] paste_item failed:", result.error);
+    }
+  }, []);
+
   return (
     <TooltipProvider>
       <Tabs
-        defaultValue="clipboard"
+        value={activeTab}
+        onValueChange={(v) =>
+          setActiveTab(v as "clipboard" | "gif" | "symbols")
+        }
         className="h-full overflow-hidden bg-background text-foreground"
       >
         <div
@@ -206,6 +237,7 @@ function App() {
                 hasMore={hasMore && !isSearching}
                 onLoadMore={loadMore}
                 hotkeys={hotkeys}
+                isActive={activeTab === "clipboard"}
               />
             )}
           </div>
@@ -216,7 +248,11 @@ function App() {
           keepMounted
           className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
         >
-          <GifView onSelect={handleGifSelect} />
+          <GifView
+            onSelect={handleGifSelect}
+            onPaste={handleGifPaste}
+            isActive={activeTab === "gif"}
+          />
         </TabsContent>
 
         <TabsContent
@@ -224,7 +260,11 @@ function App() {
           keepMounted
           className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
         >
-          <SymbolsView onSelect={handleSymbolSelect} />
+          <SymbolsView
+            onSelect={handleSymbolSelect}
+            onPaste={handleSymbolPaste}
+            isActive={activeTab === "symbols"}
+          />
         </TabsContent>
       </Tabs>
     </TooltipProvider>

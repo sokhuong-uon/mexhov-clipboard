@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeys } from "@tanstack/react-hotkeys";
 import { Search } from "lucide-react";
 import { useDebouncedState } from "@tanstack/react-pacer";
 
@@ -11,6 +12,9 @@ import {
   KlipyError,
 } from "@/features/klipy/hooks/use-klipy";
 import { type Klipy } from "@/features/klipy/schema/klipy";
+import { useModifierHeld } from "@/hooks/use-modifier-held";
+
+const QUICK_PASTE_LIMIT = 9;
 
 function klipyErrorMessage(error: unknown): string {
   if (error instanceof KlipyError) {
@@ -70,9 +74,15 @@ function computeLayout(
 
 type GifViewProps = {
   onSelect: (item: Klipy) => void;
+  onPaste?: (item: Klipy) => void;
+  isActive?: boolean;
 };
 
-export const GifView = ({ onSelect }: GifViewProps) => {
+export const GifView = ({
+  onSelect,
+  onPaste,
+  isActive = true,
+}: GifViewProps) => {
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 300 });
   const [selectedCategory] = useState<string | undefined>();
@@ -154,6 +164,29 @@ export const GifView = ({ onSelect }: GifViewProps) => {
     }
   }, [scrollTop, viewportHeight, totalHeight, fetchNext]);
 
+  const modifierHeld = useModifierHeld();
+
+  const quickIndexBySlug = useMemo(() => {
+    const map = new Map<string, number>();
+    for (let i = 0; i < Math.min(items.length, QUICK_PASTE_LIMIT); i++) {
+      map.set(items[i].slug, i + 1);
+    }
+    return map;
+  }, [items]);
+
+  useHotkeys(
+    Array.from({ length: QUICK_PASTE_LIMIT }, (_, i) => ({
+      hotkey: `Mod+${(i + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}` as const,
+      callback: () => {
+        const target = items[i];
+        if (!target) return;
+        if (onPaste) onPaste(target);
+        else onSelect(target);
+      },
+      options: { enabled: isActive && items.length > i },
+    })),
+  );
+
   return (
     <div className="flex flex-1 flex-col min-h-0">
       <div className="flex items-center gap-2 p-4 pb-2">
@@ -204,7 +237,15 @@ export const GifView = ({ onSelect }: GifViewProps) => {
                   height: cell.height,
                 }}
               >
-                <GifGridItem item={cell.item} onSelect={onSelect} />
+                <GifGridItem
+                  item={cell.item}
+                  onSelect={onSelect}
+                  quickIndex={
+                    isActive && modifierHeld
+                      ? (quickIndexBySlug.get(cell.item.slug) ?? null)
+                      : null
+                  }
+                />
               </div>
             ))}
             {activeQuery.isFetchingNextPage && (

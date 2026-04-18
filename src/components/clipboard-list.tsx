@@ -52,6 +52,7 @@ type ClipboardListProps = {
   hasMore?: boolean;
   onLoadMore?: () => void;
   hotkeys: HotkeyConfig;
+  isActive?: boolean;
 };
 
 export const ClipboardList = ({
@@ -71,12 +72,13 @@ export const ClipboardList = ({
   hasMore = false,
   onLoadMore,
   hotkeys,
+  isActive = true,
 }: ClipboardListProps) => {
   const [activeId, setActiveId] = useState<number | null>(null);
   const [colorMenuItemId, setColorMenuItemId] = useState<number | null>(null);
   const setIsEditingNote = onEditingNoteChange ?? (() => {});
   const modifierHeld = useModifierHeld();
-  const showQuickPaste = modifierHeld && !isEditingNote;
+  const showQuickPaste = isActive && modifierHeld && !isEditingNote;
 
   // Stable per-item callback cache for onColorMenuOpenChange
   const colorMenuHandlersRef = useRef(new Map<number, (open: boolean) => void>());
@@ -140,7 +142,7 @@ export const ClipboardList = ({
   };
 
   const colorMenuIsOpen = colorMenuItemId != null;
-  const hotkeysDisabled = colorMenuIsOpen || isEditingNote;
+  const hotkeysDisabled = !isActive || colorMenuIsOpen || isEditingNote;
 
   useHotkey(hotkeys.moveDown, moveDown, { enabled: !hotkeysDisabled });
   useHotkey(hotkeys.moveUp, moveUp, { enabled: !hotkeysDisabled });
@@ -182,8 +184,8 @@ export const ClipboardList = ({
     enabled: !hotkeysDisabled,
   });
 
-  useHotkey("ArrowDown", moveDown);
-  useHotkey("ArrowUp", moveUp);
+  useHotkey("ArrowDown", moveDown, { enabled: isActive });
+  useHotkey("ArrowUp", moveUp, { enabled: isActive });
 
   useHotkeySequence([hotkeys.jumpTop], () => {
     if (!hotkeysDisabled && items.length > 0) setActiveIndex(0);
