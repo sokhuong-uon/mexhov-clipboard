@@ -63,12 +63,6 @@ pub fn db_update_sort_orders(
 
 #[tauri::command]
 #[specta::specta]
-pub fn db_get_item_count(database: State<'_, Database>) -> Result<i64, String> {
-    database.get_item_count()
-}
-
-#[tauri::command]
-#[specta::specta]
 pub fn db_dedup_item(id: i64, database: State<'_, Database>) -> Result<i64, String> {
     database.delete_duplicates(id)
 }

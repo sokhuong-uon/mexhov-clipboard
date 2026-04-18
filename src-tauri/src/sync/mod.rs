@@ -8,7 +8,7 @@ mod server;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 use tokio::sync::{broadcast, Mutex, RwLock};
 use tokio_tungstenite::tungstenite::Message;
 
@@ -93,6 +93,50 @@ pub(crate) enum SyncMode {
     },
 }
 
+pub(crate) fn build_status(mode: &SyncMode, peer_count: usize) -> SyncStatus {
+    match mode {
+        SyncMode::Off => SyncStatus {
+            mode: "off".into(),
+            address: None,
+            pairing_code: None,
+            room_id: None,
+            connected_peers: peer_count,
+        },
+        SyncMode::LanServer {
+            address,
+            pairing_code,
+            ..
+        } => SyncStatus {
+            mode: "lan-server".into(),
+            address: Some(address.clone()),
+            pairing_code: Some(pairing_code.clone()),
+            room_id: None,
+            connected_peers: peer_count,
+        },
+        SyncMode::LanClient { address, .. } => SyncStatus {
+            mode: "lan-client".into(),
+            address: Some(address.clone()),
+            pairing_code: None,
+            room_id: None,
+            connected_peers: peer_count,
+        },
+        SyncMode::Cloud { room_id, .. } => SyncStatus {
+            mode: "cloud".into(),
+            address: None,
+            pairing_code: None,
+            room_id: Some(room_id.clone()),
+            connected_peers: peer_count,
+        },
+    }
+}
+
+pub(crate) fn emit_status(app: &AppHandle, mode: &SyncMode, peer_count: usize) {
+    let status = build_status(mode, peer_count);
+    if let Err(e) = app.emit("sync-status-changed", status) {
+        eprintln!("failed to emit sync status: {e}");
+    }
+}
+
 impl SyncState {
     pub fn new() -> Self {
         let (outgoing_tx, _) = broadcast::channel(64);
@@ -110,47 +154,8 @@ impl SyncState {
         }
     }
 
-    pub async fn status(&self) -> SyncStatus {
-        let mode = self.mode.read().await;
-        let peer_count = self.peers.read().await.len();
-        match &*mode {
-            SyncMode::Off => SyncStatus {
-                mode: "off".into(),
-                address: None,
-                pairing_code: None,
-                room_id: None,
-                connected_peers: peer_count,
-            },
-            SyncMode::LanServer {
-                address,
-                pairing_code,
-                ..
-            } => SyncStatus {
-                mode: "lan-server".into(),
-                address: Some(address.clone()),
-                pairing_code: Some(pairing_code.clone()),
-                room_id: None,
-                connected_peers: peer_count,
-            },
-            SyncMode::LanClient { address, .. } => SyncStatus {
-                mode: "lan-client".into(),
-                address: Some(address.clone()),
-                pairing_code: None,
-                room_id: None,
-                connected_peers: peer_count,
-            },
-            SyncMode::Cloud { room_id, .. } => SyncStatus {
-                mode: "cloud".into(),
-                address: None,
-                pairing_code: None,
-                room_id: Some(room_id.clone()),
-                connected_peers: peer_count,
-            },
-        }
-    }
-
     pub async fn start_server(&self, port: u16, app: AppHandle) -> Result<SyncStartResult, String> {
-        self.stop().await;
+        self.stop(&app).await;
 
         let pairing_code = crypto::generate_pairing_code();
         let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
@@ -164,7 +169,7 @@ impl SyncState {
             self.last_remote_hash.clone(),
             self.peer_counter.clone(),
             shutdown_rx,
-            app,
+            app.clone(),
             self.mode.clone(),
         )
         .await?;
@@ -178,11 +183,13 @@ impl SyncState {
             eprintln!("mDNS registration failed (non-fatal): {e}");
         }
 
-        *self.mode.write().await = SyncMode::LanServer {
+        let new_mode = SyncMode::LanServer {
             address: local_addr.clone(),
             pairing_code: pairing_code.clone(),
             shutdown: shutdown_tx,
         };
+        emit_status(&app, &new_mode, 0);
+        *self.mode.write().await = new_mode;
 
         Ok(SyncStartResult {
             address: local_addr,
@@ -196,7 +203,7 @@ impl SyncState {
         pairing_code: String,
         app: AppHandle,
     ) -> Result<(), String> {
-        self.stop().await;
+        self.stop(&app).await;
 
         let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
 
@@ -209,15 +216,17 @@ impl SyncState {
             self.last_remote_hash.clone(),
             self.peer_counter.clone(),
             shutdown_rx,
-            app,
+            app.clone(),
             self.mode.clone(),
         )
         .await?;
 
-        *self.mode.write().await = SyncMode::LanClient {
+        let new_mode = SyncMode::LanClient {
             address,
             shutdown: shutdown_tx,
         };
+        emit_status(&app, &new_mode, self.peers.read().await.len());
+        *self.mode.write().await = new_mode;
         Ok(())
     }
 
@@ -227,7 +236,7 @@ impl SyncState {
         auth_token: String,
         app: AppHandle,
     ) -> Result<String, String> {
-        self.stop().await;
+        self.stop(&app).await;
 
         let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
 
@@ -238,20 +247,22 @@ impl SyncState {
             self.incoming_tx.clone(),
             self.last_remote_hash.clone(),
             shutdown_rx,
-            app,
+            app.clone(),
             self.mode.clone(),
         )
         .await?;
 
-        *self.mode.write().await = SyncMode::Cloud {
+        let new_mode = SyncMode::Cloud {
             room_id: room_id.clone(),
             shutdown: shutdown_tx,
         };
+        emit_status(&app, &new_mode, 0);
+        *self.mode.write().await = new_mode;
 
         Ok(room_id)
     }
 
-    pub async fn stop(&self) {
+    pub async fn stop(&self, app: &AppHandle) {
         self.mdns.lock().await.unregister();
 
         let prev = std::mem::replace(&mut *self.mode.write().await, SyncMode::Off);
@@ -262,6 +273,7 @@ impl SyncState {
             let _ = shutdown.send(true);
         }
         self.peers.write().await.clear();
+        emit_status(app, &SyncMode::Off, 0);
     }
 
     /// Called by the clipboard monitor when local clipboard changes.

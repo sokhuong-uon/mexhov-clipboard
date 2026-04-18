@@ -4,12 +4,8 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 
 /** Commands */
 export const commands = {
-	showWindow: () => __TAURI_INVOKE<void>("show_window"),
-	showWindowAtCursor: () => __TAURI_INVOKE<void>("show_window_at_cursor"),
-	hideWindow: () => __TAURI_INVOKE<void>("hide_window"),
 	// Copies content to clipboard, hides the window, and simulates Ctrl+V.
 	pasteItem: (contentType: string, textContent: string | null, imageData: string | null) => typedError<null, string>(__TAURI_INVOKE("paste_item", { contentType, textContent, imageData })),
-	toggleWindow: () => __TAURI_INVOKE<void>("toggle_window"),
 	readClipboard: () => typedError<string, string>(__TAURI_INVOKE("read_clipboard")),
 	readClipboardImage: () => typedError<[string, number, number] | null, string>(__TAURI_INVOKE("read_clipboard_image")),
 	writeClipboard: (text: string) => typedError<null, string>(__TAURI_INVOKE("write_clipboard", { text })),
@@ -18,7 +14,6 @@ export const commands = {
 	setMonitoring: (enabled: boolean) => __TAURI_INVOKE<void>("set_monitoring", { enabled }),
 	isWaylandSession: () => __TAURI_INVOKE<boolean>("is_wayland_session"),
 	isCosmicDataControlEnabled: () => __TAURI_INVOKE<boolean>("is_cosmic_data_control_enabled"),
-	getSystemTheme: () => __TAURI_INVOKE<string>("get_system_theme"),
 	dbGetAllItems: (limit: number, offset: number, favoritesFirst: boolean) => typedError<ClipboardItemRow[], string>(__TAURI_INVOKE("db_get_all_items", { limit, offset, favoritesFirst })),
 	dbInsertItem: (params: InsertClipboardItemParams) => typedError<ClipboardItemRow, string>(__TAURI_INVOKE("db_insert_item", { params })),
 	dbBumpItem: (id: number, sortOrder: string) => typedError<ClipboardItemRow, string>(__TAURI_INVOKE("db_bump_item", { id, sortOrder })),
@@ -26,7 +21,6 @@ export const commands = {
 	dbClearAll: () => typedError<null, string>(__TAURI_INVOKE("db_clear_all")),
 	dbToggleFavorite: (id: number) => typedError<ClipboardItemRow, string>(__TAURI_INVOKE("db_toggle_favorite", { id })),
 	dbUpdateSortOrders: (items: UpdateSortOrderParams[]) => typedError<null, string>(__TAURI_INVOKE("db_update_sort_orders", { items })),
-	dbGetItemCount: () => typedError<number, string>(__TAURI_INVOKE("db_get_item_count")),
 	dbDedupItem: (id: number) => typedError<number, string>(__TAURI_INVOKE("db_dedup_item", { id })),
 	dbUpdateNote: (id: number, note: string | null) => typedError<ClipboardItemRow, string>(__TAURI_INVOKE("db_update_note", { id, note })),
 	fetchLinkPreview: (url: string) => typedError<LinkPreviewData, string>(__TAURI_INVOKE("fetch_link_preview", { url })),
@@ -35,17 +29,14 @@ export const commands = {
 	 *  along with a small PNG icon for the drag preview.
 	 */
 	downloadMediaToTemp: (url: string) => typedError<[string, string], string>(__TAURI_INVOKE("download_media_to_temp", { url })),
-	getFileSize: (path: string) => typedError<number, string>(__TAURI_INVOKE("get_file_size", { path })),
 	getSetting: (key: string) => typedError<string | null, string>(__TAURI_INVOKE("get_setting", { key })),
 	setSetting: (key: string, value: string) => typedError<null, string>(__TAURI_INVOKE("set_setting", { key, value })),
-	getLocalIp: () => typedError<string, string>(__TAURI_INVOKE("get_local_ip")),
 	getHostname: () => __TAURI_INVOKE<string>("get_hostname"),
 	getNetworkInterfaces: () => __TAURI_INVOKE<NetworkInterfaceInfo[]>("get_network_interfaces"),
 	syncStartServer: (port: number) => typedError<SyncStartResult, string>(__TAURI_INVOKE("sync_start_server", { port })),
 	syncConnect: (address: string, pairingCode: string) => typedError<null, string>(__TAURI_INVOKE("sync_connect", { address, pairingCode })),
 	syncCloudJoin: (relayUrl: string, authToken: string) => typedError<string, string>(__TAURI_INVOKE("sync_cloud_join", { relayUrl, authToken })),
 	syncStop: () => typedError<null, string>(__TAURI_INVOKE("sync_stop")),
-	syncStatus: () => typedError<SyncStatus, string>(__TAURI_INVOKE("sync_status")),
 	mdnsStartDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_start_discovery")),
 	mdnsStopDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_stop_discovery")),
 	convertColor: (text: string, format: string) => typedError<string, string>(__TAURI_INVOKE("convert_color", { text, format })),
@@ -107,14 +98,6 @@ export type NetworkInterfaceInfo = {
 export type SyncStartResult = {
 	address: string,
 	pairingCode: string,
-};
-
-export type SyncStatus = {
-	mode: string,
-	address: string | null,
-	pairingCode: string | null,
-	roomId: string | null,
-	connectedPeers: number,
 };
 
 export type UpdateSortOrderParams = {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { commands } from "@/bindings";
 import { listen } from "@tauri-apps/api/event";
 
@@ -32,24 +32,14 @@ export function useSync() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const refreshStatus = useCallback(async () => {
-    const result = await commands.syncStatus();
-    if (result.status === "ok") {
-      setStatus(result.data as SyncStatus);
-    }
-  }, []);
-
   useEffect(() => {
-    refreshStatus();
-    const interval = setInterval(refreshStatus, 2000);
-    const unlisten = listen<number>("sync-peer-changed", () => {
-      refreshStatus();
+    const unlisten = listen<SyncStatus>("sync-status-changed", (e) => {
+      setStatus(e.payload);
     });
     return () => {
-      clearInterval(interval);
       unlisten.then((fn) => fn());
     };
-  }, [refreshStatus]);
+  }, []);
 
   useEffect(() => {
     commands.getNetworkInterfaces().then(setInterfaces).catch(() => {});
@@ -62,8 +52,6 @@ export function useSync() {
     const result = await commands.syncStartServer(DEFAULT_SYNC_PORT);
     if (result.status === "error") {
       setError(String(result.error));
-    } else {
-      await refreshStatus();
     }
     setLoading(false);
   };
@@ -74,8 +62,6 @@ export function useSync() {
     const result = await commands.syncConnect(address, pairingCode);
     if (result.status === "error") {
       setError(String(result.error));
-    } else {
-      await refreshStatus();
     }
     setLoading(false);
   };
@@ -86,15 +72,12 @@ export function useSync() {
     const result = await commands.syncCloudJoin(relayUrl, authToken);
     if (result.status === "error") {
       setError(String(result.error));
-    } else {
-      await refreshStatus();
     }
     setLoading(false);
   };
 
   const disconnect = async () => {
     await commands.syncStop();
-    await refreshStatus();
     setError(null);
   };
 

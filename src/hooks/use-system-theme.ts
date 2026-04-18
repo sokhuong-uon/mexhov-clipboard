@@ -1,11 +1,17 @@
 import { useEffect } from "react";
 import { useTheme } from "next-themes";
-import { commands } from "@/bindings";
 
 export function useSystemTheme() {
   const { setTheme } = useTheme();
 
   useEffect(() => {
-    commands.getSystemTheme().then(setTheme);
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setTheme(mq.matches ? "dark" : "light");
+
+    const onChange = (e: MediaQueryListEvent) => {
+      setTheme(e.matches ? "dark" : "light");
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, [setTheme]);
 }

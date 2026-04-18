@@ -1,10 +1,10 @@
 use super::crypto::{self, EncryptedEnvelope};
-use super::{SyncMessage, SyncMode};
+use super::{emit_status, SyncMessage, SyncMode};
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter};
+use tauri::AppHandle;
 use tokio::sync::{broadcast, RwLock};
 use tokio_tungstenite::tungstenite::Message;
 
@@ -127,13 +127,13 @@ pub async fn spawn(
                                         }
                                     }
                                     pending_secrets.write().await.insert(peer_id, secret);
-                                    emit_peer_count(&app, peer_keys.read().await.len() + 1);
+                                    emit_status(&app, &*mode.read().await, peer_keys.read().await.len() + 1);
                                 }
 
                                 RelayMessage::PeerLeft { peer_id } => {
                                     peer_keys.write().await.remove(&peer_id);
                                     pending_secrets.write().await.remove(&peer_id);
-                                    emit_peer_count(&app, peer_keys.read().await.len());
+                                    emit_status(&app, &*mode.read().await, peer_keys.read().await.len());
                                 }
 
                                 RelayMessage::KeyExchange { from, pubkey, .. } => {
@@ -158,7 +158,7 @@ pub async fn spawn(
                                             break;
                                         }
                                     }
-                                    emit_peer_count(&app, peer_keys.read().await.len());
+                                    emit_status(&app, &*mode.read().await, peer_keys.read().await.len());
                                 }
 
                                 RelayMessage::KeyExchangeAck { from, pubkey, .. } => {
@@ -171,7 +171,7 @@ pub async fn spawn(
                                         let shared = secret.diffie_hellman(&their_pk);
                                         let key = crypto::derive_key_from_shared_secret(shared.as_bytes());
                                         peer_keys.write().await.insert(from, PeerKey { key });
-                                        emit_peer_count(&app, peer_keys.read().await.len());
+                                        emit_status(&app, &*mode.read().await, peer_keys.read().await.len());
                                     }
                                 }
 
@@ -251,19 +251,13 @@ pub async fn spawn(
 
         // Cleanup
         peer_keys.write().await.clear();
-        emit_peer_count(&app, 0);
 
         let mut mode_lock = mode.write().await;
         if matches!(*mode_lock, SyncMode::Cloud { .. }) {
             *mode_lock = SyncMode::Off;
         }
+        emit_status(&app, &mode_lock, 0);
     });
 
     Ok(room_id_clone)
-}
-
-fn emit_peer_count(app: &AppHandle, count: usize) {
-    if let Err(e) = app.emit("sync-peer-changed", count) {
-        eprintln!("failed to emit peer count: {e}");
-    }
 }

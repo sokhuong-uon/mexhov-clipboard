@@ -1,19 +1,10 @@
-use crate::sync::{SyncStartResult, SyncState, SyncStatus};
+use crate::sync::{SyncStartResult, SyncState};
 use tauri::{AppHandle, State};
 
 #[derive(serde::Serialize, specta::Type)]
 pub struct NetworkInterfaceInfo {
     pub name: String,
     pub ip: String,
-}
-
-#[tauri::command]
-#[specta::specta]
-pub fn get_local_ip() -> Result<String, String> {
-    let socket = std::net::UdpSocket::bind("0.0.0.0:0").map_err(|e| e.to_string())?;
-    socket.connect("8.8.8.8:80").map_err(|e| e.to_string())?;
-    let addr = socket.local_addr().map_err(|e| e.to_string())?;
-    Ok(addr.ip().to_string())
 }
 
 #[tauri::command]
@@ -86,15 +77,9 @@ pub async fn sync_cloud_join(
 
 #[tauri::command]
 #[specta::specta]
-pub async fn sync_stop(state: State<'_, SyncState>) -> Result<(), String> {
-    state.stop().await;
+pub async fn sync_stop(app: AppHandle, state: State<'_, SyncState>) -> Result<(), String> {
+    state.stop(&app).await;
     Ok(())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn sync_status(state: State<'_, SyncState>) -> Result<SyncStatus, String> {
-    Ok(state.status().await)
 }
 
 #[tauri::command]

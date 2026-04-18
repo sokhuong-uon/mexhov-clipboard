@@ -131,14 +131,6 @@ pub async fn download_media_to_temp(url: String) -> Result<(String, String), Str
     Ok((file_str, icon_str))
 }
 
-#[tauri::command]
-#[specta::specta]
-pub fn get_file_size(path: String) -> Result<u64, String> {
-    std::fs::metadata(&path)
-        .map(|m| m.len())
-        .map_err(|e| e.to_string())
-}
-
 fn select_meta_content(document: &Html, property: &str) -> Option<String> {
     let selector = Selector::parse(&format!("meta[property=\"{}\"]", property)).ok()?;
     document

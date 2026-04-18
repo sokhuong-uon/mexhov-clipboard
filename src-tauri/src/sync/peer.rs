@@ -1,16 +1,10 @@
 use super::crypto::EncryptedEnvelope;
-use super::{PeerMap, SyncMessage, SyncMode};
+use super::{emit_status, PeerMap, SyncMessage, SyncMode};
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter};
+use tauri::AppHandle;
 use tokio::sync::{broadcast, RwLock};
 use tokio_tungstenite::tungstenite::Message;
-
-fn emit_peer_count(app: &AppHandle, count: usize) {
-    if let Err(e) = app.emit("sync-peer-changed", count) {
-        eprintln!("failed to emit peer count: {e}");
-    }
-}
 
 /// Drive a single WebSocket peer: read from remote, forward local changes,
 /// relay messages between peers (server mode), and respect shutdown.
@@ -35,7 +29,7 @@ pub async fn run<Stream>(
 {
     let (tx, mut relay_rx) = tokio::sync::mpsc::unbounded_channel::<Message>();
     peers.write().await.insert(peer_id, tx);
-    emit_peer_count(&app, peers.read().await.len());
+    emit_status(&app, &*mode.read().await, peers.read().await.len());
 
     let (mut sink, mut stream) = ws_stream.split();
     let mut outgoing_rx = outgoing_tx.subscribe();
@@ -100,7 +94,6 @@ pub async fn run<Stream>(
 
     peers.write().await.remove(&peer_id);
     let remaining = peers.read().await.len();
-    emit_peer_count(&app, remaining);
 
     // If this was a client and its only peer (the server) disconnected, reset mode
     if remaining == 0 {
@@ -108,6 +101,9 @@ pub async fn run<Stream>(
         if matches!(*mode_lock, SyncMode::LanClient { .. }) {
             *mode_lock = SyncMode::Off;
         }
+        emit_status(&app, &mode_lock, 0);
+    } else {
+        emit_status(&app, &*mode.read().await, remaining);
     }
 }
 

@@ -15,8 +15,6 @@ export const clipboardDb = {
       ClipboardItem[]
     >,
 
-  getItemCount: () => unwrap(commands.dbGetItemCount()),
-
   insertItem: (params: InsertClipboardItemParams) =>
     unwrap(commands.dbInsertItem(params)) as Promise<ClipboardItem>,
 

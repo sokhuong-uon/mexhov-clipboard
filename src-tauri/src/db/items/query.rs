@@ -1,5 +1,3 @@
-use drizzle::core::expr::*;
-
 use crate::schema::*;
 
 use super::super::schema::*;
@@ -56,19 +54,5 @@ impl Database {
             .map_err(error_to_string)?;
 
         Ok(rows.into_iter().map(ClipboardItemRow::from).collect())
-    }
-
-    pub fn get_item_count(&self) -> DbResult<i64> {
-        let inner = self.lock()?;
-        let ci = &inner.schema.clipboard_items;
-
-        let result: (i64,) = inner
-            .db
-            .select((count(ci.id),))
-            .from(*ci)
-            .get()
-            .map_err(error_to_string)?;
-
-        Ok(result.0)
     }
 }

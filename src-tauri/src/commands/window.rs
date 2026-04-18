@@ -2,18 +2,6 @@ use crate::caret;
 use crate::main_window;
 use tauri::{AppHandle, Manager, PhysicalPosition};
 
-#[tauri::command]
-#[specta::specta]
-pub fn show_window(app: AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.show();
-        let _ = window.set_focus();
-        main_window::set_visible(true);
-    }
-}
-
-#[tauri::command]
-#[specta::specta]
 pub fn show_window_at_cursor(app: AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let window_size = window.inner_size().ok();
@@ -70,28 +58,3 @@ pub fn show_window_at_cursor(app: AppHandle) {
     }
 }
 
-#[tauri::command]
-#[specta::specta]
-pub fn hide_window(app: AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.hide();
-        main_window::set_visible(false);
-    }
-}
-
-#[tauri::command]
-#[specta::specta]
-pub fn toggle_window(app: AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        if let Ok(visible) = window.is_visible() {
-            if visible {
-                let _ = window.hide();
-                main_window::set_visible(false);
-            } else {
-                let _ = window.show();
-                let _ = window.set_focus();
-                main_window::set_visible(true);
-            }
-        }
-    }
-}
