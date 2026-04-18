@@ -39,7 +39,6 @@ export const commands = {
 	syncStop: () => typedError<null, string>(__TAURI_INVOKE("sync_stop")),
 	mdnsStartDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_start_discovery")),
 	mdnsStopDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_stop_discovery")),
-	convertColor: (text: string, format: string) => typedError<string, string>(__TAURI_INVOKE("convert_color", { text, format })),
 };
 
 /* Types */

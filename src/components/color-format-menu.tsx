@@ -3,6 +3,7 @@ import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { commands } from "@/bindings";
 import { cn } from "@/lib/utils";
 import { ColorPreview } from "@/components/color-preview";
+import { convertColor } from "@/utils/color";
 
 const COLOR_FORMATS = [
   { format: "hex", label: "HEX" },
@@ -28,9 +29,9 @@ export function ColorFormatMenu({
 }: ColorFormatMenuProps) {
   const handleCopyAs = useCallback(
     async (format: string) => {
-      const converted = await commands.convertColor(colorText, format);
-      if (converted.status === "error") return;
-      await commands.writeClipboard(converted.data);
+      const converted = convertColor(colorText, format);
+      if (!converted) return;
+      await commands.writeClipboard(converted);
       onOpenChange(false);
     },
     [colorText, onOpenChange],

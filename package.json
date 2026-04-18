@@ -28,6 +28,7 @@
     "axios": "^1.14.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "colord": "^2.9.3",
     "date-fns": "^4.1.0",
     "jittered-fractional-indexing": "^1.0.1",
     "lucide-react": "^0.562.0",

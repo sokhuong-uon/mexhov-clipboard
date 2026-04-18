@@ -14,8 +14,6 @@ pub use sync::*;
 pub use system::*;
 pub use window::*;
 
-use crate::detection::color;
-
 use crate::main_window;
 use tauri::{AppHandle, Manager};
 use tauri_specta::{collect_commands, Builder};
@@ -52,7 +50,6 @@ pub fn create_command_builder() -> Builder<tauri::Wry> {
         sync_stop,
         mdns_start_discovery,
         mdns_stop_discovery,
-        color::convert_color,
     ])
 }
 
