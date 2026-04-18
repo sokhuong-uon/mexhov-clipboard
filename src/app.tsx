@@ -7,6 +7,7 @@ import { ClipboardList } from "@/components/clipboard-list";
 import { ClipboardItemSkeletonList } from "@/components/clipboard-item-skeleton";
 import { ClipboardHeader } from "@/components/clipboard-window-header";
 import { GifView } from "@/components/gif-view";
+import { SymbolsView } from "@/components/symbols-view";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -20,7 +21,7 @@ import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
 import { useClipboardFilters } from "@/hooks/use-clipboard-filters";
 import { ClipboardItem } from "@/types/clipboard";
 import type { Klipy } from "@/features/klipy/schema/klipy";
-import { Clipboard } from "lucide-react";
+import { Clipboard, TypeOutline } from "lucide-react";
 
 function App() {
   useSystemTheme();
@@ -113,6 +114,13 @@ function App() {
     [write],
   );
 
+  const handleSymbolSelect = useCallback(
+    async (char: string) => {
+      await write(char);
+    },
+    [write],
+  );
+
   return (
     <TooltipProvider>
       <Tabs
@@ -135,6 +143,9 @@ function App() {
               value="gif"
             >
               GIF
+            </TabsTrigger>
+            <TabsTrigger value="symbols" className="rounded-2xl">
+              <TypeOutline className="text-neutral-500 dark:text-neutral-400" />
             </TabsTrigger>
           </TabsList>
         </div>
@@ -206,6 +217,14 @@ function App() {
           className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
         >
           <GifView onSelect={handleGifSelect} />
+        </TabsContent>
+
+        <TabsContent
+          value="symbols"
+          keepMounted
+          className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
+        >
+          <SymbolsView onSelect={handleSymbolSelect} />
         </TabsContent>
       </Tabs>
     </TooltipProvider>
