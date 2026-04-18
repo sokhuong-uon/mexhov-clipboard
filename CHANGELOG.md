@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/sokhuong-uon/mexboard/compare/v1.6.0...v1.7.0) (2026-04-18)
+
+
+### Features
+
+* add paste hint ([350caf0](https://github.com/sokhuong-uon/mexboard/commit/350caf08eca053762d99b388509e65dbceb83d4c))
+
 # [1.6.0](https://github.com/sokhuong-uon/mexboard/compare/v1.5.0...v1.6.0) (2026-04-18)
 
 
