@@ -8,6 +8,7 @@ export const SearchResultItem = memo(function SearchResultItem({
   item,
   isActive,
   isCopied,
+  quickIndex,
   onCopy,
   onDelete,
   onToggleFavorite,
@@ -20,6 +21,7 @@ export const SearchResultItem = memo(function SearchResultItem({
   item: ClipboardItemType;
   isActive: boolean;
   isCopied: boolean;
+  quickIndex?: number | null;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
@@ -55,6 +57,7 @@ export const SearchResultItem = memo(function SearchResultItem({
       <ClipboardItem
         item={item}
         isCopied={isCopied}
+        quickIndex={quickIndex}
         onCopy={onCopy}
         onDelete={onDelete}
         onToggleFavorite={onToggleFavorite}

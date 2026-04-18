@@ -10,6 +10,7 @@ export const SortableItem = memo(function SortableItem({
   index,
   isActive,
   isCopied,
+  quickIndex,
   onCopy,
   onDelete,
   onToggleFavorite,
@@ -23,6 +24,7 @@ export const SortableItem = memo(function SortableItem({
   index: number;
   isActive: boolean;
   isCopied: boolean;
+  quickIndex?: number | null;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
   onToggleFavorite: (id: number) => void;
@@ -69,6 +71,7 @@ export const SortableItem = memo(function SortableItem({
       <ClipboardItem
         item={item}
         isCopied={isCopied}
+        quickIndex={quickIndex}
         dragHandleRef={handleRef}
         onCopy={onCopy}
         onDelete={onDelete}

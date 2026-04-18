@@ -16,8 +16,11 @@ import {
   ClipboardContent,
 } from "@/types/clipboard";
 import type { HotkeyConfig } from "@/hooks/use-hotkeys-config";
+import { useModifierHeld } from "@/hooks/use-modifier-held";
 import { SortableItem } from "./sortable-item";
 import { SearchResultItem } from "./search-result-item";
+
+const QUICK_PASTE_LIMIT = 9;
 
 export const isItemCopied = (
   item: ClipboardItemType,
@@ -72,6 +75,8 @@ export const ClipboardList = ({
   const [activeId, setActiveId] = useState<number | null>(null);
   const [colorMenuItemId, setColorMenuItemId] = useState<number | null>(null);
   const setIsEditingNote = onEditingNoteChange ?? (() => {});
+  const modifierHeld = useModifierHeld();
+  const showQuickPaste = modifierHeld && !isEditingNote;
 
   // Stable per-item callback cache for onColorMenuOpenChange
   const colorMenuHandlersRef = useRef(new Map<number, (open: boolean) => void>());
@@ -187,16 +192,18 @@ export const ClipboardList = ({
     if (items.length > 0) setActiveIndex(items.length - 1);
   }, { enabled: !hotkeysDisabled });
 
-  // Ctrl+1–9 to select search result by index (works even with input focused)
+  // Ctrl/Cmd + 1–9 to paste the Nth visible item (works in both list and search,
+  // even when the search input is focused)
   useHotkeys(
-    Array.from({ length: 9 }, (_, i) => ({
+    Array.from({ length: QUICK_PASTE_LIMIT }, (_, i) => ({
       hotkey: `Mod+${(i + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}` as const,
       callback: () => {
-        if (items[i]) {
-          onCopy(items[i]);
-        }
+        const target = items[i];
+        if (!target) return;
+        if (onPaste) onPaste(target);
+        else onCopy(target);
       },
-      options: { enabled: isSearching && items.length > i },
+      options: { enabled: !hotkeysDisabled && items.length > i },
     })),
   );
 
@@ -249,6 +256,9 @@ export const ClipboardList = ({
                 item={item}
                 isActive={index === activeIndex}
                 isCopied={isItemCopied(item, currentContent)}
+                quickIndex={
+                  showQuickPaste && index < QUICK_PASTE_LIMIT ? index + 1 : null
+                }
                 onCopy={onCopy}
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}
@@ -277,6 +287,9 @@ export const ClipboardList = ({
                 index={index}
                 isActive={index === activeIndex}
                 isCopied={isItemCopied(item, currentContent)}
+                quickIndex={
+                  showQuickPaste && index < QUICK_PASTE_LIMIT ? index + 1 : null
+                }
                 onCopy={onCopy}
                 onDelete={onDelete}
                 onToggleFavorite={onToggleFavorite}

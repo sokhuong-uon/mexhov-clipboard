@@ -6,10 +6,15 @@ import { ClipboardItemContent } from "@/components/clipboard-item-content";
 import { ClipboardItemMeta } from "@/components/clipboard-item-meta";
 import { ClipboardItemActions } from "@/components/clipboard-item-actions";
 import { ColorFormatMenu } from "@/components/color-format-menu";
+import {
+  QUICK_PASTE_MODIFIER,
+  QUICK_PASTE_MODIFIER_SYMBOL,
+} from "@/hooks/use-modifier-held";
 
 type ClipboardItemProps = {
   item: ClipboardItemType;
   isCopied: boolean;
+  quickIndex?: number | null;
   dragHandleRef?: (element: Element | null) => void;
   onCopy: (item: ClipboardItemType) => void;
   onDelete: (id: number) => void;
@@ -24,6 +29,7 @@ type ClipboardItemProps = {
 export const ClipboardItem = memo(function ClipboardItem({
   item,
   isCopied,
+  quickIndex,
   dragHandleRef,
   onCopy,
   onDelete,
@@ -111,10 +117,26 @@ export const ClipboardItem = memo(function ClipboardItem({
     <>
       <Card
         ref={cardRef}
-        className="gap-2 py-3 group"
+        className="gap-2 py-3 group relative"
         onDoubleClick={handleCopy}
         onContextMenu={handleContextMenu}
+        aria-keyshortcuts={
+          quickIndex != null
+            ? `${QUICK_PASTE_MODIFIER}+${quickIndex}`
+            : undefined
+        }
       >
+        {quickIndex != null && (
+          <kbd
+            aria-hidden
+            className="absolute top-1.5 left-1.5 z-10 inline-flex items-center gap-0.5 rounded-md border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] font-medium text-foreground shadow-sm ring-1 ring-black/5 pointer-events-none animate-in fade-in-0 zoom-in-95 duration-150"
+          >
+            <span className="text-muted-foreground">
+              {QUICK_PASTE_MODIFIER_SYMBOL}
+            </span>
+            <span>{quickIndex}</span>
+          </kbd>
+        )}
         <CardContent className="flex items-start gap-2 px-1 relative">
           <div
             ref={dragHandleRef}
