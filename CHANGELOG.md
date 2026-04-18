@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/sokhuong-uon/mexboard/compare/v1.5.0...v1.6.0) (2026-04-18)
+
+
+### Features
+
+* add symbols tab ([ce899b0](https://github.com/sokhuong-uon/mexboard/commit/ce899b05ec4bb81e5ca58ea4b275b6187f3e404a))
+
 # [1.5.0](https://github.com/sokhuong-uon/mexhov-clipboard/compare/v1.4.2...v1.5.0) (2026-04-05)
 
 
