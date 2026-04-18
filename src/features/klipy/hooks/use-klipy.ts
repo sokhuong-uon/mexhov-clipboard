@@ -1,19 +1,56 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { KlipyResponse } from "@/features/klipy/schema/klipy-response";
 
 const API_KEY = import.meta.env.VITE_KLIPY_API_KEY;
+
+export type KlipyErrorKind =
+  | "missing_api_key"
+  | "invalid_api_key"
+  | "rate_limited"
+  | "network"
+  | "api"
+  | "unknown";
+
+export class KlipyError extends Error {
+  constructor(
+    public kind: KlipyErrorKind,
+    message: string,
+  ) {
+    super(message);
+    this.name = "KlipyError";
+  }
+}
 
 async function get<T>(
   path: string,
   params?: Record<string, string>,
 ): Promise<T> {
-  const { data } = await axios.get<T>(path, {
-    baseURL: `${import.meta.env.VITE_KLIPY_API_BASE_URL}/${API_KEY}`,
-    params,
-  });
-
-  return data;
+  if (!API_KEY) {
+    throw new KlipyError("missing_api_key", "VITE_KLIPY_API_KEY is not set");
+  }
+  try {
+    const { data } = await axios.get<T>(path, {
+      baseURL: `${import.meta.env.VITE_KLIPY_API_BASE_URL}/${API_KEY}`,
+      params,
+    });
+    return data;
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      const status = e.response?.status;
+      if (status === 401 || status === 403) {
+        throw new KlipyError("invalid_api_key", "API key was rejected");
+      }
+      if (status === 429) {
+        throw new KlipyError("rate_limited", "Too many requests");
+      }
+      if (!e.response) {
+        throw new KlipyError("network", "Network request failed");
+      }
+      throw new KlipyError("api", `KLIPY returned ${status}`);
+    }
+    throw new KlipyError("unknown", String(e));
+  }
 }
 
 const PER_PAGE = 20;

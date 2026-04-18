@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy, Wifi } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
@@ -29,8 +29,13 @@ export function SyncLanServerCard({
   const handleCopy = (addr: string) => {
     navigator.clipboard.writeText(addr);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
   };
+
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(t);
+  }, [copied]);
 
   return (
     <div className="rounded-xl border border-border bg-accent/30 overflow-hidden">

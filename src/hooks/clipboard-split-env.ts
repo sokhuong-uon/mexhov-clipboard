@@ -1,5 +1,5 @@
-import { invoke } from "@tauri-apps/api/core";
 import { generateNKeysBetween } from "jittered-fractional-indexing";
+import { commands } from "@/bindings";
 import { ClipboardItem } from "@/types/clipboard";
 import { clipboardDb } from "@/hooks/use-clipboard-db";
 
@@ -14,9 +14,7 @@ export async function splitEnvItemInDb(
 ): Promise<ClipboardItem[] | null> {
   if (item.content_type !== "text" || !item.text_content) return null;
 
-  const pairs = await invoke<[string, string][]>("parse_env_content", {
-    text: item.text_content,
-  });
+  const pairs = await commands.parseEnvContent(item.text_content);
   if (pairs.length === 0) return null;
 
   const totalSlots = pairs.length * 2;

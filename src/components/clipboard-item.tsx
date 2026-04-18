@@ -135,6 +135,7 @@ export const ClipboardItem = memo(function ClipboardItem({
                 onBlur={handleNoteSubmit}
                 onKeyDown={handleNoteKeyDown}
                 placeholder="Add a note..."
+                aria-label="Edit clipboard item note"
                 className="text-[11px] bg-transparent border-b border-muted-foreground/30 outline-none text-muted-foreground focus:text-foreground focus:border-foreground/50 py-0.5 w-full"
               />
             ) : (

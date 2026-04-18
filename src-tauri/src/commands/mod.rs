@@ -26,6 +26,7 @@ pub fn create_command_builder() -> Builder<tauri::Wry> {
         write_clipboard,
         write_clipboard_image,
         reinitialize_clipboard,
+        parse_env_content,
         set_monitoring,
         is_wayland_session,
         is_cosmic_data_control_enabled,

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -278,8 +278,13 @@ export const SymbolsView = ({ onSelect }: SymbolsViewProps) => {
   const handleClick = (char: string) => {
     onSelect(char);
     setCopied(char);
-    setTimeout(() => setCopied(null), 800);
   };
+
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(null), 800);
+    return () => clearTimeout(t);
+  }, [copied]);
 
   return (
     <div className="flex flex-1 flex-col min-h-0">

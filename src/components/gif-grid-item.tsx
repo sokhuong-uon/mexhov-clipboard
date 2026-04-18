@@ -1,7 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { memo, useState, useCallback } from "react";
 import { type Klipy } from "@/features/klipy/schema/klipy";
-import { startDrag } from "@crabnebula/tauri-plugin-drag";
-import { commands } from "@/bindings";
+import { useDraggableMedia } from "@/hooks/use-draggable-media";
 
 type GifGridItemProps = {
   item: Klipy;
@@ -13,44 +12,21 @@ function getDragUrl(item: Klipy): string | undefined {
   return variant?.gif?.url ?? variant?.webp?.url;
 }
 
-export const GifGridItem = ({ item, onSelect }: GifGridItemProps) => {
+export const GifGridItem = memo(({ item, onSelect }: GifGridItemProps) => {
   const variant = item.file.sm ?? item.file.xs ?? item.file.md;
   const src = variant?.webp?.url ?? variant?.gif?.url ?? "";
   const [loaded, setLoaded] = useState(false);
-  const cached = useRef<{ filePath: string; iconPath: string } | null>(null);
-  const dragUrl = getDragUrl(item);
+  const { preload, handleDragStart } = useDraggableMedia(getDragUrl(item));
 
-  const preload = useCallback(async () => {
-    if (cached.current || !dragUrl) return;
-    const result = await commands.downloadMediaToTemp(dragUrl);
-    if (result.status === "ok") {
-      const [filePath, iconPath] = result.data;
-      cached.current = { filePath, iconPath };
-    }
-  }, [dragUrl]);
-
-  const handleMouseDown = useCallback(
-    async (e: React.MouseEvent) => {
-      if (!dragUrl) return;
-      e.preventDefault();
-      if (!cached.current) {
-        const result = await commands.downloadMediaToTemp(dragUrl);
-        if (result.status === "error") return;
-        const [filePath, iconPath] = result.data;
-        cached.current = { filePath, iconPath };
-      }
-      const { filePath, iconPath } = cached.current;
-      await startDrag({ item: [filePath], icon: iconPath });
-    },
-    [dragUrl],
-  );
+  const handleClick = useCallback(() => onSelect(item), [item, onSelect]);
 
   return (
     <button
       type="button"
       onMouseEnter={preload}
-      onMouseDown={handleMouseDown}
-      onClick={() => onSelect(item)}
+      onMouseDown={handleDragStart}
+      onClick={handleClick}
+      aria-label={item.title}
       className="w-full h-full overflow-hidden rounded-lg bg-muted cursor-grab hover:ring-2 hover:ring-ring transition-shadow focus-visible:ring-2 focus-visible:ring-ring outline-none"
       title={item.title}
     >
@@ -75,4 +51,6 @@ export const GifGridItem = ({ item, onSelect }: GifGridItemProps) => {
       />
     </button>
   );
-};
+});
+
+GifGridItem.displayName = "GifGridItem";

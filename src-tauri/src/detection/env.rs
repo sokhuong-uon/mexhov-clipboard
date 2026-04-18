@@ -26,15 +26,19 @@ pub fn detect_env(text: &str) -> bool {
     valid_count > 0
 }
 
-// pub fn parse_env(text: &str) -> Vec<(String, String)> {
-//     let cursor = Cursor::new(text.as_bytes());
-//     let iter = dotenvy::from_read_iter(cursor);
-//     let mut pairs = Vec::new();
-//     for result in iter {
-//         match result {
-//             Ok((key, value)) => pairs.push((key, value)),
-//             Err(_) => break,
-//         }
-//     }
-//     pairs
-// }
+pub fn parse_env(text: &str) -> Vec<(String, String)> {
+    let cursor = Cursor::new(text.as_bytes());
+    let iter = dotenvy::from_read_iter(cursor);
+    let mut pairs = Vec::new();
+    for result in iter {
+        match result {
+            Ok((key, value)) => {
+                if is_valid_key(&key) {
+                    pairs.push((key, value));
+                }
+            }
+            Err(_) => break,
+        }
+    }
+    pairs
+}

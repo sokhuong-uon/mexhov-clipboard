@@ -12,7 +12,18 @@ import {
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
+const PREVIEW_CACHE_LIMIT = 100;
 const previewCache = new Map<string, LinkPreviewData | null>();
+
+function cachePreview(url: string, data: LinkPreviewData | null) {
+  if (previewCache.has(url)) previewCache.delete(url);
+  previewCache.set(url, data);
+  while (previewCache.size > PREVIEW_CACHE_LIMIT) {
+    const oldest = previewCache.keys().next().value;
+    if (oldest === undefined) break;
+    previewCache.delete(oldest);
+  }
+}
 
 export function isUrl(text: string): boolean {
   return URL_REGEX.test(text.trim());
@@ -34,8 +45,13 @@ export function LinkPreview({ url }: { url: string }) {
     const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
     await commands.writeClipboardImage(base64);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
   }, []);
+
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(t);
+  }, [copied]);
 
   useEffect(() => {
     if (previewCache.has(url)) {
@@ -51,10 +67,10 @@ export function LinkPreview({ url }: { url: string }) {
     commands.fetchLinkPreview(url).then((result) => {
       if (cancelled) return;
       if (result.status === "ok") {
-        previewCache.set(url, result.data);
+        cachePreview(url, result.data);
         setData(result.data);
       } else {
-        previewCache.set(url, null);
+        cachePreview(url, null);
         setError(true);
       }
       setLoading(false);

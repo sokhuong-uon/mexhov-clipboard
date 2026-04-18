@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { ChevronDown, Film } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import { LinkPreview, isUrl } from "@/components/link-preview";
@@ -8,8 +8,7 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/collapsible";
-import { startDrag } from "@crabnebula/tauri-plugin-drag";
-import { commands } from "@/bindings";
+import { useDraggableMedia } from "@/hooks/use-draggable-media";
 
 const IMAGE_EXT = /\.(gif|webp|png|jpg|jpeg|svg)(\?.*)?$/i;
 const VIDEO_EXT = /\.(mp4|webm|mov)(\?.*)?$/i;
@@ -59,31 +58,7 @@ const CollapsibleText = ({ text }: { text: string }) => {
 };
 
 const DraggableMedia = ({ url }: { url: string }) => {
-  const cached = useRef<{ filePath: string; iconPath: string } | null>(null);
-
-  const preload = useCallback(async () => {
-    if (cached.current) return;
-    const result = await commands.downloadMediaToTemp(url);
-    if (result.status === "ok") {
-      const [filePath, iconPath] = result.data;
-      cached.current = { filePath, iconPath };
-    }
-  }, [url]);
-
-  const handleDrag = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (!cached.current) {
-        const result = await commands.downloadMediaToTemp(url);
-        if (result.status === "error") return;
-        const [filePath, iconPath] = result.data;
-        cached.current = { filePath, iconPath };
-      }
-      const { filePath, iconPath } = cached.current;
-      await startDrag({ item: [filePath], icon: iconPath });
-    },
-    [url],
-  );
+  const { preload, handleDragStart } = useDraggableMedia(url);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -93,7 +68,7 @@ const DraggableMedia = ({ url }: { url: string }) => {
         loading="lazy"
         draggable={false}
         onMouseEnter={preload}
-        onMouseDown={handleDrag}
+        onMouseDown={handleDragStart}
         className="max-w-full max-h-40 rounded-md object-contain bg-muted cursor-grab"
       />
     </div>

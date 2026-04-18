@@ -1,5 +1,6 @@
 use crate::clipboard::ClipboardManager;
 use crate::clipboard_monitor::MonitorState;
+use crate::detection::env;
 use crate::main_window;
 use std::sync::atomic::Ordering;
 use tauri::{AppHandle, Manager, State};
@@ -40,6 +41,12 @@ pub async fn write_clipboard_image(
 #[specta::specta]
 pub async fn reinitialize_clipboard(manager: State<'_, ClipboardManager>) -> Result<(), String> {
     manager.reinitialize()
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn parse_env_content(text: String) -> Vec<(String, String)> {
+    env::parse_env(&text)
 }
 
 #[tauri::command]

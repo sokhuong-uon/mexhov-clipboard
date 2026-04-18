@@ -8,8 +8,27 @@ import { GifGridItem } from "@/components/gif-grid-item";
 import {
   useKlipyTrending,
   useKlipySearch,
+  KlipyError,
 } from "@/features/klipy/hooks/use-klipy";
 import { type Klipy } from "@/features/klipy/schema/klipy";
+
+function klipyErrorMessage(error: unknown): string {
+  if (error instanceof KlipyError) {
+    switch (error.kind) {
+      case "missing_api_key":
+        return "KLIPY API key is missing.";
+      case "invalid_api_key":
+        return "KLIPY rejected the API key. Check your settings.";
+      case "rate_limited":
+        return "Too many requests — try again in a moment.";
+      case "network":
+        return "Network unavailable. Check your connection.";
+      case "api":
+        return "KLIPY service is having trouble. Try again later.";
+    }
+  }
+  return "Failed to load GIFs.";
+}
 
 const COLUMNS = 3;
 const GAP = 8;
@@ -162,8 +181,8 @@ export const GifView = ({ onSelect }: GifViewProps) => {
             ))}
           </div>
         ) : isError ? (
-          <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-            Failed to load GIFs. Check your API key.
+          <div className="flex items-center justify-center h-32 text-muted-foreground text-sm px-4 text-center">
+            {klipyErrorMessage(activeQuery.error)}
           </div>
         ) : items.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
