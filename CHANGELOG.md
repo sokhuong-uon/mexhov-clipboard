@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/sokhuong-uon/mexboard/compare/v1.7.0...v1.8.0) (2026-04-18)
+
+
+### Features
+
+* paste symbols and GIF to other app except Telegram for GIF ([585074a](https://github.com/sokhuong-uon/mexboard/commit/585074a115efa6d4098ab77229d12f6a6231044f))
+
 # [1.7.0](https://github.com/sokhuong-uon/mexboard/compare/v1.6.0...v1.7.0) (2026-04-18)
 
 
