@@ -1,5 +1,6 @@
 import { memo, useState, useCallback } from "react";
 import { type Klipy } from "@/features/klipy/schema/klipy";
+import { getKlipyPasteUrl } from "@/features/klipy/klipy-url";
 import { useDraggableMedia } from "@/hooks/use-draggable-media";
 import { QuickPasteBadge } from "@/components/quick-paste-badge";
 import { QUICK_PASTE_MODIFIER } from "@/hooks/use-modifier-held";
@@ -10,17 +11,14 @@ type GifGridItemProps = {
   quickIndex?: number | null;
 };
 
-function getDragUrl(item: Klipy): string | undefined {
-  const variant = item.file.hd ?? item.file.md ?? item.file.sm;
-  return variant?.gif?.url ?? variant?.webp?.url;
-}
-
 export const GifGridItem = memo(
   ({ item, onSelect, quickIndex }: GifGridItemProps) => {
     const variant = item.file.sm ?? item.file.xs ?? item.file.md;
     const src = variant?.webp?.url ?? variant?.gif?.url ?? "";
     const [loaded, setLoaded] = useState(false);
-    const { preload, handleDragStart } = useDraggableMedia(getDragUrl(item));
+    const { preload, handleDragStart } = useDraggableMedia(
+      getKlipyPasteUrl(item),
+    );
 
     const handleClick = useCallback(() => onSelect(item), [item, onSelect]);
 
