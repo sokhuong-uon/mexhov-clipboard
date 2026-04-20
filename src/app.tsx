@@ -16,9 +16,6 @@ import { getKlipyPasteUrl } from "@/features/klipy/klipy-url";
 
 type TabValue = "clipboard" | "gif" | "symbols";
 
-const TAB_CONTENT_CLASS =
-  "flex flex-col overflow-hidden min-h-0 data-hidden:hidden";
-
 function App() {
   useSystemTheme();
   const [activeTab, setActiveTab] = useState<TabValue>("clipboard");
@@ -63,7 +60,11 @@ function App() {
           </TabsList>
         </div>
 
-        <TabsContent value="clipboard" keepMounted className={TAB_CONTENT_CLASS}>
+        <TabsContent
+          value="clipboard"
+          keepMounted
+          className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
+        >
           <ClipboardTab
             clipboard={clipboard}
             onPaste={pasteClipboardItem}
@@ -71,7 +72,11 @@ function App() {
           />
         </TabsContent>
 
-        <TabsContent value="gif" keepMounted className={TAB_CONTENT_CLASS}>
+        <TabsContent
+          value="gif"
+          keepMounted
+          className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
+        >
           <GifView
             onSelect={handleGifSelect}
             onPaste={pasteKlipy}
@@ -79,7 +84,11 @@ function App() {
           />
         </TabsContent>
 
-        <TabsContent value="symbols" keepMounted className={TAB_CONTENT_CLASS}>
+        <TabsContent
+          value="symbols"
+          keepMounted
+          className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
+        >
           <SymbolsView
             onSelect={clipboard.write}
             onPaste={pasteText}
