@@ -8,7 +8,7 @@ import { ClipboardHeader } from "@/components/clipboard-window-header";
 import type { useClipboard } from "@/hooks/use-clipboard";
 import { useSettings } from "@/hooks/use-settings";
 import { useHotkeysConfig } from "@/hooks/use-hotkeys-config";
-import { useClipboardHistory } from "@/hooks/use-clipboard-history";
+import { useClipboardHistory } from "@/features/clipboard/hooks/use-clipboard-history";
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
 import { useClipboardFilters } from "@/hooks/use-clipboard-filters";
 import { ClipboardItem } from "@/types/clipboard";
