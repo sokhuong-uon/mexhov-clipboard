@@ -2,6 +2,7 @@ import { Clock } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import { formatRelativeDate, formatFullDate } from "@/utils/formatting";
 import { Badge } from "@/components/ui/badge";
+import { classifyFileMime } from "@/components/clipboard-item-file";
 import {
   Tooltip,
   TooltipTrigger,
@@ -9,8 +10,28 @@ import {
 } from "@/components/ui/tooltip";
 
 export const ClipboardItemMeta = ({ item }: { item: ClipboardItem }) => {
+  const fileKind = item.file_mime ? classifyFileMime(item.file_mime) : null;
+
   return (
     <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+      {fileKind && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Badge
+                variant="outline"
+                className={`text-[10px] px-1.5 py-0 h-4 border-current/40 cursor-default ${fileKind.tone}`}
+              >
+                {fileKind.label}
+              </Badge>
+            }
+          />
+          <TooltipContent className="pointer-events-none font-mono">
+            {item.file_mime}
+          </TooltipContent>
+        </Tooltip>
+      )}
+
       {item.kv_key && (
         <Badge
           variant="outline"

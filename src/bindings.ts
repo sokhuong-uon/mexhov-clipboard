@@ -69,6 +69,7 @@ export type ClipboardItemRow = {
 	is_secret: boolean,
 	note: string | null,
 	content_hash: string | null,
+	file_mime: string | null,
 	created_at: string,
 	updated_at: string,
 };
@@ -120,4 +121,3 @@ async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; dat
         return { status: "error", error: e as any };
     }
 }
-

@@ -22,6 +22,7 @@ export type ClipboardItem = {
   is_env: boolean;
   is_secret: boolean;
   note: string | null;
+  file_mime: string | null;
 };
 
 export type ContentFilter =

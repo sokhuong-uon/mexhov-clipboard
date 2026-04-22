@@ -25,6 +25,7 @@ pub struct ClipboardItemRow {
     pub is_secret: bool,
     pub note: Option<String>,
     pub content_hash: Option<String>,
+    pub file_mime: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -51,6 +52,7 @@ impl From<SelectClipboardItems> for ClipboardItemRow {
             is_secret: row.is_secret != 0,
             note: row.note,
             content_hash: row.content_hash,
+            file_mime: row.file_mime,
             created_at: row.created_at,
             updated_at: row.updated_at,
         }

@@ -1,7 +1,7 @@
 use drizzle::core::expr::*;
 use drizzle::sqlite::prelude::*;
 
-use crate::detection::{color, date, env, secret};
+use crate::detection::{color, date, env, file, secret};
 use crate::schema::*;
 
 use super::super::schema::*;
@@ -21,23 +21,30 @@ impl Database {
         );
 
         // Run all content detections on text
-        let (detected_date, detected_color, is_env, is_secret) =
+        let (detected_date, detected_color, is_env, is_secret, file_mime) =
             if let Some(text) = &params.text_content {
-                (
-                    date::detect_date(text),
-                    color::detect(text),
-                    env::detect_env(text),
-                    secret::detect_secret(text),
-                )
+                let mime = file::detect_file_mime(text);
+                // Path items should not be misclassified as env/secret/etc.
+                if mime.is_some() {
+                    (None, None, false, false, mime)
+                } else {
+                    (
+                        date::detect_date(text),
+                        color::detect(text),
+                        env::detect_env(text),
+                        secret::detect_secret(text),
+                        None,
+                    )
+                }
             } else {
-                (None, None, false, false)
+                (None, None, false, false, None)
             };
 
         inner
             .db
             .conn()
             .execute(
-                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, detected_color, is_env, is_secret, note, content_hash, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13, ?14, NULL, ?15, ?16, ?17)",
+                "INSERT INTO clipboard_items (content_type, text_content, image_data, image_width, image_height, char_count, line_count, source_app, is_favorite, sort_order, copy_count, kv_key, detected_date, detected_color, is_env, is_secret, note, content_hash, file_mime, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, 1, ?10, ?11, ?12, ?13, ?14, NULL, ?15, ?16, ?17, ?18)",
                 rusqlite::params![
                     params.content_type,
                     params.text_content,
@@ -54,6 +61,7 @@ impl Database {
                     is_env as i64,
                     is_secret as i64,
                     content_hash,
+                    file_mime,
                     params.created_at,
                     params.updated_at,
                 ],

@@ -31,6 +31,9 @@ pub struct ClipboardItems {
     pub note: Option<String>,
     /// SHA-256 hash of content for fast deduplication
     pub content_hash: Option<String>,
+    /// MIME type when text_content is detected as a path to an existing file
+    /// or directory (e.g. "application/pdf", "inode/directory")
+    pub file_mime: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }

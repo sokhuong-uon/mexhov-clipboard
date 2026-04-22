@@ -3,6 +3,7 @@ import { ChevronDown, Film } from "lucide-react";
 import { ClipboardItem } from "@/types/clipboard";
 import { LinkPreview, isUrl } from "@/components/link-preview";
 import { ClipboardItemColor } from "@/components/clipboard-item-color";
+import { ClipboardItemFile } from "@/components/clipboard-item-file";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -116,6 +117,12 @@ export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
           />
         )}
       </div>
+    );
+  }
+
+  if (item.file_mime && item.text_content) {
+    return (
+      <ClipboardItemFile path={item.text_content} fileMime={item.file_mime} />
     );
   }
 

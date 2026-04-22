@@ -45,6 +45,7 @@ impl Database {
                         is_secret: row.get("is_secret")?,
                         note: row.get("note")?,
                         content_hash: row.get("content_hash")?,
+                        file_mime: row.get("file_mime")?,
                         created_at: row.get("created_at")?,
                         updated_at: row.get("updated_at")?,
                     })
