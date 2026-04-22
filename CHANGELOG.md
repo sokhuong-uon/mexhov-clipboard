@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/sokhuong-uon/mexboard/compare/v1.9.0...v1.9.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* correct hotkey translation between Tanstack hotkey and Tauri ([ae3ef03](https://github.com/sokhuong-uon/mexboard/commit/ae3ef03ff51c869b18a7d2982e8f97bab5fce70f))
+
 # [1.9.0](https://github.com/sokhuong-uon/mexboard/compare/v1.8.0...v1.9.0) (2026-04-22)
 
 
