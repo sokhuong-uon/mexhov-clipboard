@@ -76,7 +76,7 @@ pub async fn download_media_to_temp(url: String) -> Result<(String, String), Str
         .and_then(|u| u.path().rsplit('.').next().map(|ext| ext.to_lowercase()))
         .unwrap_or_else(|| "gif".to_string());
 
-    let temp_dir = std::env::temp_dir().join("mexc-drag");
+    let temp_dir = std::env::temp_dir().join("mexboard-drag");
     std::fs::create_dir_all(&temp_dir).map_err(|e| e.to_string())?;
 
     use sha2::{Digest, Sha256};
