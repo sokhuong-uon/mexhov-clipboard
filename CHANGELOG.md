@@ -1,3 +1,15 @@
+# [1.10.0](https://github.com/sokhuong-uon/mexboard/compare/v1.9.1...v1.10.0) (2026-04-22)
+
+
+### Bug Fixes
+
+* reduce the case where app's window cover the caret ([de2911e](https://github.com/sokhuong-uon/mexboard/commit/de2911ece98d1a55b781d226ad949641a55ba1ed))
+
+
+### Features
+
+* position window based on caret's position ([aaf49f7](https://github.com/sokhuong-uon/mexboard/commit/aaf49f75428e62034afb11cb4ac8457b78539878))
+
 ## [1.9.1](https://github.com/sokhuong-uon/mexboard/compare/v1.9.0...v1.9.1) (2026-04-22)
 
 
