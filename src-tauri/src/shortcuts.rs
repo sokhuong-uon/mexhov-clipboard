@@ -43,7 +43,7 @@ pub fn register(app: &AppHandle) {
 }
 
 pub fn apply(app: &AppHandle, accelerator: &str) -> Result<(), String> {
-    let shortcut: Shortcut = accelerator
+    let shortcut: Shortcut = to_tauri_accelerator(accelerator)
         .parse()
         .map_err(|e| format!("invalid accelerator: {e}"))?;
 
@@ -67,6 +67,18 @@ pub fn apply(app: &AppHandle, accelerator: &str) -> Result<(), String> {
     let mut guard = state.0.lock().map_err(|_| "poisoned mutex".to_string())?;
     *guard = Some(shortcut);
     Ok(())
+}
+
+fn to_tauri_accelerator(accelerator: &str) -> String {
+    accelerator
+        .split('+')
+        .map(|t| match t.trim() {
+            "Meta" => "Super",
+            "Mod" => "CmdOrCtrl",
+            other => other,
+        })
+        .collect::<Vec<_>>()
+        .join("+")
 }
 
 fn load_accelerator(app: &AppHandle) -> String {
