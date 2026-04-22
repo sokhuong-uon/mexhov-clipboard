@@ -127,7 +127,7 @@ fn process_message(msg: &Message) {
     }
 }
 
-pub fn get_caret_position() -> Option<(f64, f64)> {
+pub fn get_caret_position() -> Option<(f64, f64, f64)> {
     let (bus_name, obj_path) = {
         let guard = FOCUSED_ELEMENT.lock().ok()?;
         guard.clone()?
@@ -168,5 +168,5 @@ pub fn get_caret_position() -> Option<(f64, f64)> {
         return None;
     }
 
-    Some((x as f64, (y + h) as f64))
+    Some((x as f64, y as f64, (y + h) as f64))
 }

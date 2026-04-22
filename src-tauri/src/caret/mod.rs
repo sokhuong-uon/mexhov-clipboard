@@ -14,7 +14,7 @@ pub fn init() {
 
 /// Returns the screen-space (x, y) position of the text caret in the
 /// currently focused application, or None if it cannot be determined.
-pub fn get_caret_position() -> Option<(f64, f64)> {
+pub fn get_caret_position() -> Option<(f64, f64, f64)> {
     #[cfg(target_os = "linux")]
     {
         linux::get_caret_position()

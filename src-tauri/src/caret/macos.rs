@@ -46,7 +46,7 @@ extern "C" {
     fn AXValueGetValue(value: *mut c_void, value_type: u32, value_ptr: *mut c_void) -> bool;
 }
 
-pub fn get_caret_position() -> Option<(f64, f64)> {
+pub fn get_caret_position() -> Option<(f64, f64, f64)> {
     unsafe {
         let system = AXUIElementCreateSystemWide();
         let result = get_caret_position_inner(system);
@@ -130,5 +130,5 @@ unsafe fn get_caret_position_inner(system: AXUIElementRef) -> Option<(f64, f64)>
     }
 
     // Position below the caret
-    Some((rect.origin.x, rect.origin.y + rect.size.height))
+    Some((rect.origin.x, rect.origin.y, rect.origin.y + rect.size.height))
 }
