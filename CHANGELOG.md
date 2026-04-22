@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/sokhuong-uon/mexboard/compare/v1.8.0...v1.9.0) (2026-04-22)
+
+
+### Features
+
+* register shortcut for toggling window ([fe2a7e3](https://github.com/sokhuong-uon/mexboard/commit/fe2a7e3bc3b1b76dd7b0e1108e576f30925e70dd))
+
 # [1.8.0](https://github.com/sokhuong-uon/mexboard/compare/v1.7.0...v1.8.0) (2026-04-18)
 
 
