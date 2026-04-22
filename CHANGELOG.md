@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/sokhuong-uon/mexboard/compare/v1.10.0...v1.10.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* fix Mac OS build error due to type mismatch ([a7c6946](https://github.com/sokhuong-uon/mexboard/commit/a7c6946a8908fd1aa7da923f424e79bff9d8bedb))
+
 # [1.10.0](https://github.com/sokhuong-uon/mexboard/compare/v1.9.1...v1.10.0) (2026-04-22)
 
 
