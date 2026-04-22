@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/sokhuong-uon/mexboard/compare/v1.10.1...v1.11.0) (2026-04-22)
+
+
+### Features
+
+* hint file type based on mime for copied path ([0ee5a0f](https://github.com/sokhuong-uon/mexboard/commit/0ee5a0f80ec50c6979f68c56e7429456e6dfcea5))
+
 ## [1.10.1](https://github.com/sokhuong-uon/mexboard/compare/v1.10.0...v1.10.1) (2026-04-22)
 
 
