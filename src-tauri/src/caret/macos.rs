@@ -55,7 +55,7 @@ pub fn get_caret_position() -> Option<(f64, f64, f64)> {
     }
 }
 
-unsafe fn get_caret_position_inner(system: AXUIElementRef) -> Option<(f64, f64)> {
+unsafe fn get_caret_position_inner(system: AXUIElementRef) -> Option<(f64, f64, f64)> {
     // Get focused application
     let mut focused_app: *mut c_void = ptr::null_mut();
     let attr = CFString::new("AXFocusedApplication");
@@ -130,5 +130,9 @@ unsafe fn get_caret_position_inner(system: AXUIElementRef) -> Option<(f64, f64)>
     }
 
     // Position below the caret
-    Some((rect.origin.x, rect.origin.y, rect.origin.y + rect.size.height))
+    Some((
+        rect.origin.x,
+        rect.origin.y,
+        rect.origin.y + rect.size.height,
+    ))
 }
