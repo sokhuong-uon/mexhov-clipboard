@@ -45,6 +45,7 @@ export const commands = {
 	syncStop: () => typedError<null, string>(__TAURI_INVOKE("sync_stop")),
 	mdnsStartDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_start_discovery")),
 	mdnsStopDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_stop_discovery")),
+	setToggleShortcut: (accelerator: string) => typedError<null, string>(__TAURI_INVOKE("set_toggle_shortcut", { accelerator })),
 };
 
 /* Types */

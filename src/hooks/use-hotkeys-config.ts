@@ -18,6 +18,25 @@ export type HotkeyAction =
   | "searchAlt"
   | "toggleWindowVisibility";
 
+function detectPlatform(): "mac" | "windows" | "linux" {
+  if (typeof navigator === "undefined") return "linux";
+  const ua = navigator.userAgent;
+  if (/Macintosh|Mac OS X/i.test(ua)) return "mac";
+  if (/Windows/i.test(ua)) return "windows";
+  return "linux";
+}
+
+const TOGGLE_DEFAULT: Hotkey = (() => {
+  switch (detectPlatform()) {
+    case "mac":
+      return "Shift+Meta+V";
+    case "windows":
+      return "Alt+Meta+V";
+    default:
+      return "Meta+V";
+  }
+})();
+
 export const HOTKEY_META: Record<
   HotkeyAction,
   { label: string; defaultKey: Hotkey }
@@ -34,7 +53,10 @@ export const HOTKEY_META: Record<
   jumpBottom: { label: "Jump to bottom", defaultKey: "B" },
   search: { label: "Focus search", defaultKey: "Mod+K" },
   searchAlt: { label: "Focus search (alt)", defaultKey: "I" },
-  toggleWindowVisibility: { label: "Toggle window visibility", defaultKey: "Meta+V" },
+  toggleWindowVisibility: {
+    label: "Toggle window visibility",
+    defaultKey: TOGGLE_DEFAULT,
+  },
 };
 
 export const HOTKEY_ACTIONS = Object.keys(HOTKEY_META) as HotkeyAction[];
@@ -82,6 +104,16 @@ export function useHotkeysConfig() {
         persist(next);
         return next;
       });
+      if (action === "toggleWindowVisibility") {
+        commands.setToggleShortcut(hotkey).then((res) => {
+          if (res.status !== "ok") {
+            console.error(
+              `[hotkeys] failed to register ${hotkey}:`,
+              res.error,
+            );
+          }
+        });
+      }
     },
     [persist],
   );
@@ -97,6 +129,14 @@ export function useHotkeysConfig() {
     const defaults = getDefaults();
     setHotkeysState(defaults);
     persist(defaults);
+    commands.setToggleShortcut(defaults.toggleWindowVisibility).then((res) => {
+      if (res.status !== "ok") {
+        console.error(
+          `[hotkeys] failed to register ${defaults.toggleWindowVisibility}:`,
+          res.error,
+        );
+      }
+    });
   }, [persist]);
 
   const formatted = useMemo(

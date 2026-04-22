@@ -51,6 +51,7 @@ fn main() {
         .manage(ClipboardManager::new())
         .manage(MonitorState::new())
         .manage(SyncState::new())
+        .manage(shortcuts::ToggleShortcut::default())
         .setup(move |app| {
             let database = db::initialization::init(app);
             app.manage(database);

@@ -2,6 +2,7 @@ mod clipboard;
 mod db;
 mod media;
 mod settings;
+mod shortcuts;
 mod sync;
 mod system;
 mod window;
@@ -10,6 +11,7 @@ pub use clipboard::*;
 pub use db::*;
 pub use media::*;
 pub use settings::*;
+pub use shortcuts::*;
 pub use sync::*;
 pub use system::*;
 pub use window::*;
@@ -52,6 +54,7 @@ pub fn create_command_builder() -> Builder<tauri::Wry> {
         sync_stop,
         mdns_start_discovery,
         mdns_stop_discovery,
+        set_toggle_shortcut,
     ])
 }
 
