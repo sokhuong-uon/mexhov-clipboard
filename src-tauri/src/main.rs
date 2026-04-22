@@ -8,6 +8,7 @@ mod commands;
 mod db;
 mod detection;
 mod schema;
+mod shortcuts;
 mod sync;
 mod tray;
 mod window;
@@ -34,7 +35,13 @@ fn main() {
         .expect("failed to export specta bindings");
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(
+            tauri_plugin_global_shortcut::Builder::new()
+                .with_handler(|app, shortcut, event| {
+                    shortcuts::on_event(app, shortcut, event);
+                })
+                .build(),
+        )
         .plugin(tauri_plugin_drag::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
@@ -53,6 +60,8 @@ fn main() {
             main_window::setup(app, &initial_command);
 
             clipboard_monitor::start_monitor(app.handle());
+
+            shortcuts::register(app.handle());
 
             Ok(())
         })
