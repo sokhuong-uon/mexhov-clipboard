@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/sokhuong-uon/mexboard/compare/v1.11.0...v1.12.0) (2026-04-23)
+
+
+### Features
+
+* improve UI on empty state ([c604ca6](https://github.com/sokhuong-uon/mexboard/commit/c604ca6a2efdca84a37df8a59b99271879474e6d))
+
 # [1.11.0](https://github.com/sokhuong-uon/mexboard/compare/v1.10.1...v1.11.0) (2026-04-22)
 
 
