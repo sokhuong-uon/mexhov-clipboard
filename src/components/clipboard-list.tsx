@@ -81,7 +81,9 @@ export const ClipboardList = ({
   const showQuickPaste = isActive && modifierHeld && !isEditingNote;
 
   // Stable per-item callback cache for onColorMenuOpenChange
-  const colorMenuHandlersRef = useRef(new Map<number, (open: boolean) => void>());
+  const colorMenuHandlersRef = useRef(
+    new Map<number, (open: boolean) => void>(),
+  );
   const getColorMenuHandler = useCallback((itemId: number) => {
     let handler = colorMenuHandlersRef.current.get(itemId);
     if (!handler) {
@@ -190,9 +192,13 @@ export const ClipboardList = ({
   useHotkeySequence([hotkeys.jumpTop], () => {
     if (!hotkeysDisabled && items.length > 0) setActiveIndex(0);
   });
-  useHotkey(hotkeys.jumpBottom, () => {
-    if (items.length > 0) setActiveIndex(items.length - 1);
-  }, { enabled: !hotkeysDisabled });
+  useHotkey(
+    hotkeys.jumpBottom,
+    () => {
+      if (items.length > 0) setActiveIndex(items.length - 1);
+    },
+    { enabled: !hotkeysDisabled },
+  );
 
   // Ctrl/Cmd + 1–9 to paste the Nth visible item (works in both list and search,
   // even when the search input is focused)
@@ -210,7 +216,11 @@ export const ClipboardList = ({
   );
 
   const handleDragEnd = useCallback(
-    (event: Parameters<NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragEnd"]>>[0]) => {
+    (
+      event: Parameters<
+        NonNullable<React.ComponentProps<typeof DragDropProvider>["onDragEnd"]>
+      >[0],
+    ) => {
       const { source } = event.operation;
       if (!source || !isSortable(source)) return;
 

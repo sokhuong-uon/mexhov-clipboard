@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { useDebouncedState } from "@tanstack/react-pacer";
 
 import { ErrorBanner } from "@/components/clipboard-error-banner";
 import { ClipboardList } from "@/components/clipboard-list";
@@ -12,6 +11,7 @@ import { useClipboardHistory } from "@/features/clipboard/hooks/use-clipboard-hi
 import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
 import { useClipboardFilters } from "@/hooks/use-clipboard-filters";
 import { ClipboardItem } from "@/types/clipboard";
+import { useClipboardSearchQueryStore } from "@/features/clipboard/stores/clipboard-search-query-store";
 
 type ClipboardTabProps = {
   clipboard: ReturnType<typeof useClipboard>;
@@ -19,19 +19,18 @@ type ClipboardTabProps = {
   isActive: boolean;
 };
 
-export function ClipboardTab({ clipboard, onPaste, isActive }: ClipboardTabProps) {
-  const {
-    readContent,
-    write,
-    writeImage,
-    reinitialize,
-    error,
-    dismissError,
-  } = clipboard;
+export function ClipboardTab({
+  clipboard,
+  onPaste,
+  isActive,
+}: ClipboardTabProps) {
+  const { readContent, write, writeImage, reinitialize, error, dismissError } =
+    clipboard;
 
   const [isMonitoring, setIsMonitoring] = useState(true);
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 150 });
+
+  const { searchQuery } = useClipboardSearchQueryStore();
+
   const [isEditingNote, setIsEditingNote] = useState(false);
 
   const { historyLimit, setHistoryLimit } = useSettings();
@@ -98,11 +97,6 @@ export function ClipboardTab({ clipboard, onPaste, isActive }: ClipboardTabProps
         hasHistory={history.length > 0}
         onClearAll={clearAll}
         systemInfo={systemInfo}
-        searchQuery={searchInput}
-        onSearchChange={(q) => {
-          setSearchInput(q);
-          setSearchQuery(q);
-        }}
         historyLimit={historyLimit}
         onHistoryLimitChange={setHistoryLimit}
         filters={filters}
@@ -111,7 +105,6 @@ export function ClipboardTab({ clipboard, onPaste, isActive }: ClipboardTabProps
         onSetHotkey={setHotkey}
         onResetHotkey={resetHotkey}
         onResetAllHotkeys={resetAllHotkeys}
-        isEditingNote={isEditingNote}
       />
 
       {error && (
