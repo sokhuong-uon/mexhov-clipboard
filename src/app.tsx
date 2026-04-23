@@ -44,6 +44,7 @@ function App() {
           <div data-tauri-drag-region className="select-none text-muted">
             Mexhov
           </div>
+
           <TabsList className="ml-auto">
             <TabsTrigger value="clipboard" className="rounded-2xl">
               <Clipboard className="text-neutral-500 dark:text-neutral-400" />
