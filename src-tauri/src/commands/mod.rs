@@ -79,12 +79,10 @@ pub fn handle_command(app: &AppHandle, command: &str) {
                 show_window_at_cursor(app.clone());
             }
         }
-        _ => {
-            show_window_at_cursor(app.clone());
-        }
+        _ => {}
     }
 }
 
 pub fn parse_command_from_args(args: &[String]) -> &str {
-    args.get(1).map(|s| s.as_str()).unwrap_or("show")
+    args.get(1).map(|s| s.as_str()).unwrap_or("")
 }
