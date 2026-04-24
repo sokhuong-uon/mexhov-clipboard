@@ -112,8 +112,7 @@ export const ClipboardItemContent = ({ item }: { item: ClipboardItem }) => {
           <img
             src={`data:image/png;base64,${item.image_data}`}
             alt="Clipboard image"
-            className="max-w-full max-h-32 rounded-md object-contain bg-muted"
-            style={{ maxWidth: Math.min(item.image_width || 200, 200) }}
+            className="max-w-full max-h-80 rounded-md object-contain bg-muted"
           />
         )}
       </div>
