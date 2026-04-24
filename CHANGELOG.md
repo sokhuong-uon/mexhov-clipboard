@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/sokhuong-uon/mexboard/compare/v1.13.0...v1.14.0) (2026-04-24)
+
+
+### Features
+
+* display image in full width if height <= 20rem ([243d1f5](https://github.com/sokhuong-uon/mexboard/commit/243d1f56adb7ea10dd3366ca45857813a5381104))
+
 # [1.13.0](https://github.com/sokhuong-uon/mexboard/compare/v1.12.0...v1.13.0) (2026-04-24)
 
 
