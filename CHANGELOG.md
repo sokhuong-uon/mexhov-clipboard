@@ -1,3 +1,10 @@
+## [1.15.1](https://github.com/sokhuong-uon/mexboard/compare/v1.15.0...v1.15.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* don't hide window on context menu ([cb4d672](https://github.com/sokhuong-uon/mexboard/commit/cb4d6729b6a1fa7dad98b8030b8da4abcc3c7c66))
+
 # [1.15.0](https://github.com/sokhuong-uon/mexboard/compare/v1.14.0...v1.15.0) (2026-04-24)
 
 
