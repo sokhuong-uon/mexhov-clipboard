@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/sokhuong-uon/mexboard/compare/v1.14.0...v1.15.0) (2026-04-24)
+
+
+### Features
+
+* hide window in Escape or loss focus ([59ba19a](https://github.com/sokhuong-uon/mexboard/commit/59ba19a4539ed29d17c520963295864cf8fa7083))
+
 # [1.14.0](https://github.com/sokhuong-uon/mexboard/compare/v1.13.0...v1.14.0) (2026-04-24)
 
 
