@@ -2,8 +2,10 @@
 
 Works on Linux, Windows, and probably MacOS too 🤔
 
-<img width="401" height="676" alt="image" src="https://github.com/user-attachments/assets/c0f51f52-9548-4ecf-848d-33519d34017d" />
-<img width="401" height="676" alt="image" src="https://github.com/user-attachments/assets/7d7f643d-9741-448c-911f-e61d523efacb" />
+
+<img width="395" height="627" alt="image" src="https://github.com/user-attachments/assets/6be02335-ead2-4c57-bf8d-dce8326a0f82" />
+<img width="395" height="627" alt="image" src="https://github.com/user-attachments/assets/900b5163-8d3a-4b50-b400-fae882ee2f8c" />
+
 
 
 ## Features
