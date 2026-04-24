@@ -86,10 +86,13 @@ export const ClipboardItem = memo(function ClipboardItem({
   );
 
   const [editingNote, setEditingNoteRaw] = useState(false);
-  const setEditingNote = useCallback((v: boolean) => {
-    setEditingNoteRaw(v);
-    onEditingNoteChange?.(v);
-  }, [onEditingNoteChange]);
+  const setEditingNote = useCallback(
+    (v: boolean) => {
+      setEditingNoteRaw(v);
+      onEditingNoteChange?.(v);
+    },
+    [onEditingNoteChange],
+  );
   const [noteValue, setNoteValue] = useState(item.note ?? "");
 
   const handleNoteSubmit = useCallback(() => {

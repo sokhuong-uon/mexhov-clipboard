@@ -23,7 +23,7 @@ export const ClipboardItemActions = ({
   showSplit,
 }: ClipboardItemActionsProps) => {
   return (
-    <div className="flex flex-col items-center gap-0.5 shrink-0 pt-0.5">
+    <div className="flex invisible group-hover:visible flex-col items-center gap-0.5 shrink-0 pt-0.5">
       <Tooltip>
         <TooltipTrigger
           render={
