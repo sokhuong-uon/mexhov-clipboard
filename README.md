@@ -6,18 +6,6 @@
 # Mexboard: Clipboard Manager from Mexhov
 Works on Linux, Windows, and probably MacOS too 🤔
 
-## Features
-
-- **Clipboard history tracking** - Automatically tracks all copied text and image items
-- **Image clipboard support** - Full support for copying and pasting images from clipboard history
-- **Quick copy from history** - Click any item to copy it back to clipboard
-- **Monitoring toggle** - Pause/resume clipboard monitoring as needed
-- **Clear history** - Delete individual items or clear all history at once
-- **Automatic environment detection** - Automatically detects and adapts to Wayland or X11
-- **System tray integration** - Access the application from system tray with show/hide/quit options
-- **Single instance** - Only one instance runs at a time, preventing conflicts
-- **Error handling** - Built-in retry logic and error recovery
-
 ## Development
 
 **Prerequisites:**
