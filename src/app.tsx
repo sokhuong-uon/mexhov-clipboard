@@ -37,6 +37,15 @@ function App() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (e.defaultPrevented) return;
+      e.preventDefault();
+    };
+    window.addEventListener("contextmenu", handler);
+    return () => window.removeEventListener("contextmenu", handler);
+  }, []);
+
   const clipboard = useClipboard();
   const { pasteClipboardItem, pasteText, pasteKlipy } = usePasteActions();
 
