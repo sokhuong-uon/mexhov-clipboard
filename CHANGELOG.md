@@ -1,3 +1,16 @@
+# [1.13.0](https://github.com/sokhuong-uon/mexboard/compare/v1.12.0...v1.13.0) (2026-04-24)
+
+
+### Bug Fixes
+
+* don't show window if ran without argument ([ed7d5db](https://github.com/sokhuong-uon/mexboard/commit/ed7d5db75b0b7f5413f2f0ca627a6a571f6bb5cc))
+
+
+### Features
+
+* make actions invisible until hovered ([03dedf5](https://github.com/sokhuong-uon/mexboard/commit/03dedf5b548be81c51b7313ec2a8c9f58c2bb86c))
+* move tab option to the bottom to improve UI ([a5b63a5](https://github.com/sokhuong-uon/mexboard/commit/a5b63a5645bfafb5220c2b6117d7279fc7acb4ea))
+
 # [1.12.0](https://github.com/sokhuong-uon/mexboard/compare/v1.11.0...v1.12.0) (2026-04-23)
 
 
