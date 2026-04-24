@@ -35,32 +35,8 @@ function App() {
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as TabValue)}
-        className="h-full overflow-hidden bg-background text-foreground"
+        className="h-full overflow-hidden bg-background text-foreground pt-3"
       >
-        <div
-          data-tauri-drag-region
-          className="flex items-center gap-2 px-4 pt-3 pb-1 select-none"
-        >
-          <div data-tauri-drag-region className="select-none text-muted">
-            Mexhov
-          </div>
-
-          <TabsList className="ml-auto">
-            <TabsTrigger value="clipboard" className="rounded-2xl">
-              <Clipboard className="text-neutral-500 dark:text-neutral-400" />
-            </TabsTrigger>
-            <TabsTrigger
-              value="gif"
-              className="text-neutral-500 dark:text-neutral-400 rounded-2xl"
-            >
-              GIF
-            </TabsTrigger>
-            <TabsTrigger value="symbols" className="rounded-2xl">
-              <TypeOutline className="text-neutral-500 dark:text-neutral-400" />
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
         <TabsContent
           value="clipboard"
           keepMounted
@@ -96,6 +72,28 @@ function App() {
             isActive={activeTab === "symbols"}
           />
         </TabsContent>
+
+        <div
+          data-tauri-drag-region
+          className="flex items-center gap-2 px-3 pb-3 select-none"
+        >
+          <TabsList className="bg-transparent">
+            <TabsTrigger value="clipboard" className="rounded-2xl  border-0">
+              <Clipboard className="text-neutral-500 dark:text-neutral-500" />
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="gif"
+              className="text-neutral-500 dark:text-neutral-500 rounded-2xl border-0"
+            >
+              GIF
+            </TabsTrigger>
+
+            <TabsTrigger value="symbols" className="rounded-2xl border-0">
+              <TypeOutline className="text-neutral-500 dark:text-neutral-500" />
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </Tabs>
     </TooltipProvider>
   );
