@@ -19,6 +19,9 @@ pub fn setup(app: &tauri::App, initial_command: &str) {
             tauri::WindowEvent::Focused(focused) => {
                 if *focused {
                     set_visible(true);
+                } else {
+                    let _ = window_clone.hide();
+                    set_visible(false);
                 }
             }
             _ => {}

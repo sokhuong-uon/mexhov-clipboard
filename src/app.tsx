@@ -1,6 +1,7 @@
 import "@/main.css";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Clipboard, TypeOutline } from "lucide-react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import { ClipboardTab } from "@/components/clipboard-tab";
 import { GifView } from "@/components/gif-view";
@@ -16,9 +17,26 @@ import { getKlipyPasteUrl } from "@/features/klipy/klipy-url";
 
 type TabValue = "clipboard" | "gif" | "symbols";
 
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
+}
+
 function App() {
   useSystemTheme();
   const [activeTab, setActiveTab] = useState<TabValue>("clipboard");
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (isEditableTarget(e.target)) return;
+      void getCurrentWindow().hide();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   const clipboard = useClipboard();
   const { pasteClipboardItem, pasteText, pasteKlipy } = usePasteActions();
 
