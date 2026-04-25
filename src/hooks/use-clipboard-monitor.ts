@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { commands } from "@/bindings";
 import { listen } from "@tauri-apps/api/event";
-import { SystemInfo, ClipboardContent } from "@/types/clipboard";
+import { ClipboardContent } from "@/types/clipboard";
 
 type ClipboardChangeEvent =
   | { type: "text"; text: string }
@@ -18,25 +18,7 @@ export const useClipboardMonitor = ({
   onCurrentContentUpdate,
   isMonitoring,
 }: MonitorOptions) => {
-  const [systemInfo, setSystemInfo] = useState<SystemInfo>({
-    isWayland: false,
-    isCosmicDataControlEnabled: false,
-  });
   const previousContentRef = useRef<ClipboardContent | null>(null);
-
-  // Detect system capabilities
-  useEffect(() => {
-    Promise.all([
-      commands.isWaylandSession(),
-      commands.isCosmicDataControlEnabled(),
-    ])
-      .then(([isWayland, isCosmicDataControlEnabled]) => {
-        setSystemInfo({ isWayland, isCosmicDataControlEnabled });
-      })
-      .catch(() => {
-        setSystemInfo({ isWayland: false, isCosmicDataControlEnabled: false });
-      });
-  }, []);
 
   // Tell backend whether to monitor
   useEffect(() => {
@@ -84,7 +66,6 @@ export const useClipboardMonitor = ({
   }, []);
 
   return {
-    systemInfo,
     previousContentRef,
   };
 };

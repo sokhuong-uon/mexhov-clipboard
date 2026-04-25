@@ -1,12 +1,11 @@
 import type { Hotkey } from "@tanstack/react-hotkeys";
-import { SystemInfo, ClipboardFilters } from "@/types/clipboard";
+import { ClipboardFilters } from "@/types/clipboard";
 import type { HotkeyAction, HotkeyConfig } from "@/hooks/use-hotkeys-config";
 import { SettingsSheet } from "@/features/preferences/components/settings-sheet";
 import { ClipboardFilterMenu } from "@/components/clipboard-filter-menu";
 import { ClipboardSearchBox } from "@/features/clipboard/components/clipboard-search-box";
 
 type ClipboardHeaderProps = {
-  systemInfo: SystemInfo;
   historyLimit: number;
   onHistoryLimitChange: (limit: number) => void;
   filters: ClipboardFilters;
@@ -18,7 +17,6 @@ type ClipboardHeaderProps = {
 };
 
 export const ClipboardHeader = ({
-  systemInfo,
   historyLimit,
   onHistoryLimitChange,
   filters,
@@ -38,7 +36,6 @@ export const ClipboardHeader = ({
       />
 
       <SettingsSheet
-        systemInfo={systemInfo}
         historyLimit={historyLimit}
         onHistoryLimitChange={onHistoryLimitChange}
         hotkeys={hotkeys}

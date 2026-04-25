@@ -3,21 +3,19 @@ import { Badge } from "@/components/ui/badge";
 import { SheetClose } from "@/components/ui/sheet";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
-import { SystemInfo } from "@/types/clipboard";
 import { PAGE_LIMIT_OPTIONS } from "@/hooks/use-settings";
+import { useSystemInfo } from "@/hooks/use-system-info";
 import { useClipboardMonitoringStore } from "@/features/clipboard/stores/clipboard-monitoring-store";
 import { useClearClipboardHistory } from "@/features/clipboard/hooks/use-clear-clipboard-history";
 import { useHasClipboardHistory } from "@/features/clipboard/hooks/use-has-clipboard-history";
 import { SettingRow } from "../setting-row";
 
 type GeneralSettingsProps = {
-  systemInfo: SystemInfo;
   historyLimit: number;
   onHistoryLimitChange: (limit: number) => void;
 };
 
 export function GeneralSettings({
-  systemInfo,
   historyLimit,
   onHistoryLimitChange,
 }: GeneralSettingsProps) {
@@ -29,6 +27,7 @@ export function GeneralSettings({
   );
   const hasHistory = useHasClipboardHistory();
   const clearAll = useClearClipboardHistory();
+  const systemInfo = useSystemInfo();
   return (
     <div className="flex flex-col gap-1">
       {/* ── Monitoring row ── */}

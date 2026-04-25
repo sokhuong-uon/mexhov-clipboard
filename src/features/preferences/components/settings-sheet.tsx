@@ -9,12 +9,10 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { SystemInfo } from "@/types/clipboard";
 import type { HotkeyAction, HotkeyConfig } from "@/hooks/use-hotkeys-config";
 import { SettingsSheetBody } from "@/features/preferences/components/settings-sheet-body";
 
 type SettingsSheetProps = {
-  systemInfo: SystemInfo;
   historyLimit: number;
   onHistoryLimitChange: (limit: number) => void;
   hotkeys: HotkeyConfig;
@@ -24,7 +22,6 @@ type SettingsSheetProps = {
 };
 
 export function SettingsSheet({
-  systemInfo,
   historyLimit,
   onHistoryLimitChange,
   hotkeys,
@@ -55,7 +52,6 @@ export function SettingsSheet({
         </SheetHeader>
 
         <SettingsSheetBody
-          systemInfo={systemInfo}
           historyLimit={historyLimit}
           onHistoryLimitChange={onHistoryLimitChange}
           hotkeys={hotkeys}

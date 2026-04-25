@@ -59,7 +59,7 @@ export function ClipboardTab({
     updateNote,
   } = useClipboardHistory(historyLimit, false);
 
-  const { systemInfo, previousContentRef } = useClipboardMonitor({
+  const { previousContentRef } = useClipboardMonitor({
     onClipboardChange: addContentToHistory,
     onCurrentContentUpdate: setCurrentContent,
     isMonitoring,
@@ -94,7 +94,6 @@ export function ClipboardTab({
   return (
     <>
       <ClipboardHeader
-        systemInfo={systemInfo}
         historyLimit={historyLimit}
         onHistoryLimitChange={setHistoryLimit}
         filters={filters}

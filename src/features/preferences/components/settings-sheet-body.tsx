@@ -1,7 +1,6 @@
 import type { Hotkey } from "@tanstack/react-hotkeys";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import type { SystemInfo } from "@/types/clipboard";
 import type { HotkeyAction, HotkeyConfig } from "@/hooks/use-hotkeys-config";
 import { GeneralSettings } from "@/features/preferences/components/general-settings";
 import { HotkeysSettings } from "@/features/preferences/components/hotkeys-settings";
@@ -9,7 +8,6 @@ import { SyncSettings } from "../sync/sync-settings";
 import { useSync } from "../sync/use-sync";
 
 type SettingsBodyProps = {
-  systemInfo: SystemInfo;
   historyLimit: number;
   onHistoryLimitChange: (limit: number) => void;
   hotkeys: HotkeyConfig;
@@ -19,7 +17,6 @@ type SettingsBodyProps = {
 };
 
 export function SettingsSheetBody({
-  systemInfo,
   historyLimit,
   onHistoryLimitChange,
   hotkeys,
@@ -58,7 +55,6 @@ export function SettingsSheetBody({
 
       <TabsContent value="general">
         <GeneralSettings
-          systemInfo={systemInfo}
           historyLimit={historyLimit}
           onHistoryLimitChange={onHistoryLimitChange}
         />
