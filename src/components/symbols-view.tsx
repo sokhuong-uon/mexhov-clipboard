@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "@tanstack/react-hotkeys";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipTrigger,
@@ -12,6 +10,8 @@ import {
   QUICK_PASTE_MODIFIER,
   useModifierHeld,
 } from "@/hooks/use-modifier-held";
+import { SymbolsSearchBox } from "@/features/symbols/components/symbols-search-box";
+import { useSymbolsSearchQueryStore } from "@/features/symbols/stores/symbols-search-query-store";
 
 const QUICK_PASTE_LIMIT = 9;
 
@@ -273,10 +273,10 @@ export const SymbolsView = ({
   onPaste,
   isActive = true,
 }: SymbolsViewProps) => {
-  const [search, setSearch] = useState("");
+  const searchQuery = useSymbolsSearchQueryStore((state) => state.searchQuery);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = searchQuery.trim().toLowerCase();
     if (!q) return SYMBOL_DATA;
 
     return SYMBOL_DATA.map((cat) => ({
@@ -285,7 +285,7 @@ export const SymbolsView = ({
         (s) => s.name.toLowerCase().includes(q) || s.char === q,
       ),
     })).filter((cat) => cat.symbols.length > 0);
-  }, [search]);
+  }, [searchQuery]);
 
   // Flat ordering across categories so quick-paste numbering matches reading order
   const flatSymbols = useMemo(
@@ -331,18 +331,8 @@ export const SymbolsView = ({
 
   return (
     <div className="flex flex-1 flex-col min-h-0">
-      <div className="flex items-center gap-2 p-4 pb-2">
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-          <Input
-            type="search"
-            placeholder="Search symbols"
-            aria-label="Search symbols"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-8"
-          />
-        </div>
+      <div className="px-4 py-1">
+        <SymbolsSearchBox className="flex-1 min-w-0" isActive={isActive} />
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4">

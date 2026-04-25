@@ -29,7 +29,9 @@ export function ClipboardTab({
 
   const [isMonitoring, setIsMonitoring] = useState(true);
 
-  const { searchQuery } = useClipboardSearchQueryStore();
+  const searchQuery = useClipboardSearchQueryStore(
+    (state) => state.searchQuery,
+  );
 
   const { historyLimit, setHistoryLimit } = useSettings();
   const {

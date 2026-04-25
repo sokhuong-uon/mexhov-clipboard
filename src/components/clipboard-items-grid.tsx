@@ -20,7 +20,7 @@ export function ClipboardItemsGrid({
   return (
     <ScrollArea className="h-full">
       <ul
-        className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2"
+        className="grid grid-cols-1 gap-3 px-4 pt-1 md:grid-cols-2"
         role={ariaLabel ? "listbox" : undefined}
         aria-label={ariaLabel}
       >

@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "@tanstack/react-hotkeys";
-import { Search } from "lucide-react";
-import { useDebouncedState } from "@tanstack/react-pacer";
 
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GifGridItem } from "@/components/gif-grid-item";
 import {
@@ -13,6 +10,8 @@ import {
 } from "@/features/klipy/hooks/use-klipy";
 import { type Klipy } from "@/features/klipy/schema/klipy";
 import { useModifierHeld } from "@/hooks/use-modifier-held";
+import { GifSearchBox } from "@/features/klipy/components/gif-search-box";
+import { useGifSearchQueryStore } from "@/features/klipy/stores/gif-search-query-store";
 
 const QUICK_PASTE_LIMIT = 9;
 
@@ -83,8 +82,7 @@ export const GifView = ({
   onPaste,
   isActive = true,
 }: GifViewProps) => {
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useDebouncedState("", { wait: 300 });
+  const searchQuery = useGifSearchQueryStore((state) => state.searchQuery);
   const [selectedCategory] = useState<string | undefined>();
 
   const isSearching = searchQuery.trim().length > 0;
@@ -189,21 +187,8 @@ export const GifView = ({
 
   return (
     <div className="flex flex-1 flex-col min-h-0">
-      <div className="flex items-center gap-2 p-4 pb-2">
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-          <Input
-            type="search"
-            placeholder="Search KLIPY"
-            aria-label="Search GIFs"
-            value={searchInput}
-            onChange={(e) => {
-              setSearchInput(e.target.value);
-              setSearchQuery(e.target.value);
-            }}
-            className="pl-8 h-8"
-          />
-        </div>
+      <div className="px-4 py-1">
+        <GifSearchBox className="flex-1 min-w-0" isActive={isActive} />
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0">
