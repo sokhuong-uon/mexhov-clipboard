@@ -405,7 +405,7 @@ Mexboard is a single-instance background app (`tauri-plugin-single-instance`) wi
   - Data retention policy (auto-delete after N days).
 
 #### REQ-CONFIG-003 `[Shipped]`: Keyboard Shortcuts
-- Configurable actions: `moveDown, moveUp, copy, paste, delete, favorite, colorMenu, favoritesFirst, jumpTop, jumpBottom, search, searchAlt, toggleWindowVisibility`.
+- Configurable actions: `moveDown, moveUp, copy, paste, delete, favorite, colorMenu, favoritesFirst, jumpTop, jumpBottom, search, toggleWindowVisibility`.
 - Defaults are platform-aware: toggle defaults to `Shift+Meta+V` (macOS), `Alt+Meta+V` (Windows), `Meta+V` (Linux).
 - Tauri accelerator translation (`Meta`→`Super`, `Mod`→`CmdOrCtrl`) handled in `shortcuts::to_tauri_accelerator`.
 - **Missing and Proposed:** conflict detection against OS-registered shortcuts (today only registration failure is logged).
@@ -884,7 +884,7 @@ Settings
 └─ Keymap
     └─ Rebindable hotkeys for: moveDown, moveUp, copy, paste, delete,
        favorite, colorMenu, favoritesFirst, jumpTop, jumpBottom,
-       search, searchAlt, toggleWindowVisibility
+       search, toggleWindowVisibility
        (Reset per-hotkey / Reset all)
 ```
 

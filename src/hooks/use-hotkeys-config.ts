@@ -15,7 +15,6 @@ export type HotkeyAction =
   | "jumpTop"
   | "jumpBottom"
   | "search"
-  | "searchAlt"
   | "toggleWindowVisibility";
 
 function detectPlatform(): "mac" | "windows" | "linux" {
@@ -51,8 +50,7 @@ export const HOTKEY_META: Record<
   favoritesFirst: { label: "Favorites first", defaultKey: "O" },
   jumpTop: { label: "Jump to top", defaultKey: "T" },
   jumpBottom: { label: "Jump to bottom", defaultKey: "B" },
-  search: { label: "Focus search", defaultKey: "Mod+K" },
-  searchAlt: { label: "Focus search (alt)", defaultKey: "I" },
+  search: { label: "Focus search", defaultKey: "/" },
   toggleWindowVisibility: {
     label: "Toggle window visibility",
     defaultKey: TOGGLE_DEFAULT,

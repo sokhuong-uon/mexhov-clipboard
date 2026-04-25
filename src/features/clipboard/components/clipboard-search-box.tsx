@@ -28,12 +28,7 @@ export function ClipboardSearchBox({ className }: ComponentProps<"div">) {
 
   useHotkey(hotkeys.search, focusSearch, {
     enabled: !isEditingNote,
-    ignoreInputs: false,
-  });
-
-  useHotkey(hotkeys.searchAlt, focusSearch, {
-    enabled: !isEditingNote,
-    ignoreInputs: false,
+    ignoreInputs: true,
   });
 
   return (
