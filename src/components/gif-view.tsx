@@ -3,11 +3,9 @@ import { useHotkeys } from "@tanstack/react-hotkeys";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { GifGridItem } from "@/components/gif-grid-item";
-import {
-  useKlipyTrending,
-  useKlipySearch,
-  KlipyError,
-} from "@/features/klipy/hooks/use-klipy";
+import { useKlipyTrending } from "@/features/klipy/hooks/use-klipy-trending";
+import { useKlipySearch } from "@/features/klipy/hooks/use-klipy-search";
+import { KlipyError } from "@/features/klipy/klipy-client";
 import { type Klipy } from "@/features/klipy/schema/klipy";
 import { useModifierHeld } from "@/hooks/use-modifier-held";
 import { GifSearchBox } from "@/features/klipy/components/gif-search-box";
