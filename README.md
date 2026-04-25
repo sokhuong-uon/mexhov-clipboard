@@ -8,7 +8,7 @@ Works on Linux, Windows, and probably MacOS too 🤔
 
 ## Development
 
-**Prerequisites:**
+**Requirements:**
 
 - [Pnpm](https://pnpm.io/) package manager
 - [Tauri](https://tauri.app/) toolchain
