@@ -1,3 +1,12 @@
+# [1.16.0](https://github.com/sokhuong-uon/mexboard/compare/v1.15.1...v1.16.0) (2026-04-25)
+
+
+### Features
+
+* cycle through tabs with t by default ([50b665a](https://github.com/sokhuong-uon/mexboard/commit/50b665afc6549cb5af472f12ff66d0ca76689a34))
+* use / as the default search focus ([d397dac](https://github.com/sokhuong-uon/mexboard/commit/d397dac9b31e8550d64326323de463459bc023c2))
+* use a nicer search box for GIF and symbol tab ([d64761c](https://github.com/sokhuong-uon/mexboard/commit/d64761c6ddba2ae2c79107f08da323c28ed5e06a))
+
 ## [1.15.1](https://github.com/sokhuong-uon/mexboard/compare/v1.15.0...v1.15.1) (2026-04-24)
 
 
