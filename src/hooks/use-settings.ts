@@ -1,11 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
 import { commands } from "@/bindings";
 
+export const PAGE_LIMIT_OPTIONS = [10, 15, 20, 50, 100] as const;
+
 const DEFAULTS = {
-  history_limit: 50,
+  history_limit: 10,
 } as const;
 
 type SettingsKey = keyof typeof DEFAULTS;
+
+const isValidPageLimit = (value: number): boolean =>
+  (PAGE_LIMIT_OPTIONS as readonly number[]).includes(value);
 
 export const useSettings = () => {
   const [historyLimit, setHistoryLimitState] = useState<number>(
@@ -19,7 +24,7 @@ export const useSettings = () => {
         const result = await commands.getSetting("history_limit");
         if (result.status === "ok" && result.data) {
           const parsed = parseInt(result.data, 10);
-          if (!isNaN(parsed) && parsed > 0) {
+          if (isValidPageLimit(parsed)) {
             setHistoryLimitState(parsed);
           }
         }

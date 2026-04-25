@@ -3,10 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import { SystemInfo } from "@/types/clipboard";
+import { PAGE_LIMIT_OPTIONS } from "@/hooks/use-settings";
 import { SettingRow } from "./setting-row";
 import { SyncSettings } from "./sync/sync-settings";
-
-const HISTORY_LIMIT_OPTIONS = [25, 50, 100, 200, 500] as const;
 
 type GeneralSettingsProps = {
   isMonitoring: boolean;
@@ -54,13 +53,14 @@ export function GeneralSettings({
 
       <div className="h-px bg-border/60 my-1" />
 
-      {/* ── History limit row ── */}
+      {/* ── Page limit row ── */}
       <div className="py-2">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[13px] font-medium text-foreground">
-            History limit
+            Page limit
           </span>
         </div>
+
         <ToggleGroup
           variant="outline"
           size="sm"
@@ -71,7 +71,7 @@ export function GeneralSettings({
           }}
           className="w-full"
         >
-          {HISTORY_LIMIT_OPTIONS.map((option) => (
+          {PAGE_LIMIT_OPTIONS.map((option) => (
             <ToggleGroupItem
               key={option}
               value={String(option)}
