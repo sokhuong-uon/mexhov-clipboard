@@ -18,7 +18,6 @@ export const SortableItem = memo(function SortableItem({
   onUpdateNote,
   colorMenuOpen,
   onColorMenuOpenChange,
-  onEditingNoteChange,
 }: {
   item: ClipboardItemType;
   index: number;
@@ -32,7 +31,6 @@ export const SortableItem = memo(function SortableItem({
   onUpdateNote?: (id: number, note: string | null) => void;
   colorMenuOpen?: boolean;
   onColorMenuOpenChange?: (open: boolean) => void;
-  onEditingNoteChange?: (editing: boolean) => void;
 }) {
   const {
     ref: sortableRef,
@@ -80,7 +78,6 @@ export const SortableItem = memo(function SortableItem({
         onUpdateNote={onUpdateNote}
         colorMenuOpen={colorMenuOpen}
         onColorMenuOpenChange={onColorMenuOpenChange}
-        onEditingNoteChange={onEditingNoteChange}
       />
     </motion.li>
   );

@@ -8,6 +8,7 @@ import { ClipboardItemActions } from "@/components/clipboard-item-actions";
 import { ColorFormatMenu } from "@/components/color-format-menu";
 import { QuickPasteBadge } from "@/components/quick-paste-badge";
 import { QUICK_PASTE_MODIFIER } from "@/hooks/use-modifier-held";
+import { useClipboardNoteStore } from "@/features/clipboard/stores/clipboard-note-store";
 
 type ClipboardItemProps = {
   item: ClipboardItemType;
@@ -21,7 +22,6 @@ type ClipboardItemProps = {
   onUpdateNote?: (id: number, note: string | null) => void;
   colorMenuOpen?: boolean;
   onColorMenuOpenChange?: (open: boolean) => void;
-  onEditingNoteChange?: (editing: boolean) => void;
 };
 
 export const ClipboardItem = memo(function ClipboardItem({
@@ -35,7 +35,6 @@ export const ClipboardItem = memo(function ClipboardItem({
   onUpdateNote,
   colorMenuOpen,
   onColorMenuOpenChange,
-  onEditingNoteChange,
 }: ClipboardItemProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const virtualAnchorRef = useRef<{ x: number; y: number } | null>(null);
@@ -86,12 +85,15 @@ export const ClipboardItem = memo(function ClipboardItem({
   );
 
   const [editingNote, setEditingNoteRaw] = useState(false);
+  const setIsEditingNoteGlobal = useClipboardNoteStore(
+    (s) => s.setIsEditingNote,
+  );
   const setEditingNote = useCallback(
     (v: boolean) => {
       setEditingNoteRaw(v);
-      onEditingNoteChange?.(v);
+      setIsEditingNoteGlobal(v);
     },
-    [onEditingNoteChange],
+    [setIsEditingNoteGlobal],
   );
   const [noteValue, setNoteValue] = useState(item.note ?? "");
 

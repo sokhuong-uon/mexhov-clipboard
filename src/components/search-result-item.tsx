@@ -16,7 +16,6 @@ export const SearchResultItem = memo(function SearchResultItem({
   onUpdateNote,
   colorMenuOpen,
   onColorMenuOpenChange,
-  onEditingNoteChange,
 }: {
   item: ClipboardItemType;
   isActive: boolean;
@@ -29,7 +28,6 @@ export const SearchResultItem = memo(function SearchResultItem({
   onUpdateNote?: (id: number, note: string | null) => void;
   colorMenuOpen?: boolean;
   onColorMenuOpenChange?: (open: boolean) => void;
-  onEditingNoteChange?: (editing: boolean) => void;
 }) {
   const ref = useRef<HTMLLIElement>(null);
 
@@ -65,7 +63,6 @@ export const SearchResultItem = memo(function SearchResultItem({
         onUpdateNote={onUpdateNote}
         colorMenuOpen={colorMenuOpen}
         onColorMenuOpenChange={onColorMenuOpenChange}
-        onEditingNoteChange={onEditingNoteChange}
       />
     </motion.li>
   );

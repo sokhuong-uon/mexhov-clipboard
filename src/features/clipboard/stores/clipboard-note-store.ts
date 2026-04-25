@@ -1,11 +1,11 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
 type ClipboardNoteState = {
-  isEditingNote: string
-  setIsEditingNote: (query: string) => void
-}
+  isEditingNote: boolean;
+  setIsEditingNote: (editing: boolean) => void;
+};
 
 export const useClipboardNoteStore = create<ClipboardNoteState>()((set) => ({
-  isEditingNote: '',
-  setIsEditingNote: (query: string) => set({ isEditingNote: query }),
-}))
+  isEditingNote: false,
+  setIsEditingNote: (editing) => set({ isEditingNote: editing }),
+}));

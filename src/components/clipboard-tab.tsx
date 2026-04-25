@@ -31,8 +31,6 @@ export function ClipboardTab({
 
   const { searchQuery } = useClipboardSearchQueryStore();
 
-  const [isEditingNote, setIsEditingNote] = useState(false);
-
   const { historyLimit, setHistoryLimit } = useSettings();
   const {
     hotkeys,
@@ -130,12 +128,9 @@ export function ClipboardTab({
             onSplitEnv={splitEnvItem}
             onUpdateNote={updateNote}
             onToggleFavoriteFilter={toggleFavoriteFilter}
-            onEditingNoteChange={setIsEditingNote}
-            isEditingNote={isEditingNote}
             isSearching={isSearching}
             hasMore={hasMore && !isSearching}
             onLoadMore={loadMore}
-            hotkeys={hotkeys}
             isActive={isActive}
           />
         )}
