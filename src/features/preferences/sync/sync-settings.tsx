@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { Cloud, Globe, Wifi } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useSync } from "./use-sync";
+import type { useSync } from "./use-sync";
 import { useDiscoveredDevices } from "./use-discovered-devices";
 import { SyncStatusIndicator } from "./sync-status-indicator";
 import { SyncLanServerCard } from "./sync-lan-server-card";
 import { SyncLanConnect } from "./sync-lan-connect";
 import { SyncCloudConnect } from "./sync-cloud-connect";
 
-export function SyncSettings() {
-  const sync = useSync();
+type SyncSettingsProps = {
+  sync: ReturnType<typeof useSync>;
+};
+
+export function SyncSettings({ sync }: SyncSettingsProps) {
   const [tab, setTab] = useState<"lan" | "cloud">("lan");
   const discoveredDevices = useDiscoveredDevices(
     tab === "lan" && sync.status.mode === "off",
@@ -18,22 +22,7 @@ export function SyncSettings() {
   const isActive = sync.status.mode !== "off";
 
   return (
-    <div className="py-2">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[13px] font-medium text-foreground">
-          Clipboard Sync
-        </span>
-        {isActive && (
-          <button
-            onClick={sync.disconnect}
-            className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
-          >
-            Disconnect
-          </button>
-        )}
-      </div>
-
-      {/* ── Active states ── */}
+    <div className="flex flex-col gap-3">
       {sync.status.mode === "lan-server" && (
         <SyncLanServerCard
           status={sync.status}
@@ -63,9 +52,7 @@ export function SyncSettings() {
           {sync.status.roomId && (
             <div className="border-t border-border/60 px-3 py-2">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] text-muted-foreground">
-                  Room:
-                </span>
+                <span className="text-[11px] text-muted-foreground">Room:</span>
                 <code className="text-[11px] text-foreground">
                   {sync.status.roomId}
                 </code>
@@ -75,40 +62,44 @@ export function SyncSettings() {
         </div>
       )}
 
-      {/* ── Disconnected: pick LAN or Cloud ── */}
       {!isActive && (
-        <div className="flex flex-col gap-3">
-          <div className="flex rounded-lg border border-border overflow-hidden">
-            <button
-              onClick={() => {
-                setTab("lan");
-                sync.clearError();
-              }}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium transition-colors",
-                tab === "lan"
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-              )}
-            >
-              <Wifi className="size-3.5" />
-              LAN
-            </button>
-            <button
-              onClick={() => {
-                setTab("cloud");
-                sync.clearError();
-              }}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium transition-colors border-l border-border",
-                tab === "cloud"
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-              )}
-            >
-              <Globe className="size-3.5" />
-              Cloud
-            </button>
+        <>
+          <div className="flex flex-col gap-1">
+            <span className="text-[11px] text-muted-foreground pl-0.5">
+              Mirror your clipboard between devices
+            </span>
+            <div className="flex rounded-lg border border-border overflow-hidden">
+              <button
+                onClick={() => {
+                  setTab("lan");
+                  sync.clearError();
+                }}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium transition-colors",
+                  tab === "lan"
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                )}
+              >
+                <Wifi className="size-3.5" />
+                LAN
+              </button>
+              <button
+                onClick={() => {
+                  setTab("cloud");
+                  sync.clearError();
+                }}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium transition-colors border-l border-border",
+                  tab === "cloud"
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                )}
+              >
+                <Globe className="size-3.5" />
+                Cloud
+              </button>
+            </div>
           </div>
 
           {tab === "lan" && (
@@ -127,13 +118,24 @@ export function SyncSettings() {
               onConnect={sync.connectCloud}
             />
           )}
-        </div>
+        </>
       )}
 
       {sync.error && (
-        <p className="mt-2 text-[11px] text-destructive leading-relaxed">
+        <p className="text-[11px] text-destructive leading-relaxed">
           {sync.error}
         </p>
+      )}
+
+      {isActive && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={sync.disconnect}
+          className="w-full text-destructive/80 hover:text-destructive hover:bg-destructive/10"
+        >
+          Disconnect
+        </Button>
       )}
     </div>
   );

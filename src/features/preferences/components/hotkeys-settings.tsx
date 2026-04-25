@@ -6,7 +6,7 @@ import {
   type HotkeyAction,
   type HotkeyConfig,
 } from "@/hooks/use-hotkeys-config";
-import { HotkeyRow } from "@/features/preferences/hotkey-row";
+import { HotkeyRow } from "@/features/preferences/components/hotkey-row";
 
 type HotkeysSettingsProps = {
   hotkeys: HotkeyConfig;

@@ -1,15 +1,11 @@
 import type { Hotkey } from "@tanstack/react-hotkeys";
 import { SystemInfo, ClipboardFilters } from "@/types/clipboard";
 import type { HotkeyAction, HotkeyConfig } from "@/hooks/use-hotkeys-config";
-import { SettingsSheet } from "@/features/preferences/settings-sheet";
+import { SettingsSheet } from "@/features/preferences/components/settings-sheet";
 import { ClipboardFilterMenu } from "@/components/clipboard-filter-menu";
 import { ClipboardSearchBox } from "@/features/clipboard/components/clipboard-search-box";
 
 type ClipboardHeaderProps = {
-  isMonitoring: boolean;
-  onToggleMonitoring: () => void;
-  hasHistory: boolean;
-  onClearAll: () => void;
   systemInfo: SystemInfo;
   historyLimit: number;
   onHistoryLimitChange: (limit: number) => void;
@@ -22,10 +18,6 @@ type ClipboardHeaderProps = {
 };
 
 export const ClipboardHeader = ({
-  isMonitoring,
-  onToggleMonitoring,
-  hasHistory,
-  onClearAll,
   systemInfo,
   historyLimit,
   onHistoryLimitChange,
@@ -46,10 +38,6 @@ export const ClipboardHeader = ({
       />
 
       <SettingsSheet
-        isMonitoring={isMonitoring}
-        onToggleMonitoring={onToggleMonitoring}
-        hasHistory={hasHistory}
-        onClearAll={onClearAll}
         systemInfo={systemInfo}
         historyLimit={historyLimit}
         onHistoryLimitChange={onHistoryLimitChange}

@@ -3,7 +3,6 @@ import { ClipboardContent } from "@/types/clipboard";
 import { useClipboardHistoryQuery } from "@/features/clipboard/hooks/use-clipboard-history-query";
 import { useAddClipboardContentToHistory } from "@/features/clipboard/hooks/use-add-clipboard-content-to-history";
 import { useDeleteClipboardItem } from "@/features/clipboard/hooks/use-delete-clipboard-item";
-import { useClearClipboardHistory } from "@/features/clipboard/hooks/use-clear-clipboard-history";
 import { useToggleClipboardFavorite } from "@/features/clipboard/hooks/use-toggle-clipboard-favorite";
 import { useUpdateClipboardNote } from "@/features/clipboard/hooks/use-update-clipboard-note";
 import { useReorderClipboardItems } from "@/features/clipboard/hooks/use-reorder-clipboard-items";
@@ -25,7 +24,6 @@ export const useClipboardHistory = (
     invalidate,
   );
   const deleteItem = useDeleteClipboardItem(invalidate);
-  const clearAll = useClearClipboardHistory(invalidate);
   const toggleFavorite = useToggleClipboardFavorite(invalidate);
   const updateNote = useUpdateClipboardNote(invalidate);
   const reorderItems = useReorderClipboardItems(
@@ -45,7 +43,6 @@ export const useClipboardHistory = (
     setCurrentContent,
     addContentToHistory,
     deleteItem,
-    clearAll,
     toggleFavorite,
     updateNote,
     reorderItems,

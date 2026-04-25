@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import { ErrorBanner } from "@/components/clipboard-error-banner";
 import { ClipboardList } from "@/components/clipboard-list";
@@ -12,6 +12,7 @@ import { useClipboardMonitor } from "@/hooks/use-clipboard-monitor";
 import { useClipboardFilters } from "@/hooks/use-clipboard-filters";
 import { ClipboardItem } from "@/types/clipboard";
 import { useClipboardSearchQueryStore } from "@/features/clipboard/stores/clipboard-search-query-store";
+import { useClipboardMonitoringStore } from "@/features/clipboard/stores/clipboard-monitoring-store";
 
 type ClipboardTabProps = {
   clipboard: ReturnType<typeof useClipboard>;
@@ -27,7 +28,9 @@ export function ClipboardTab({
   const { readContent, write, writeImage, reinitialize, error, dismissError } =
     clipboard;
 
-  const [isMonitoring, setIsMonitoring] = useState(true);
+  const isMonitoring = useClipboardMonitoringStore(
+    (state) => state.isMonitoring,
+  );
 
   const searchQuery = useClipboardSearchQueryStore(
     (state) => state.searchQuery,
@@ -50,7 +53,6 @@ export function ClipboardTab({
     setCurrentContent,
     addContentToHistory,
     deleteItem,
-    clearAll,
     toggleFavorite,
     reorderItems,
     splitEnvItem,
@@ -92,10 +94,6 @@ export function ClipboardTab({
   return (
     <>
       <ClipboardHeader
-        isMonitoring={isMonitoring}
-        onToggleMonitoring={() => setIsMonitoring(!isMonitoring)}
-        hasHistory={history.length > 0}
-        onClearAll={clearAll}
         systemInfo={systemInfo}
         historyLimit={historyLimit}
         onHistoryLimitChange={setHistoryLimit}
