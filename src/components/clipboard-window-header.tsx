@@ -1,6 +1,9 @@
 import type { Hotkey } from "@tanstack/react-hotkeys";
 import { ClipboardFilters } from "@/types/clipboard";
-import type { HotkeyAction, HotkeyConfig } from "@/hooks/use-hotkeys-config";
+import type {
+  HotkeyAction,
+  HotkeyConfig,
+} from "@/features/hotkey/hotkey-actions";
 import { SettingsSheet } from "@/features/preferences/components/settings-sheet";
 import { ClipboardFilterMenu } from "@/components/clipboard-filter-menu";
 import { ClipboardSearchBox } from "@/features/clipboard/components/clipboard-search-box";

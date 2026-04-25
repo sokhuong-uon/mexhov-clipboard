@@ -5,7 +5,10 @@ import type { Hotkey } from "@tanstack/react-hotkeys";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { HOTKEY_META, type HotkeyAction } from "@/hooks/use-hotkeys-config";
+import {
+  HOTKEY_META,
+  type HotkeyAction,
+} from "@/features/hotkey/hotkey-actions";
 
 export function HotkeyRow({
   action,

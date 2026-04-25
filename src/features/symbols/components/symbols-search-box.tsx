@@ -3,7 +3,7 @@ import { useSymbolsSearchQueryStore } from "@/features/symbols/stores/symbols-se
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { Search } from "lucide-react";
 import { ComponentProps, useRef } from "react";
-import { useHotkeysConfig } from "@/hooks/use-hotkeys-config";
+import { useHotkeysConfig } from "@/features/hotkey/hooks/use-hotkeys-config";
 import { cn } from "@/utils/cn";
 
 type SymbolsSearchBoxProps = ComponentProps<"div"> & {

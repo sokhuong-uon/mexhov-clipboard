@@ -9,7 +9,10 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { HotkeyAction, HotkeyConfig } from "@/hooks/use-hotkeys-config";
+import type {
+  HotkeyAction,
+  HotkeyConfig,
+} from "@/features/hotkey/hotkey-actions";
 import { SettingsSheetBody } from "@/features/preferences/components/settings-sheet-body";
 
 type SettingsSheetProps = {

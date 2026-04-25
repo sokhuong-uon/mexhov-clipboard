@@ -1,11 +1,7 @@
 import { useState } from "react";
-import {
-  useHotkey,
-  useHotkeys,
-  useHotkeySequence,
-} from "@tanstack/react-hotkeys";
+import { useHotkey, useHotkeys } from "@tanstack/react-hotkeys";
 
-import { useHotkeysConfig } from "@/hooks/use-hotkeys-config";
+import { useHotkeysConfig } from "@/features/hotkey/hooks/use-hotkeys-config";
 import { useClipboardNoteStore } from "@/features/clipboard/stores/clipboard-note-store";
 import type { ClipboardItem as ClipboardItemType } from "@/types/clipboard";
 
@@ -133,9 +129,13 @@ export function useClipboardListHotkeys({
   useHotkey("ArrowDown", moveDown, { enabled: isActive });
   useHotkey("ArrowUp", moveUp, { enabled: isActive });
 
-  useHotkeySequence([hotkeys.jumpTop], () => {
-    if (!hotkeysDisabled && items.length > 0) setActiveIndex(0);
-  });
+  useHotkey(
+    hotkeys.jumpTop,
+    () => {
+      if (items.length > 0) setActiveIndex(0);
+    },
+    { enabled: !hotkeysDisabled },
+  );
   useHotkey(
     hotkeys.jumpBottom,
     () => {

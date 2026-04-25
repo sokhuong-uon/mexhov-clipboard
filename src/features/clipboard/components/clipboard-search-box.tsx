@@ -4,7 +4,7 @@ import { useClipboardNoteStore } from "@/features/clipboard/stores/clipboard-not
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { Search } from "lucide-react";
 import { ComponentProps, useRef } from "react";
-import { useHotkeysConfig } from "@/hooks/use-hotkeys-config";
+import { useHotkeysConfig } from "@/features/hotkey/hooks/use-hotkeys-config";
 import { cn } from "@/utils/cn";
 import { useDebouncedCallback } from "@tanstack/react-pacer";
 

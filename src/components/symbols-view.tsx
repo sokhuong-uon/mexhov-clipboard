@@ -9,7 +9,7 @@ import { QuickPasteBadge } from "@/components/quick-paste-badge";
 import {
   QUICK_PASTE_MODIFIER,
   useModifierHeld,
-} from "@/hooks/use-modifier-held";
+} from "@/features/hotkey/hooks/use-modifier-held";
 import { SymbolsSearchBox } from "@/features/symbols/components/symbols-search-box";
 import { useSymbolsSearchQueryStore } from "@/features/symbols/stores/symbols-search-query-store";
 

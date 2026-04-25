@@ -2,6 +2,7 @@ import "@/main.css";
 import { useCallback, useEffect, useState } from "react";
 import { Clipboard, TypeOutline } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useHotkey } from "@tanstack/react-hotkeys";
 
 import { ClipboardTab } from "@/components/clipboard-tab";
 import { GifView } from "@/components/gif-view";
@@ -12,10 +13,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { useSystemTheme } from "@/hooks/use-system-theme";
 import { usePasteActions } from "@/hooks/use-paste-actions";
+import { useHotkeysConfig } from "@/features/hotkey/hooks/use-hotkeys-config";
 import type { Klipy } from "@/features/klipy/schema/klipy";
 import { getKlipyPasteUrl } from "@/features/klipy/klipy-url";
 
 type TabValue = "clipboard" | "gif" | "symbols";
+
+const TAB_ORDER: readonly TabValue[] = ["clipboard", "gif", "symbols"];
 
 function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -26,6 +30,18 @@ function isEditableTarget(target: EventTarget | null): boolean {
 function App() {
   useSystemTheme();
   const [activeTab, setActiveTab] = useState<TabValue>("clipboard");
+  const { hotkeys } = useHotkeysConfig();
+
+  useHotkey(
+    hotkeys.cycleTabs,
+    () => {
+      setActiveTab((prev) => {
+        const idx = TAB_ORDER.indexOf(prev);
+        return TAB_ORDER[(idx + 1) % TAB_ORDER.length];
+      });
+    },
+    { ignoreInputs: true },
+  );
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

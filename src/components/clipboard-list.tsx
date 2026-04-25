@@ -9,7 +9,7 @@ import {
   ClipboardItem as ClipboardItemType,
   ClipboardContent,
 } from "@/types/clipboard";
-import { useModifierHeld } from "@/hooks/use-modifier-held";
+import { useModifierHeld } from "@/features/hotkey/hooks/use-modifier-held";
 import { useClipboardNoteStore } from "@/features/clipboard/stores/clipboard-note-store";
 import {
   useClipboardListHotkeys,

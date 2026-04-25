@@ -7,7 +7,7 @@ import { ClipboardItemMeta } from "@/components/clipboard-item-meta";
 import { ClipboardItemActions } from "@/components/clipboard-item-actions";
 import { ColorFormatMenu } from "@/components/color-format-menu";
 import { QuickPasteBadge } from "@/components/quick-paste-badge";
-import { QUICK_PASTE_MODIFIER } from "@/hooks/use-modifier-held";
+import { QUICK_PASTE_MODIFIER } from "@/features/hotkey/hooks/use-modifier-held";
 import { useClipboardNoteStore } from "@/features/clipboard/stores/clipboard-note-store";
 
 type ClipboardItemProps = {

@@ -3,7 +3,7 @@ import { type Klipy } from "@/features/klipy/schema/klipy";
 import { getKlipyPasteUrl } from "@/features/klipy/klipy-url";
 import { useDraggableMedia } from "@/hooks/use-draggable-media";
 import { QuickPasteBadge } from "@/components/quick-paste-badge";
-import { QUICK_PASTE_MODIFIER } from "@/hooks/use-modifier-held";
+import { QUICK_PASTE_MODIFIER } from "@/features/hotkey/hooks/use-modifier-held";
 
 type GifGridItemProps = {
   item: Klipy;

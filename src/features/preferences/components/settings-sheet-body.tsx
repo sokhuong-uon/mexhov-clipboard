@@ -1,7 +1,10 @@
 import type { Hotkey } from "@tanstack/react-hotkeys";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import type { HotkeyAction, HotkeyConfig } from "@/hooks/use-hotkeys-config";
+import type {
+  HotkeyAction,
+  HotkeyConfig,
+} from "@/features/hotkey/hotkey-actions";
 import { GeneralSettings } from "@/features/preferences/components/general-settings";
 import { HotkeysSettings } from "@/features/preferences/components/hotkeys-settings";
 import { SyncSettings } from "../sync/sync-settings";
