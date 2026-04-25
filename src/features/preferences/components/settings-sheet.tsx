@@ -43,7 +43,10 @@ export function SettingsSheet({
         <Settings2 className="size-5" />
       </SheetTrigger>
 
-      <SheetContent side="right" className="w-full overflow-y-auto">
+      <SheetContent
+        side="right"
+        className="data-[side=right]:w-11/12 overflow-y-auto"
+      >
         <SheetHeader className="pb-2">
           <SheetTitle>Settings</SheetTitle>
           <SheetDescription className="sr-only">
