@@ -4,7 +4,8 @@
   <img width="376" alt="Gifs from KLIPY in Mexboard UI" src="https://github.com/user-attachments/assets/ccb6aaea-b20d-4cc1-85cb-c6e4f89b898e" />
 </p>
 
-# Mexboard: Clipboard Manager from Mexhov
+<h1 align="center">Mexboard</h1>
+
 Works on Linux, Windows, and probably MacOS too 🤔
 
 ## Development
