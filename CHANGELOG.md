@@ -1,3 +1,11 @@
+# [1.17.0](https://github.com/sokhuong-uon/mexboard/compare/v1.16.0...v1.17.0) (2026-04-29)
+
+
+### Features
+
+* deep link is working ([6b0a1f1](https://github.com/sokhuong-uon/mexboard/commit/6b0a1f1d6cd0d1ef4fc71d3d3a8985805942693c))
+* set up better-auth-tauri ([8a2b135](https://github.com/sokhuong-uon/mexboard/commit/8a2b1358d85517423c2dfa87cfc83326bdee22d6))
+
 # [1.16.0](https://github.com/sokhuong-uon/mexboard/compare/v1.15.1...v1.16.0) (2026-04-25)
 
 
