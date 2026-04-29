@@ -61,12 +61,12 @@ zbus = { version = "5", default-features = false, features = ["blocking"] }
 wl-clipboard-rs = "0.9"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-windows-sys = { version = "0.59", features = [
+windows-sys = { version = "0.61.2", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_Graphics_Gdi",
     "Win32_Foundation",
 ] }
-windows = { version = "0.59", features = [
+windows = { version = "0.62.2", features = [
     "Win32_UI_Accessibility",
     "Win32_System_Com",
     "Win32_System_Ole",
