@@ -18,6 +18,7 @@ use clipboard_monitor::MonitorState;
 use commands::{create_command_builder, handle_command, parse_command_from_args};
 use sync::SyncState;
 use tauri::Manager;
+use tauri_plugin_deep_link::DeepLinkExt;
 use window::main_window;
 
 fn main() {
@@ -35,6 +36,7 @@ fn main() {
         .expect("failed to export specta bindings");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, shortcut, event| {
@@ -53,6 +55,9 @@ fn main() {
         .manage(SyncState::new())
         .manage(shortcuts::ToggleShortcut::default())
         .setup(move |app| {
+            #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
+            app.deep_link().register_all()?;
+
             let database = db::initialization::init(app);
             app.manage(database);
 
@@ -63,6 +68,16 @@ fn main() {
             clipboard_monitor::start_monitor(app.handle());
 
             shortcuts::register(app.handle());
+
+            let start_urls = app.deep_link().get_current()?;
+            if let Some(urls) = start_urls {
+                // app was likely started by a deep link
+                println!("deep link URLs: {:?}", urls);
+            }
+
+            app.deep_link().on_open_url(|event| {
+                println!("deep link URLs: {:?}", event.urls());
+            });
 
             Ok(())
         })

@@ -34,7 +34,11 @@ fn get_caret_via_gui_thread() -> Option<(f64, f64, f64)> {
         if ClientToScreen(caret_window, &mut bottom_point) == 0 {
             return None;
         }
-        Some((top_point.x as f64, top_point.y as f64, bottom_point.y as f64))
+        Some((
+            top_point.x as f64,
+            top_point.y as f64,
+            bottom_point.y as f64,
+        ))
     }
 }
 

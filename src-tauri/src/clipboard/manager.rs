@@ -33,7 +33,8 @@ impl ClipboardManager {
                 let png_bytes = image::encode_rgba_to_png(&rgba_bytes, width, height)
                     .map_err(|e| format!("Failed to encode image as PNG: {}", e))?;
                 let base64_data = BASE64.encode(&png_bytes);
-                self.image_cache.set(hash, base64_data.clone(), width, height);
+                self.image_cache
+                    .set(hash, base64_data.clone(), width, height);
                 Ok(Some((base64_data, width, height)))
             }
             None => {
@@ -53,8 +54,8 @@ impl ClipboardManager {
             .decode(&base64_data)
             .map_err(|e| format!("Failed to decode base64 image: {}", e))?;
 
-        let (rgba_bytes, width, height) =
-            image::decode_png_to_rgba(&png_bytes).map_err(|e| format!("Failed to decode PNG: {}", e))?;
+        let (rgba_bytes, width, height) = image::decode_png_to_rgba(&png_bytes)
+            .map_err(|e| format!("Failed to decode PNG: {}", e))?;
 
         self.clipboard.write_image(rgba_bytes, width, height).await
     }

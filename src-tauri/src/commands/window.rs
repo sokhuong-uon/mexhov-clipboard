@@ -18,47 +18,48 @@ pub fn show_window_at_cursor(app: AppHandle) {
             .map(|m| m.size().height as f64)
             .unwrap_or(1080.0);
 
-        let (x, y) = if let Some((caret_left, caret_top, caret_bottom)) = caret::get_caret_position() {
-            const GAP: f64 = 8.0;
+        let (x, y) =
+            if let Some((caret_left, caret_top, caret_bottom)) = caret::get_caret_position() {
+                const GAP: f64 = 8.0;
 
-            let fits_below = caret_bottom + GAP + window_height <= screen_height;
-            let fits_above = caret_top - GAP - window_height >= 0.0;
+                let fits_below = caret_bottom + GAP + window_height <= screen_height;
+                let fits_above = caret_top - GAP - window_height >= 0.0;
 
-            let y = if fits_below {
-                caret_bottom + GAP
-            } else if fits_above {
-                caret_top - GAP - window_height
-            } else {
-                // Neither fits without overlap; pick the side with more room
-                let space_below = screen_height - caret_bottom;
-                let space_above = caret_top;
-                if space_below >= space_above {
-                    (screen_height - window_height).max(0.0)
+                let y = if fits_below {
+                    caret_bottom + GAP
+                } else if fits_above {
+                    caret_top - GAP - window_height
                 } else {
-                    0.0
-                }
-            };
+                    // Neither fits without overlap; pick the side with more room
+                    let space_below = screen_height - caret_bottom;
+                    let space_above = caret_top;
+                    if space_below >= space_above {
+                        (screen_height - window_height).max(0.0)
+                    } else {
+                        0.0
+                    }
+                };
 
-            let x = caret_left.max(0.0).min(screen_width - window_width);
-            (x, y)
-        } else if let Ok(cursor_pos) = app.cursor_position() {
-            if cursor_pos.x == 0.0 && cursor_pos.y == 0.0 {
+                let x = caret_left.max(0.0).min(screen_width - window_width);
+                (x, y)
+            } else if let Ok(cursor_pos) = app.cursor_position() {
+                if cursor_pos.x == 0.0 && cursor_pos.y == 0.0 {
+                    let x = (screen_width - window_width) / 2.0;
+                    let y = (screen_height - window_height) / 2.0;
+                    (x.max(0.0), y.max(0.0))
+                } else {
+                    let mut x = cursor_pos.x - (window_width / 2.0);
+                    let mut y = cursor_pos.y + 20.0;
+
+                    x = x.max(0.0).min(screen_width - window_width);
+                    y = y.max(0.0).min(screen_height - window_height);
+                    (x, y)
+                }
+            } else {
                 let x = (screen_width - window_width) / 2.0;
                 let y = (screen_height - window_height) / 2.0;
                 (x.max(0.0), y.max(0.0))
-            } else {
-                let mut x = cursor_pos.x - (window_width / 2.0);
-                let mut y = cursor_pos.y + 20.0;
-
-                x = x.max(0.0).min(screen_width - window_width);
-                y = y.max(0.0).min(screen_height - window_height);
-                (x, y)
-            }
-        } else {
-            let x = (screen_width - window_width) / 2.0;
-            let y = (screen_height - window_height) / 2.0;
-            (x.max(0.0), y.max(0.0))
-        };
+            };
 
         let _ = window.set_position(PhysicalPosition::new(x, y));
         let _ = window.unminimize();
@@ -69,4 +70,3 @@ pub fn show_window_at_cursor(app: AppHandle) {
         main_window::set_visible(true);
     }
 }
-

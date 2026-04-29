@@ -48,17 +48,11 @@ fn mime_from_extension(ext: Option<&str>) -> &'static str {
         // Documents
         Some("pdf") => "application/pdf",
         Some("doc") => "application/msword",
-        Some("docx") => {
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        }
+        Some("docx") => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         Some("xls") => "application/vnd.ms-excel",
-        Some("xlsx") => {
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        }
+        Some("xlsx") => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         Some("ppt") => "application/vnd.ms-powerpoint",
-        Some("pptx") => {
-            "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        }
+        Some("pptx") => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         Some("odt") => "application/vnd.oasis.opendocument.text",
         Some("ods") => "application/vnd.oasis.opendocument.spreadsheet",
         Some("odp") => "application/vnd.oasis.opendocument.presentation",

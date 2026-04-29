@@ -25,6 +25,13 @@
       "csp": null
     }
   },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["mexboard"]
+      }
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",
