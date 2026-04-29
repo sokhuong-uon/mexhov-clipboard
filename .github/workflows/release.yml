@@ -131,6 +131,9 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_KLIPY_API_BASE_URL: ${{ vars.VITE_KLIPY_API_BASE_URL }}
+          VITE_KLIPY_PER_PAGE_LIMIT: ${{ vars.VITE_KLIPY_PER_PAGE_LIMIT }}
+          VITE_KLIPY_API_KEY: ${{ secrets.VITE_KLIPY_API_KEY }}
         with:
           projectPath: .
           tagName: ${{ needs.create-release.outputs.tag }}
@@ -188,6 +191,9 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_KLIPY_API_BASE_URL: ${{ vars.VITE_KLIPY_API_BASE_URL }}
+          VITE_KLIPY_PER_PAGE_LIMIT: ${{ vars.VITE_KLIPY_PER_PAGE_LIMIT }}
+          VITE_KLIPY_API_KEY: ${{ secrets.VITE_KLIPY_API_KEY }}
         with:
           projectPath: .
           tagName: ${{ needs.create-release.outputs.tag }}
@@ -244,6 +250,9 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_KLIPY_API_BASE_URL: ${{ vars.VITE_KLIPY_API_BASE_URL }}
+          VITE_KLIPY_PER_PAGE_LIMIT: ${{ vars.VITE_KLIPY_PER_PAGE_LIMIT }}
+          VITE_KLIPY_API_KEY: ${{ secrets.VITE_KLIPY_API_KEY }}
         with:
           projectPath: .
           tagName: ${{ needs.create-release.outputs.tag }}
