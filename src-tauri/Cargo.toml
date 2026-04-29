@@ -19,15 +19,20 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2.10.3", features = ["tray-icon"] }
+
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
 arboard = { version = "3.3", features = ["wayland-data-control"] }
+
 tokio = { version = "1", features = ["time", "net", "sync", "macros", "process"] }
 tokio-tungstenite = "0.29"
 futures-util = { version = "0.3", default-features = false, features = ["sink"] }
+
 specta = { version = "=2.0.0-rc.24" }
 tauri-specta = { version = "=2.0.0-rc.24", features = ["typescript"] }
 specta-typescript = { version = "=0.0.11" }
+
 png = "0.17"
 base64 = "0.22"
 dotenvy = "0.15"
@@ -37,10 +42,8 @@ url = "2"
 chrono = "0.4"
 csscolorparser = "0.8"
 sha2 = "0.10"
-tauri-plugin-opener = "2"
 drizzle = { git = "https://github.com/themixednuts/drizzle-rs", features = ["rusqlite"] }
 rusqlite = { version = "0.37", features = ["bundled"] }
-tauri-plugin-drag = "2.1.0"
 image = "0.25.10"
 enigo = { version = "0.6", features = ["wayland", "x11rb"] }
 hostname = "0.4.2"
@@ -51,7 +54,12 @@ argon2 = "0.5.3"
 x25519-dalek = "3.0.0-pre.6"
 mdns-sd = "0.18"
 secretscan = "0.2"
+
+tauri-plugin-drag = "2.1.0"
+tauri-plugin-opener = "2"
 tauri-plugin-deep-link = "2"
+tauri-plugin-os = "2"
+tauri-plugin-http = "2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
