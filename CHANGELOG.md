@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/sokhuong-uon/mexboard/compare/v1.17.0...v1.18.0) (2026-04-30)
+
+
+### Features
+
+* use nicer icons for tabs ([63e62f4](https://github.com/sokhuong-uon/mexboard/commit/63e62f4a42c3d6eb5b125d4a2fe3069f7e141028))
+
 # [1.17.0](https://github.com/sokhuong-uon/mexboard/compare/v1.16.0...v1.17.0) (2026-04-29)
 
 
