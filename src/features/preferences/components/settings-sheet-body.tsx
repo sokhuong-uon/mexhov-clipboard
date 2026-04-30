@@ -62,10 +62,7 @@ export function SettingsSheetBody({
       </TabsContent>
 
       <TabsContent value="cloud">
-        <SyncCloudConnect
-          loading={sync.loading}
-          onConnect={sync.connectCloud}
-        />
+        <SyncCloudConnect />
       </TabsContent>
 
       <TabsContent value="keymap">
