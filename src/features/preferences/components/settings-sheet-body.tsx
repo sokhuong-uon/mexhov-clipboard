@@ -1,6 +1,5 @@
 import type { Hotkey } from "@tanstack/react-hotkeys";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import type {
   HotkeyAction,
   HotkeyConfig,
@@ -8,7 +7,9 @@ import type {
 import { GeneralSettings } from "@/features/preferences/components/general-settings";
 import { HotkeysSettings } from "@/features/preferences/components/hotkeys-settings";
 import { SyncSettings } from "../sync/sync-settings";
-import { useSync } from "../sync/use-sync";
+import { useSync } from "../../sync/hooks/use-sync";
+import { Cloud, Keyboard, Settings2, Wifi } from "lucide-react";
+import { SyncCloudConnect } from "@/features/preferences/sync/sync-cloud-connect";
 
 type SettingsBodyProps = {
   historyLimit: number;
@@ -28,31 +29,24 @@ export function SettingsSheetBody({
   onResetAllHotkeys,
 }: SettingsBodyProps) {
   const sync = useSync();
-  const isSyncActive = sync.status.mode !== "off";
-  const isCloudSync = sync.status.mode === "cloud";
 
   return (
     <Tabs defaultValue="general" className="px-6 pb-6">
       <TabsList className="w-full mb-3">
         <TabsTrigger value="general" className="flex-1 text-xs">
-          General
+          <Settings2 />
         </TabsTrigger>
 
         <TabsTrigger value="sync" className="flex-1 text-xs gap-1.5">
-          Sync
-          {isSyncActive && (
-            <span
-              aria-hidden
-              className={cn(
-                "size-1.5 rounded-full",
-                isCloudSync ? "bg-sky-500" : "bg-emerald-500",
-              )}
-            />
-          )}
+          <Wifi />
+        </TabsTrigger>
+
+        <TabsTrigger value="cloud" className="flex-1 text-xs gap-1.5">
+          <Cloud />
         </TabsTrigger>
 
         <TabsTrigger value="keymap" className="flex-1 text-xs">
-          Keymap
+          <Keyboard />
         </TabsTrigger>
       </TabsList>
 
@@ -65,6 +59,13 @@ export function SettingsSheetBody({
 
       <TabsContent value="sync">
         <SyncSettings sync={sync} />
+      </TabsContent>
+
+      <TabsContent value="cloud">
+        <SyncCloudConnect
+          loading={sync.loading}
+          onConnect={sync.connectCloud}
+        />
       </TabsContent>
 
       <TabsContent value="keymap">

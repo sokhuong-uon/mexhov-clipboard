@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Copy, Wifi } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
-import type { SyncStatus, NetworkInterface } from "./use-sync";
+import type { SyncStatus, NetworkInterface } from "../../sync/hooks/use-sync";
 import { SyncStatusIndicator } from "./sync-status-indicator";
 
 type SyncLanServerCardProps = {

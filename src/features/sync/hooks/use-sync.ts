@@ -4,7 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 
 const DEFAULT_SYNC_PORT = 9876;
 
-export type SyncMode = "off" | "lan-server" | "lan-client" | "cloud";
+export type SyncMode = "off" | "lan-server" | "lan-client";
 
 export type SyncStatus = {
   mode: SyncMode;
