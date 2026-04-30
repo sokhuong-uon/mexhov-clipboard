@@ -1,6 +1,6 @@
 import "@/main.css";
 import { useCallback, useEffect, useState } from "react";
-import { Clipboard, TypeOutline } from "lucide-react";
+import { Copy, ImagePlay, SquarePercent } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useHotkey } from "@tanstack/react-hotkeys";
 
@@ -120,20 +120,17 @@ function App() {
           data-tauri-drag-region
           className="flex items-center gap-2 px-3 pb-3 select-none"
         >
-          <TabsList className="bg-transparent">
-            <TabsTrigger value="clipboard" className="rounded-2xl  border-0">
-              <Clipboard className="text-neutral-500 dark:text-neutral-500" />
+          <TabsList className="bg-transparent" variant="line">
+            <TabsTrigger value="clipboard">
+              <Copy />
             </TabsTrigger>
 
-            <TabsTrigger
-              value="gif"
-              className="text-neutral-500 dark:text-neutral-500 rounded-2xl border-0"
-            >
-              GIF
+            <TabsTrigger value="gif">
+              <ImagePlay />
             </TabsTrigger>
 
-            <TabsTrigger value="symbols" className="rounded-2xl border-0">
-              <TypeOutline className="text-neutral-500 dark:text-neutral-500" />
+            <TabsTrigger value="symbols">
+              <SquarePercent />
             </TabsTrigger>
           </TabsList>
         </div>
