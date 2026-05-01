@@ -1,3 +1,11 @@
+# [1.19.0](https://github.com/sokhuong-uon/mexboard/compare/v1.18.0...v1.19.0) (2026-05-01)
+
+
+### Features
+
+* can sign up/sign in in cloud sync settings tab ([4fba0d9](https://github.com/sokhuong-uon/mexboard/commit/4fba0d9d4d379337daded201d3bccd37b55a812e))
+* can sign up/sign in in cloud sync settings tab ([ab873eb](https://github.com/sokhuong-uon/mexboard/commit/ab873ebdb79b126c72c537ca013692f4eb088e48))
+
 # [1.18.0](https://github.com/sokhuong-uon/mexboard/compare/v1.17.0...v1.18.0) (2026-04-30)
 
 
