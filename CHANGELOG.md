@@ -1,3 +1,10 @@
+## [1.19.2](https://github.com/sokhuong-uon/mexboard/compare/v1.19.1...v1.19.2) (2026-05-01)
+
+
+### Bug Fixes
+
+* display three grid for GIF skeleton ([bfa0100](https://github.com/sokhuong-uon/mexboard/commit/bfa01009867d4eb0d08372919c1efb59911a7102))
+
 ## [1.19.1](https://github.com/sokhuong-uon/mexboard/compare/v1.19.0...v1.19.1) (2026-05-01)
 
 
