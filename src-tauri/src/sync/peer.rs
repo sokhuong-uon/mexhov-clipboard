@@ -1,5 +1,5 @@
-use super::crypto::EncryptedEnvelope;
 use super::{emit_status, PeerMap, SyncMessage, SyncMode};
+use crate::crypto::{open_envelope, seal_envelope};
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
 use tauri::AppHandle;
@@ -41,7 +41,7 @@ pub async fn run<Stream>(
                 match msg {
                     Some(Ok(Message::Text(text))) => {
                         // Decrypt the envelope
-                        let plaintext = match EncryptedEnvelope::open(&key, &text) {
+                        let plaintext = match open_envelope(&key, &text) {
                             Ok(p) => p,
                             Err(_) => continue, // bad decrypt, skip
                         };
@@ -69,7 +69,7 @@ pub async fn run<Stream>(
             msg = outgoing_rx.recv() => {
                 if let Ok(sync_msg) = msg {
                     if let Ok(json) = serde_json::to_string(&sync_msg) {
-                        if let Ok(encrypted) = EncryptedEnvelope::seal(&key, &json) {
+                        if let Ok(encrypted) = seal_envelope(&key, &json) {
                             if sink.send(Message::Text(encrypted.into())).await.is_err() {
                                 break;
                             }

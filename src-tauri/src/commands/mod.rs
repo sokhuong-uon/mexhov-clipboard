@@ -50,6 +50,8 @@ pub fn create_command_builder() -> Builder<tauri::Wry> {
         get_network_interfaces,
         sync_start_server,
         sync_connect,
+        sync_approve_connection,
+        sync_reject_connection,
         sync_cloud_join,
         sync_stop,
         mdns_start_discovery,

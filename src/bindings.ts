@@ -40,7 +40,9 @@ export const commands = {
 	getHostname: () => __TAURI_INVOKE<string>("get_hostname"),
 	getNetworkInterfaces: () => __TAURI_INVOKE<NetworkInterfaceInfo[]>("get_network_interfaces"),
 	syncStartServer: (port: number) => typedError<SyncStartResult, string>(__TAURI_INVOKE("sync_start_server", { port })),
-	syncConnect: (address: string, pairingCode: string) => typedError<null, string>(__TAURI_INVOKE("sync_connect", { address, pairingCode })),
+	syncConnect: (address: string) => typedError<null, string>(__TAURI_INVOKE("sync_connect", { address })),
+	syncApproveConnection: (id: string) => typedError<null, string>(__TAURI_INVOKE("sync_approve_connection", { id })),
+	syncRejectConnection: (id: string) => typedError<null, string>(__TAURI_INVOKE("sync_reject_connection", { id })),
 	syncCloudJoin: (relayUrl: string, authToken: string) => typedError<string, string>(__TAURI_INVOKE("sync_cloud_join", { relayUrl, authToken })),
 	syncStop: () => typedError<null, string>(__TAURI_INVOKE("sync_stop")),
 	mdnsStartDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_start_discovery")),
@@ -104,7 +106,6 @@ export type NetworkInterfaceInfo = {
 
 export type SyncStartResult = {
 	address: string,
-	pairingCode: string,
 };
 
 export type UpdateSortOrderParams = {

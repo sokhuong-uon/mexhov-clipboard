@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Copy, Wifi } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
-import type { SyncStatus, NetworkInterface } from "../../sync/hooks/use-sync";
+import type { SyncStatus, NetworkInterface } from "../hooks/use-sync";
 import { SyncStatusIndicator } from "./sync-status-indicator";
 
 type SyncLanServerCardProps = {
@@ -67,18 +67,10 @@ export function SyncLanServerCard({
             </code>
             <Copy className="size-3 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
-          {status.pairingCode && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-muted-foreground">Code:</span>
-              <span className="font-mono text-base font-semibold tracking-[0.25em] text-foreground">
-                {status.pairingCode}
-              </span>
-            </div>
-          )}
           <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
             {copied
               ? "Copied!"
-              : "Share the address and pairing code with the other device."}
+              : "When another device requests to connect, you'll be asked to confirm here."}
           </p>
         </div>
       )}

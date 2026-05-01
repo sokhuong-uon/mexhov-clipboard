@@ -57,11 +57,28 @@ pub async fn sync_start_server(
 #[specta::specta]
 pub async fn sync_connect(
     address: String,
-    pairing_code: String,
     app: AppHandle,
     state: State<'_, SyncState>,
 ) -> Result<(), String> {
-    state.connect(address, pairing_code, app).await
+    state.connect(address, app).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn sync_approve_connection(
+    id: String,
+    state: State<'_, SyncState>,
+) -> Result<(), String> {
+    state.approve_pending(&id).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn sync_reject_connection(
+    id: String,
+    state: State<'_, SyncState>,
+) -> Result<(), String> {
+    state.reject_pending(&id).await
 }
 
 #[tauri::command]

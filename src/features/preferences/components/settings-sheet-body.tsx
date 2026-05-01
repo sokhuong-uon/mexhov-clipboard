@@ -6,10 +6,10 @@ import type {
 } from "@/features/hotkey/hotkey-actions";
 import { GeneralSettings } from "@/features/preferences/components/general-settings";
 import { HotkeysSettings } from "@/features/preferences/components/hotkeys-settings";
-import { SyncSettings } from "../sync/sync-settings";
+import { SyncSettings } from "../../sync/components/sync-settings";
 import { useSync } from "../../sync/hooks/use-sync";
 import { Cloud, Keyboard, Settings2, Wifi } from "lucide-react";
-import { SyncCloudConnect } from "@/features/preferences/sync/sync-cloud-connect";
+import { SyncCloudConnect } from "@/features/sync/components/sync-cloud-connect";
 
 type SettingsBodyProps = {
   historyLimit: number;

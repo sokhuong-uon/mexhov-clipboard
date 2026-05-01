@@ -4,7 +4,9 @@
 mod caret;
 mod clipboard;
 mod clipboard_monitor;
+mod cloud;
 mod commands;
+mod crypto;
 mod db;
 mod detection;
 mod schema;
