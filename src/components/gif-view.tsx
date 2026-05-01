@@ -191,7 +191,7 @@ export const GifView = ({
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0">
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-2 p-4 pt-2">
+          <div className="grid grid-cols-3 gap-2 p-4 pt-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton key={i} className="aspect-square rounded-lg" />
             ))}
