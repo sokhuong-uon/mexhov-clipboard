@@ -120,7 +120,7 @@ function App() {
           data-tauri-drag-region
           className="flex items-center gap-2 px-3 pb-3 select-none"
         >
-          <TabsList className="bg-transparent" variant="line">
+          <TabsList className="bg-transparent">
             <TabsTrigger value="clipboard">
               <Copy />
             </TabsTrigger>
