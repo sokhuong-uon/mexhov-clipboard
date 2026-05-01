@@ -19,6 +19,7 @@ use commands::{create_command_builder, handle_command, parse_command_from_args};
 use sync::SyncState;
 use tauri::Manager;
 use tauri_plugin_deep_link::DeepLinkExt;
+use tauri_plugin_notification::NotificationExt;
 use window::main_window;
 
 fn main() {
@@ -31,11 +32,12 @@ fn main() {
     command_builder
         .export(
             specta_typescript::Typescript::default(),
-            "../src/bindings.ts",
+            concat!(env!("CARGO_MANIFEST_DIR"), "/../src/bindings.ts"),
         )
         .expect("failed to export specta bindings");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_deep_link::init())
@@ -77,8 +79,19 @@ fn main() {
                 println!("deep link URLs: {:?}", urls);
             }
 
-            app.deep_link().on_open_url(|event| {
-                println!("deep link URLs: {:?}", event.urls());
+            let app_handle = app.handle().clone();
+            app.deep_link().on_open_url(move |event| {
+                let urls = event.urls();
+
+                println!("deep link URLs: {:?}", urls);
+                if let Some(url) = urls.first() {
+                    let _ = app_handle
+                        .notification()
+                        .builder()
+                        .title("Mexboard")
+                        .body(format!("Authentication received: {}", url))
+                        .show();
+                }
             });
 
             Ok(())

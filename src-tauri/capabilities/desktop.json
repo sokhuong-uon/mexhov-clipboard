@@ -1,17 +1,12 @@
 {
   "identifier": "desktop-capability",
-  "platforms": [
-    "macOS",
-    "windows",
-    "linux"
-  ],
-  "windows": [
-    "main"
-  ],
+  "platforms": ["macOS", "windows", "linux"],
+  "windows": ["main"],
   "permissions": [
     "global-shortcut:default",
     "deep-link:default",
     "os:default",
-    "http:default"
+    "http:default",
+    "notification:default"
   ]
 }
