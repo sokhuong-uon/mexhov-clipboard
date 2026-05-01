@@ -1,6 +1,6 @@
 This directory contains code vendored from
 https://github.com/daveyplate/better-auth-tauri (commit: 390fc6c35bb903b5e373e2405455b4fa62d09483),
-with modifications to import statements. Original license below.
+with modifications to import statements and directory structure. Original license below.
 
 ---
 

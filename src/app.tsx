@@ -16,6 +16,9 @@ import { usePasteActions } from "@/hooks/use-paste-actions";
 import { useHotkeysConfig } from "@/features/hotkey/hooks/use-hotkeys-config";
 import type { Klipy } from "@/features/klipy/schema/klipy";
 import { getKlipyPasteUrl } from "@/features/klipy/klipy-url";
+import { useBetterAuthTauri } from "@/features/auth/better-auth-tauri/hooks/use-better-auth-tauri";
+import { authClient } from "@/features/auth/lib/better-auth-client";
+import { onOpenUrl } from "@tauri-apps/plugin-deep-link";
 
 type TabValue = "clipboard" | "gif" | "symbols";
 
@@ -31,6 +34,32 @@ function App() {
   useSystemTheme();
   const [activeTab, setActiveTab] = useState<TabValue>("clipboard");
   const { hotkeys } = useHotkeysConfig();
+
+  useEffect(() => {
+    const unlisten = onOpenUrl((urls) => {
+      console.log("DEEP LINK ARRIVED:", urls);
+    });
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, []);
+
+  useBetterAuthTauri({
+    authClient: authClient,
+    scheme: "mexboard",
+    debugLogs: true,
+    onRequest: (href) => {
+      console.log("Auth request:", href);
+    },
+    onSuccess: (callbackURL) => {
+      console.log("Auth successful", callbackURL);
+      // Navigate or update UI as needed
+    },
+    onError: (error) => {
+      console.error("Auth error:", error);
+      // Show error notification
+    },
+  });
 
   useHotkey(
     hotkeys.cycleTabs,
