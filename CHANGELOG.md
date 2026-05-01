@@ -1,3 +1,10 @@
+## [1.19.1](https://github.com/sokhuong-uon/mexboard/compare/v1.19.0...v1.19.1) (2026-05-01)
+
+
+### Bug Fixes
+
+* display only six symbols per row ([4cdea40](https://github.com/sokhuong-uon/mexboard/commit/4cdea403d84d85407284781c76ec357617d1421f))
+
 # [1.19.0](https://github.com/sokhuong-uon/mexboard/compare/v1.18.0...v1.19.0) (2026-05-01)
 
 
