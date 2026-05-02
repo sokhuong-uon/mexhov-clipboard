@@ -2,10 +2,11 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http"
 import { createAuthClient } from "better-auth/react";
 import { magicLinkClient } from "better-auth/client/plugins"
 import { tokenStore } from "@/features/auth/stores/token-store"
+import { polarClient } from "@polar-sh/better-auth/client"
 
 export const authClient = createAuthClient({
   baseURL: import.meta.env.VITE_BETTER_AUTH_BASE_URL,
-  plugins: [magicLinkClient()],
+  plugins: [magicLinkClient(), polarClient()],
 
   fetchOptions: {
     auth: {
