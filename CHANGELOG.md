@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/sokhuong-uon/mexboard/compare/v1.20.0...v1.21.0) (2026-05-02)
+
+
+### Features
+
+* show cloud plans if signed in ([949e14f](https://github.com/sokhuong-uon/mexboard/commit/949e14f7673382241201ab0b2a8f7647a47e424c))
+
 # [1.20.0](https://github.com/sokhuong-uon/mexboard/compare/v1.19.2...v1.20.0) (2026-05-02)
 
 
