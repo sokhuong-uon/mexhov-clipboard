@@ -15,12 +15,10 @@ export const authClient = createAuthClient({
 
     customFetchImpl: async (input, init) => {
       const res = await tauriFetch(input, { ...init, maxRedirections: 0 })
-      console.log(
-        `[fetch] ${init?.method ?? "GET"} ${input} → ${res.status}`,
-        Object.fromEntries(res.headers.entries()),
-      )
+
       const newToken = res.headers.get("set-auth-token")
       if (newToken) await tokenStore.set(newToken)
+
       return res
     },
   },
