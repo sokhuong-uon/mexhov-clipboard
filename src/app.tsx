@@ -30,10 +30,13 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
 }
 
+import { tokenStore } from "@/features/auth/stores/token-store";
+
 function App() {
   useSystemTheme();
   const [activeTab, setActiveTab] = useState<TabValue>("clipboard");
   const { hotkeys } = useHotkeysConfig();
+  console.log("token: ", tokenStore.get());
 
   useEffect(() => {
     const unlisten = onOpenUrl((urls) => {

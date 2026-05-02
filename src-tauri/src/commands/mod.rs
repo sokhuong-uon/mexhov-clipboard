@@ -1,5 +1,6 @@
 mod clipboard;
 mod db;
+mod keyring;
 mod media;
 mod settings;
 mod shortcuts;
@@ -9,12 +10,15 @@ mod window;
 
 pub use clipboard::*;
 pub use db::*;
+pub use keyring::*;
 pub use media::*;
 pub use settings::*;
 pub use shortcuts::*;
 pub use sync::*;
 pub use system::*;
 pub use window::*;
+
+pub use keyring::init as init_keyring;
 
 use crate::main_window;
 use tauri::{AppHandle, Manager};
@@ -57,6 +61,9 @@ pub fn create_command_builder() -> Builder<tauri::Wry> {
         mdns_start_discovery,
         mdns_stop_discovery,
         set_toggle_shortcut,
+        get_session_token,
+        save_session_token,
+        delete_session_token,
     ])
 }
 

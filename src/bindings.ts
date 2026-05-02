@@ -48,6 +48,9 @@ export const commands = {
 	mdnsStartDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_start_discovery")),
 	mdnsStopDiscovery: () => typedError<null, string>(__TAURI_INVOKE("mdns_stop_discovery")),
 	setToggleShortcut: (accelerator: string) => typedError<null, string>(__TAURI_INVOKE("set_toggle_shortcut", { accelerator })),
+	getSessionToken: () => __TAURI_INVOKE<string | null>("get_session_token"),
+	saveSessionToken: (token: string) => typedError<null, string>(__TAURI_INVOKE("save_session_token", { token })),
+	deleteSessionToken: () => typedError<null, string>(__TAURI_INVOKE("delete_session_token")),
 };
 
 /* Types */

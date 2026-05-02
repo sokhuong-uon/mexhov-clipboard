@@ -39,10 +39,14 @@ fn main() {
         .expect("failed to export specta bindings");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            let command = parse_command_from_args(&args);
+            handle_command(app, command);
+        }))
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_deep_link::init())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, shortcut, event| {
@@ -52,10 +56,6 @@ fn main() {
         )
         .plugin(tauri_plugin_drag::init())
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
-            let command = parse_command_from_args(&args);
-            handle_command(app, command);
-        }))
         .manage(ClipboardManager::new())
         .manage(MonitorState::new())
         .manage(SyncState::new())
@@ -63,6 +63,8 @@ fn main() {
         .setup(move |app| {
             #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
             app.deep_link().register_all()?;
+
+            commands::init_keyring().expect("failed to initialize keyring store");
 
             let database = db::initialization::init(app);
             app.manage(database);
