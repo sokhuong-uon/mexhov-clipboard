@@ -1,3 +1,11 @@
+# [1.20.0](https://github.com/sokhuong-uon/mexboard/compare/v1.19.2...v1.20.0) (2026-05-02)
+
+
+### Features
+
+* can sign in via magic link ([3cc9e7c](https://github.com/sokhuong-uon/mexboard/commit/3cc9e7ccbac28f9e76eb4b0ba3484327a08a5022))
+* improve the display of symbol list ([6827700](https://github.com/sokhuong-uon/mexboard/commit/6827700c217363158df623b2bd6f0858206e034d))
+
 ## [1.19.2](https://github.com/sokhuong-uon/mexboard/compare/v1.19.1...v1.19.2) (2026-05-01)
 
 
