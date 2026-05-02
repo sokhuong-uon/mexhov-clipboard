@@ -13,6 +13,7 @@ import {
 import { SymbolsSearchBox } from "@/features/symbols/components/symbols-search-box";
 import { useSymbolsSearchQueryStore } from "@/features/symbols/stores/symbols-search-query-store";
 import { SYMBOL_DATA } from "@/lib/symbol-data";
+import { cn } from "@/utils/cn";
 
 const QUICK_PASTE_LIMIT = 9;
 
@@ -95,48 +96,53 @@ export const SymbolsView = ({
             No symbols found
           </div>
         ) : (
-          filtered.map((cat) => (
-            <div key={cat.label} className="mt-3 first:mt-1">
+          filtered.map((category) => (
+            <div key={category.label} className="mt-3 first:mt-1">
               <h3 className="text-[11px] font-medium text-muted-foreground mb-1.5 px-0.5">
-                {cat.label}
+                {category.label}
               </h3>
 
-              <div className="grid grid-cols-6 gap-0.5">
-                {cat.symbols.map((s) => {
-                  const quickIndex = quickIndexByChar.get(s.char);
+              <div className="grid grid-cols-6 gap-1.5">
+                {category.symbols.map((symbol) => {
+                  const quickIndex = quickIndexByChar.get(symbol.char);
+
                   return (
-                    <div key={s.char + s.name} className="relative">
+                    <div key={symbol.char + symbol.name} className="relative">
                       {isActive && modifierHeld && quickIndex != null && (
                         <QuickPasteBadge
                           index={quickIndex}
                           className="-top-1 -left-1"
                         />
                       )}
+
                       <Tooltip>
                         <TooltipTrigger
                           render={
                             <button
                               type="button"
-                              aria-label={s.name}
+                              aria-label={symbol.name}
                               aria-keyshortcuts={
                                 quickIndex != null
                                   ? `${QUICK_PASTE_MODIFIER}+${quickIndex}`
                                   : undefined
                               }
-                              onClick={() => handleClick(s.char)}
-                              className={`flex w-full items-center justify-center rounded-lg aspect-square font-normal transition-all cursor-pointer select-none hover:bg-accent hover:text-accent-foreground active:scale-90 ${
-                                copied === s.char
-                                  ? "bg-green-500/15 text-green-600 dark:text-green-400"
-                                  : ""
-                              }`}
+                              onClick={() => handleClick(symbol.char)}
+                              className={cn(
+                                "flex w-full items-center justify-center bg-muted/60 rounded-lg aspect-square font-normal transition-all cursor-pointer select-none hover:bg-accent hover:text-accent-foreground active:scale-90",
+                                copied === symbol.char &&
+                                  "bg-green-500/15 text-green-600 dark:text-green-400",
+                              )}
                             />
                           }
                         >
                           <span className="text-base leading-none">
-                            {s.char}
+                            {symbol.char}
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent side="top">{s.name}</TooltipContent>
+
+                        <TooltipContent side="top">
+                          {symbol.name}
+                        </TooltipContent>
                       </Tooltip>
                     </div>
                   );
