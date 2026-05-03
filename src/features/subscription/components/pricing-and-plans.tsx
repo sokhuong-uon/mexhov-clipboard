@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { useState } from "react";
 
 const plans = [
   {
@@ -26,19 +28,22 @@ const plans = [
 ] as const;
 
 export function PricingAndPlans() {
-  async function handleCheckout(slug: string) {
-    try {
-      const res = await authClient.checkout({
-        slug,
-        successUrl: "/success?checkout_id={CHECKOUT_ID}",
-      });
+  const [isLoading, setIsLoading] = useState(false);
 
-      if (res.url) {
-        window.location.href = res.url;
-      }
-    } catch (err) {
-      console.error("Checkout failed", err);
+  async function handleCheckout(slug: string) {
+    setIsLoading(true);
+
+    const { data: checkout } = await authClient.checkout({
+      slug,
+      successUrl: "/success?checkout_id={CHECKOUT_ID}",
+      redirect: false,
+    });
+
+    if (checkout.url) {
+      await openUrl(checkout.url);
     }
+
+    setIsLoading(false);
   }
 
   return (
@@ -63,9 +68,10 @@ export function PricingAndPlans() {
 
           <CardFooter>
             <Button
-              className="w-full"
+              className="w-full cursor-pointer"
               variant="default"
               onClick={() => handleCheckout(plan.slug)}
+              disabled={isLoading}
             >
               Get {plan.name}
             </Button>
