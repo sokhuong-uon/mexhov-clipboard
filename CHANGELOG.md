@@ -1,3 +1,10 @@
+## [1.21.1](https://github.com/sokhuong-uon/mexboard/compare/v1.21.0...v1.21.1) (2026-05-03)
+
+
+### Bug Fixes
+
+* instead of webview, use browser to access Polar ([25b7d47](https://github.com/sokhuong-uon/mexboard/commit/25b7d47235a56bcd5b1b3a79afd8ba9eddec1b82))
+
 # [1.21.0](https://github.com/sokhuong-uon/mexboard/compare/v1.20.0...v1.21.0) (2026-05-02)
 
 
