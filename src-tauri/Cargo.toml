@@ -1,6 +1,6 @@
 [package]
 name = "mexboard"
-version = "1.21.1"
+version = "1.21.2"
 description = "Mexboard"
 authors = ["Sokhuong of Mexdehor"]
 edition = "2021"

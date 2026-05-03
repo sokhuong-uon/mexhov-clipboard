@@ -1,3 +1,10 @@
+## [1.21.2](https://github.com/sokhuong-uon/mexboard/compare/v1.21.1...v1.21.2) (2026-05-03)
+
+
+### Bug Fixes
+
+* resolve peer dep issue for @polar-sh/sdk ([ba25d78](https://github.com/sokhuong-uon/mexboard/commit/ba25d78f966759cdfa9cc304ce159fcccc48e196))
+
 ## [1.21.1](https://github.com/sokhuong-uon/mexboard/compare/v1.21.0...v1.21.1) (2026-05-03)
 
 
