@@ -1,11 +1,11 @@
 import "@/main.css";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy, ImagePlay, SquarePercent } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useHotkey } from "@tanstack/react-hotkeys";
 
 import { ClipboardTab } from "@/components/clipboard-tab";
-import { GifView } from "@/components/gif-view";
+import { GifView } from "@/features/klipy/components/gif-view";
 import { SymbolsView } from "@/components/symbols-view";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -14,8 +14,6 @@ import { useClipboard } from "@/hooks/use-clipboard";
 import { useSystemTheme } from "@/hooks/use-system-theme";
 import { usePasteActions } from "@/hooks/use-paste-actions";
 import { useHotkeysConfig } from "@/features/hotkey/hooks/use-hotkeys-config";
-import type { Klipy } from "@/features/klipy/schema/klipy";
-import { getKlipyPasteUrl } from "@/features/klipy/klipy-url";
 import { useBetterAuthTauri } from "@/features/auth/better-auth-tauri/hooks/use-better-auth-tauri";
 import { authClient } from "@/features/auth/lib/better-auth-client";
 import { onOpenUrl } from "@tauri-apps/plugin-deep-link";
@@ -97,14 +95,6 @@ function App() {
   const clipboard = useClipboard();
   const { pasteClipboardItem, pasteText, pasteKlipy } = usePasteActions();
 
-  const handleGifSelect = useCallback(
-    async (item: Klipy) => {
-      const url = getKlipyPasteUrl(item);
-      if (url) await clipboard.write(url);
-    },
-    [clipboard.write],
-  );
-
   return (
     <TooltipProvider>
       <Tabs
@@ -130,7 +120,6 @@ function App() {
           className="flex flex-col overflow-hidden min-h-0 data-hidden:hidden"
         >
           <GifView
-            onSelect={handleGifSelect}
             onPaste={pasteKlipy}
             isActive={activeTab === "gif"}
           />

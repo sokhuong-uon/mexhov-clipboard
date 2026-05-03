@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { KlipyResponse } from "@/features/klipy/schema/klipy-response";
-import { klipyGet } from "@/features/klipy/klipy-client";
+import { klipyGet } from "@/features/klipy/utils/klipy-client";
 
 export function useKlipySearch(query: string, category?: string) {
   const perPageLimit = import.meta.env.VITE_KLIPY_PER_PAGE_LIMIT

@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { KlipyResponse } from "@/features/klipy/schema/klipy-response";
-import { klipyGet } from "@/features/klipy/klipy-client";
+import { klipyGet } from "@/features/klipy/utils/klipy-client";
 
 
 export function useKlipyTrending(category?: string) {

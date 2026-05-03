@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { commands } from "@/bindings";
 import { ClipboardItem } from "@/types/clipboard";
 import type { Klipy } from "@/features/klipy/schema/klipy";
-import { getKlipyPasteUrl } from "@/features/klipy/klipy-url";
+import { getKlipyPasteUrl } from "@/features/klipy/utils/klipy-url";
 
 export function usePasteActions() {
   const pasteClipboardItem = useCallback(async (item: ClipboardItem) => {
