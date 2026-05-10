@@ -9,7 +9,7 @@ export function ConnectToServerButton() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
-  const handleClick = async () => {
+  const handleConnect = async () => {
     setIsConnecting(true);
 
     const result = await commands.connectWebsocket(
@@ -24,11 +24,21 @@ export function ConnectToServerButton() {
     setIsConnecting(false);
   };
 
+  const handleDisconnect = async () => {
+    const result = await commands.disconnectWebsocket();
+    if (result.status === "ok") {
+      setIsConnected(false);
+    }
+  };
+
   if (!session) return null;
 
   return (
-    <Button disabled={isConnecting || isConnected} onClick={handleClick}>
-      {isConnected ? "Connected" : "Connect"}
-    </Button>
+    <div className="flex flex-col gap-2">
+      <Button disabled={isConnecting || isConnected} onClick={handleConnect}>
+        {isConnected ? "Connected" : "Connect"}
+      </Button>
+      {isConnected && <Button onClick={handleDisconnect}>Disconnect</Button>}
+    </div>
   );
 }
