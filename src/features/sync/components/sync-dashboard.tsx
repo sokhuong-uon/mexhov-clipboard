@@ -18,10 +18,12 @@ export function SyncDashboard() {
       if (!session) return;
 
       const { data: state } = await authClient.customer.state();
+      console.log("state", state);
       //@ts-ignore
       setCustomerState(state);
     }
 
+    console.log("session", session);
     getCustomerState();
   }, [session]);
 
@@ -29,7 +31,9 @@ export function SyncDashboard() {
     <div className="w-full min-h-[calc(100vh-9rem)] flex flex-col items-center gap-8 ">
       <RectangularProfileCard />
 
-      {customerState?.activeSubscriptions.length === 0 && <PricingAndPlans />}
+      {(customerState?.activeSubscriptions.length ?? 0) === 0 && (
+        <PricingAndPlans />
+      )}
 
       {!!customerState?.activeSubscriptions.length && (
         <>
