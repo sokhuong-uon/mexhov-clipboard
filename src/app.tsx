@@ -1,6 +1,5 @@
 import "@/main.css";
 import { useEffect, useState } from "react";
-import { Copy, ImagePlay, SquarePercent } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useHotkey } from "@tanstack/react-hotkeys";
 
@@ -28,13 +27,13 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
 }
 
-import { authBearerTokenStore } from "@/features/auth/stores/auth-bearer-token-store";
+import { useTabs } from "@/features/tab/hooks/use-tabs";
 
 function App() {
   useSystemTheme();
   const [activeTab, setActiveTab] = useState<TabValue>("clipboard");
   const { hotkeys } = useHotkeysConfig();
-  console.log("token: ", authBearerTokenStore.get());
+  const tabs = useTabs();
 
   useEffect(() => {
     const unlisten = onOpenUrl((urls) => {
@@ -54,11 +53,9 @@ function App() {
     },
     onSuccess: (callbackURL) => {
       console.log("Auth successful", callbackURL);
-      // Navigate or update UI as needed
     },
     onError: (error) => {
       console.error("Auth error:", error);
-      // Show error notification
     },
   });
 
@@ -139,17 +136,11 @@ function App() {
           className="flex items-center gap-2 px-3 pb-3 select-none"
         >
           <TabsList className="bg-transparent">
-            <TabsTrigger value="clipboard">
-              <Copy />
-            </TabsTrigger>
-
-            <TabsTrigger value="gif">
-              <ImagePlay />
-            </TabsTrigger>
-
-            <TabsTrigger value="symbols">
-              <SquarePercent />
-            </TabsTrigger>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                <tab.icon />
+              </TabsTrigger>
+            ))}
           </TabsList>
         </div>
       </Tabs>
