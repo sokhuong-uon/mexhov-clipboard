@@ -13,8 +13,7 @@ import { useClipboard } from "@/hooks/use-clipboard";
 import { useSystemTheme } from "@/hooks/use-system-theme";
 import { usePasteActions } from "@/hooks/use-paste-actions";
 import { useHotkeysConfig } from "@/features/hotkey/hooks/use-hotkeys-config";
-import { useBetterAuthTauri } from "@/features/auth/better-auth-tauri/hooks/use-better-auth-tauri";
-import { authClient } from "@/features/auth/lib/better-auth-client";
+import { useBetterAuth } from "@/features/auth/hooks/use-better-auth";
 import { onOpenUrl } from "@tauri-apps/plugin-deep-link";
 
 type TabValue = "clipboard" | "gif" | "symbols";
@@ -44,20 +43,7 @@ function App() {
     };
   }, []);
 
-  useBetterAuthTauri({
-    authClient: authClient,
-    scheme: "mexboard",
-    debugLogs: true,
-    onRequest: (href) => {
-      console.log("Auth request:", href);
-    },
-    onSuccess: (callbackURL) => {
-      console.log("Auth successful", callbackURL);
-    },
-    onError: (error) => {
-      console.error("Auth error:", error);
-    },
-  });
+  useBetterAuth();
 
   useHotkey(
     hotkeys.cycleTabs,
